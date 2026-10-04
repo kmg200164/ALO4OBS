@@ -1,6 +1,6 @@
 # OBS Streaming Template
 
-Version: **0.4.1 — development prerelease**
+Version: **0.4.2 — development prerelease**
 
 A local OBS template that arranges seven independent panels in a bento grid. Cameras, chat, captions, and other content stay beside the game instead of covering it. No panel has a fixed role: each can contain None, an OBS source, a Web address, or Image/Video content.
 
@@ -79,12 +79,12 @@ The `layoutVersion 4` schema uses internal keys `game`, `custom1`, `custom2`, `c
 
 ## License and feedback
 
-Original code is [MIT licensed](LICENSE), copyright 2026 KMG. Figma Simple Design System icons (CC BY 4.0), Lucide (ISC), and Inter (OFL) retain their own terms; see [third-party notices](template/assets/THIRD-PARTY-NOTICES.md). The GitHub header link uses text rather than a modified logo. This repository starts with independent history and does not contain personal Vault history.
+Original code is [MIT licensed](LICENSE), copyright 2026 KMG. Figma Simple Design System icons (CC BY 4.0), Lucide (ISC), and Inter (OFL) retain their own terms; see [third-party notices](template/assets/THIRD-PARTY-NOTICES.md). The GitHub header link uses the restored Figma icon. This repository starts with independent history and does not contain personal Vault history.
 
 Report bugs and feedback through GitHub Issues. Include the version, platform, steps, and observed result; remove private URLs and tokens before attaching files. Release notes are in [CHANGELOG.md](CHANGELOG.md).
 
 ## Version policy
 
-Versions use three numbers only: `MAJOR.MINOR.PATCH`, currently `0.4.1`. Development status is described separately; `dev` is a branch name, not a version suffix. The UI adds a `v` prefix and release tags use `vX.Y.Z`.
+Versions use three numbers only: `MAJOR.MINOR.PATCH`, currently `0.4.2`. Development status is described separately; `dev` is a branch name, not a version suffix. The UI adds a `v` prefix and release tags use `vX.Y.Z`.
 
 `template/version.js` is the single version source for the UI and the build's `VERSION` file. During `0.x` development, fixes increment the patch number and new features increment the minor number. Once a version is released, publish changes under a new version instead of replacing the same release.

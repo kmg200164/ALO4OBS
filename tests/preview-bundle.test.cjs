@@ -6,15 +6,16 @@ const vm=require('node:vm');
 const source=fs.readFileSync(path.join(__dirname,'../template/preview.js'),'utf8');
 const start=source.indexOf("  byId('bundle').onclick=async()=>{"),end=source.indexOf("  frame.addEventListener('load'",start);
 
-function harness(){
+function harness(options={}){
  let releaseMasks,captured;
  const maskGate=new Promise(resolve=>{releaseMasks=resolve;});
  const oldFile={async arrayBuffer(){return Uint8Array.from([10,20,30]).buffer;}};
  const uploads=new Map([['whole',{path:'assets/background-whole.png',file:oldFile}]]);
  const keys=['game','custom1','custom2','custom3','chat','translation','hand'];
  const data={backgroundImage:'assets/background-whole.png',layout:Object.fromEntries(keys.map(key=>[key,{}]))};
+ if(options.restored)uploads.clear();
  const bundle={},status={};
- const context={uploads,status,keys,Uint8Array,Blob,URL:{createObjectURL:()=> 'blob:test',revokeObjectURL(){}},setTimeout(){},
+ const context={fetch:options.fetch,uploads,status,keys,Uint8Array,Blob,URL:{createObjectURL:()=> 'blob:test',revokeObjectURL(){}},setTimeout(){},
   byId:id=>id==='bundle'?bundle:null,current:()=>structuredClone(data),
   alphaMask:async(_,name)=>{await maskGate;return {name,bytes:new Uint8Array([1])};},
   OverlayPack:{settingsEntries:input=>[{name:'obs-settings.json',bytes:new TextEncoder().encode(JSON.stringify(input))}],zip:entries=>{captured=entries;return new Uint8Array([0]);}},
@@ -36,4 +37,18 @@ test('a replacement upload during export cannot substitute bytes for the capture
  h.uploads.set('whole',{path:'assets/background-whole.png',file:{async arrayBuffer(){return Uint8Array.from([90,91]).buffer;}}});
  h.releaseMasks();await exporting;
  assert.deepEqual(Array.from(h.captured.find(entry=>entry.name==='assets/background-whole.png').bytes),[10,20,30]);
+});
+
+
+test('re-export includes restored local assets that are no longer in the upload map',async()=>{
+ const h=harness({restored:true,fetch:async path=>{assert.equal(path,'assets/background-whole.png');return {ok:true,async arrayBuffer(){return Uint8Array.from([7,8,9]).buffer;}};}});
+ h.releaseMasks();await h.bundle.onclick();
+ assert.deepEqual(Array.from(h.captured.find(entry=>entry.name==='assets/background-whole.png').bytes),[7,8,9]);
+});
+
+test('unreadable restored media prevents an incomplete ZIP download',async()=>{
+ const h=harness({restored:true,fetch:async()=>{throw new Error('blocked');}});
+ h.releaseMasks();await h.bundle.onclick();
+ assert.equal(h.captured,undefined);
+ assert.match(h.status.textContent,/Re-upload local files/);
 });
