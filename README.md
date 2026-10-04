@@ -62,17 +62,17 @@ python3 build.py
 python3 -m http.server 8873 --bind 127.0.0.1
 ```
 
-Windows는 Python 명령을 `py`로 바꿀 수 있습니다. 테스트는 Node 기본 테스트 러너, 빌드는 Python 표준 라이브러리만 사용합니다. build.py는 `Attachments/OBS-Streaming-Template.zip`을 만들고, ZIP 내부 최상위 폴더는 `streaming-template`입니다. 내부 JS/CSS를 internal 폴더로 묶고 HTML·CSS·정적 JavaScript 자산 참조, ZIP CRC·구성·내용을 확인한 뒤 기존 ZIP을 교체합니다. 검증 실패 시 기존 ZIP을 보존합니다. 개인 설정 파일·업로드 자산·개인용 예시 아트워크·오래된 검정 모서리 자산·mock-*.html은 배포되지 않습니다.
+Windows는 Python 명령을 `py`로 바꿀 수 있습니다. 테스트는 Node 기본 테스트 러너, 빌드는 Python 표준 라이브러리만 사용합니다. build.py는 `dist/OBS-Streaming-Template.zip`을 만들고, ZIP 내부 최상위 폴더는 `streaming-template`입니다. 내부 JS/CSS를 internal 폴더로 묶고 HTML·CSS·정적 JavaScript 자산 참조, ZIP CRC·구성·내용을 확인한 뒤 기존 ZIP을 교체합니다. 검증 실패 시 기존 ZIP을 보존합니다. 개인 설정 파일·업로드 자산·개인용 예시 아트워크·오래된 검정 모서리 자산·mock-*.html은 배포되지 않습니다.
 
 미리보기 브라우저 저장값은 OBS와 공유되지 않으므로 설정 ZIP을 실제 폴더에 풀어야 합니다. 업로드 파일 자체는 브라우저에 보관하지 않으므로 설정 화면을 다시 연 뒤 ZIP을 새로 만들 때는 파일을 다시 선택하세요. 일부 브라우저의 로컬 파일 iframe 접근이 막히면 링크 입력/저장은 그대로 사용하고 OBS에서 확인하거나 http://127.0.0.1:8873/preview.html로 개발 미리보기를 엽니다. localhost URL은 실행한 PC에서만 사용합니다.
 
 내보낸 `config.js`의 `layoutVersion 4`에는 패널 1~7 각각의 콘텐츠 형식과 주소가 저장됩니다. 이 파일을 설치 폴더에 덮어쓰면 설정 화면은 그 값을 초기값으로 복원합니다. 같은 파일을 쓰는 동안에는 브라우저의 편집값이 우선하며, 새 설정 파일로 바꾸면 새 파일을 읽습니다. 초기화 기본값은 중립 `config.public.js`에서 가져옵니다. 업로드한 파일을 복원하려면 `config.js`와 `assets/`를 함께 풀어야 합니다.
 
-## 공개 저장소 준비
+## 공개 저장소와 자산
 
-현재 ZIP은 공개 전 검수용이며 공개 재배포 허가를 뜻하지 않습니다. 공개 저장소는 이 Vault의 기존 Git 기록을 가져가지 않고 새 기록과 명시적인 파일 허용 목록으로 만들어야 합니다. 개인 설정 `config.js`, `obs-settings.json`, 설정 ZIP, 이미지·영상 원본, 플랫폼 파비콘은 제외합니다. 번들의 채팅 구분 표시는 텍스트이므로 플랫폼 로고 파일은 필요하지 않습니다. Figma Simple Design System에서 가져온 UI 아이콘의 CC BY 4.0 출처 표시는 [제3자 자산 고지](assets/THIRD-PARTY-NOTICES.md)에 추가했습니다. 공개 전 개별 아이콘의 출처·변형 허용 여부는 계속 확인해야 합니다. 자체 코드는 [MIT 라이선스](LICENSE)를 사용하며, [자산별 출처와 차단 항목](assets/asset-sources.md)을 함께 검토합니다.
+이 저장소는 개인 Vault 이력을 가져오지 않은 독립 공개 저장소입니다. 개인 `config.js`, `obs-settings.json`, 설정 ZIP과 검수 자료는 추적하지 않습니다. 공개 중립 설정은 `config.public.js`이며, 배포 빌드는 이를 `config.js`로 넣습니다. 개인 위젯 주소가 포함된 설정 ZIP은 공유하지 마세요.
 
-현재 Git 저장소는 개인 Vault이며 프로젝트는 그 안의 하위 폴더입니다. 이 저장소의 이력을 그대로 공개하면 개인 Vault 자료도 공개 범위에 들어갑니다. 프로젝트 파일만 선택하더라도 추적된 `config.js`와 과거 데모·문서·배포 ZIP의 개인 이름과 이미지가 남습니다. 새로운 공개 저장소의 파일·이력 범위를 사용자 승인 후 별도로 정해야 합니다. 이 검수에서 기존 파일 삭제나 이력 재작성은 하지 않습니다.
+자체 코드는 [MIT 라이선스](LICENSE)를 사용합니다. Figma Simple Design System 아이콘(CC BY 4.0), Lucide 아이콘(ISC), Inter 폰트(OFL)의 출처와 변경 사항은 [제3자 자산 고지](assets/THIRD-PARTY-NOTICES.md)에 있습니다. GitHub 헤더 링크는 변형 마크 대신 텍스트로 표시합니다.
 
 ## Windows와 macOS
 
