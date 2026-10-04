@@ -39,8 +39,6 @@ for path in sorted(files):
     if path.name == 'THIRD-PARTY-NOTICES.md':
         data = data.replace(b'(../../LICENSE)', b'(../LICENSE)')
     if path.suffix == '.html':
-        if path.name != 'demo.html':
-            data = data.replace(b'src="config.public.js"', b'src="config.js"')
         data = re.sub(r'((?:src|href)=")([^"/]+\.(?:js|css))(\")',
                       lambda m: m[1] + ('' if m[2] == 'config.js' else 'internal/') + m[2] + m[3],
                       data.decode()).encode()

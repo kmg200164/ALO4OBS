@@ -1,5 +1,9 @@
 # 변경 기록
 
+## 0.4.1 — 2026-10-04
+
+- Restore exported local settings after replacing config.js in a GitHub source ZIP. Runtime pages load neutral defaults once, then optional local settings. Source and built ZIPs use the same order; the demo remains neutral.
+
 ## 0.4.0 — 2026-10-04 (공개 전 검수)
 
 - 일곱 위치를 `패널 1~7`로 통일하고 모든 칸에서 `없음 · OBS 소스 · 웹 주소 · 이미지/영상`을 선택할 수 있게 했습니다. 미리보기에는 번호를 표시하고 OBS 출력에서는 숨깁니다.

@@ -1,6 +1,6 @@
 # QA and device handoff
 
-Development prerelease: 0.4.0. Automated checks do not establish live platform compatibility.
+Development prerelease: 0.4.1. Automated checks do not establish live platform compatibility.
 
 ## Windows evidence
 

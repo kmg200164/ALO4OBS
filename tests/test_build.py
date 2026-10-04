@@ -65,6 +65,15 @@ class BuildTests(unittest.TestCase):
                 demo_js = archive.read('streaming-template/internal/demo.js').decode('utf-8')
                 self.assertIn('config.public.js', demo_html)
                 self.assertNotIn('config.js', demo_html)
+                import re
+                for entry in archive.namelist():
+                    if not entry.endswith('.html') or entry.endswith('/demo.html'):
+                        continue
+                    scripts = re.findall(r'<script[^>]*src="([^"]+)"', archive.read(entry).decode('utf-8'))
+                    if 'internal/config.public.js' in scripts:
+                        self.assertEqual(scripts.count('internal/config.public.js'), 1)
+                        self.assertEqual(scripts.count('config.js'), 1)
+                        self.assertLess(scripts.index('internal/config.public.js'), scripts.index('config.js'))
                 self.assertNotRegex(demo_js, r'team-tgm|tgm26|sample-mission|season-11|sample-handcam')
 
     def test_inline_css_missing_font_preserves_existing_zip(self):

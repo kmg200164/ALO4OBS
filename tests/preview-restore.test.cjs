@@ -97,3 +97,26 @@ test('saved legacy background colors and explicit gradients override the new neu
   assert.equal(gradientApi.normalize(background).stops.at(-1).color,explicit.stops.at(-1).color);
  }
 });
+
+
+test('source runtime loads neutral defaults once before optional local settings',()=>{
+ const folder=path.join(__dirname,'../template');
+ for(const filename of fs.readdirSync(folder).filter(name=>name.endsWith('.html'))){
+  const html=fs.readFileSync(path.join(folder,filename),'utf8');
+  const scripts=[...html.matchAll(/<script[^>]*src="([^"]+)"[^>]*>/g)].map(match=>match[1]);
+  if(!scripts.includes('config.public.js'))continue;
+  assert.equal(scripts.filter(name=>name==='config.public.js').length,1,filename);
+  if(filename==='demo.html'){assert.ok(!scripts.includes('config.js'));continue;}
+  assert.equal(scripts.filter(name=>name==='config.js').length,1,filename);
+  assert.ok(scripts.indexOf('config.public.js')<scripts.indexOf('config.js'),filename);
+  const neutral=fs.readFileSync(path.join(folder,'config.public.js'),'utf8');
+  const fresh={window:{}};vm.runInNewContext(neutral,fresh);
+  assert.equal(fresh.window.OVERLAY_CONFIG,fresh.window.OVERLAY_PUBLIC_CONFIG);
+  const exportedContext={window:{}};vm.runInNewContext(neutral,exportedContext);
+  const defaults=JSON.stringify(exportedContext.window.OVERLAY_PUBLIC_CONFIG);
+  vm.runInNewContext('window.OVERLAY_CONFIG='+JSON.stringify(exported),exportedContext);
+  assert.equal(exportedContext.window.OVERLAY_CONFIG.name,'EXPORTED');
+  assert.equal(exportedContext.window.OVERLAY_CONFIG.globalStyle.background.gradient.angle,225);
+  assert.equal(JSON.stringify(exportedContext.window.OVERLAY_PUBLIC_CONFIG),defaults);
+ }
+});
