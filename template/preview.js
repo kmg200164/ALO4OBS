@@ -372,7 +372,7 @@
     const target=byId('event-target');
     if(target){for(const option of target.options)option.disabled=!config.panelEnabled[option.value];if(!config.panelEnabled[target.value])target.value=keys.find(key=>config.panelEnabled[key])||'';}
     byId('panel-hit-areas').innerHTML=keys.filter(key=>config.panelEnabled[key]).map(key=>{
-      const b=layout[key],label=`${names[key]} 설정`,accessibleName=window.KMGI18n?.localize(label)||label,visibleNumber=window.KMGI18n?.localize(names[key])||names[key];return `<button class="panel-hit" type="button" data-hit="${key}" aria-label="${accessibleName}" aria-pressed="${selected===key}" style="left:${b.x/1920*100}%;top:${b.y/1080*100}%;width:${b.width/1920*100}%;height:${b.height/1080*100}%"><span class="panel-number" aria-hidden="true">${visibleNumber}</span></button>`;
+      const b=layout[key],label=`${names[key]} 설정`,accessibleName=window.KMGI18n?.localize(label)||label,visibleNumber=window.KMGI18n?.localize(names[key])||names[key];return `<button class="panel-hit" type="button" data-hit="${key}" aria-label="${accessibleName}" aria-pressed="${selected===key}" style="left:${b.x/1920*100}%;top:${b.y/1080*100}%;width:${b.width/1920*100}%;height:${b.height/1080*100}%;border-radius:${16/b.width*100}% / ${16/b.height*100}%"><span class="panel-number" aria-hidden="true">${visibleNumber}</span></button>`;
     }).join('');
   }
   function apply(message){
