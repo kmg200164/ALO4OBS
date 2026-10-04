@@ -10,7 +10,7 @@ source = repository / 'template'
 output = repository / 'dist' / 'OBS-Streaming-Template.zip'
 public_config = (source / 'config.public.js').read_bytes()
 version_source = (source / 'version.js').read_text(encoding='utf-8')
-match = re.fullmatch(r"window\.KMG_VERSION = '([0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?)';\s*", version_source)
+match = re.fullmatch(r"window\.KMG_VERSION = '((?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*))';\s*", version_source)
 if not match:
     raise ValueError('Invalid version.js')
 version = match.group(1)

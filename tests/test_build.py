@@ -105,3 +105,16 @@ class BuildTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class VersionFormatTests(unittest.TestCase):
+    def test_build_rejects_version_suffix(self):
+        original_read = Path.read_text
+        def read_with_suffix(path, *args, **kwargs):
+            if path.name == 'version.js':
+                return "window.KMG_VERSION = '0.4.0-dev.1';\n"
+            return original_read(path, *args, **kwargs)
+        alternate = importlib.util.module_from_spec(spec)
+        with patch.object(Path, 'read_text', read_with_suffix):
+            with self.assertRaisesRegex(ValueError, 'Invalid version.js'):
+                spec.loader.exec_module(alternate)

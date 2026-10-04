@@ -1,4 +1,4 @@
-OBS Streaming Template v0.4.0-dev.1 — Development prerelease
+OBS Streaming Template v0.4.0 — Development prerelease
 
 Open guide-en.html for setup instructions and preview.html to configure Panel 1–7.
 English is the default. Korean and Japanese are available in the language menu.
