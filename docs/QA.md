@@ -50,3 +50,14 @@ Baseline: `a75e518`, version 0.4.1, OBS Studio 32.2.2. The independent clone mat
 At handoff, the isolated QA scene collection was removed after its JSON was copied to a private backup. The original scene-collection JSON and OBS global.ini remained byte-identical to the pre-test backup; broadcasting and recording were never started. Shogun Showdown was closed.
 
 Unverified on Mac: actual game capture inside the template, built-package OBS application, source swapping/disabling and duplicate rejection, capture/camera permission rejection and recovery, camera availability, and populated-scene injected failure/reapplication. These checks are not required for a Windows-only release but cannot be claimed as passed. The remaining Windows checks above still gate 1.0.0 readiness.
+
+## Windows follow-up (2026-10-05, without Computer Use)
+
+Baseline: `a077dca`, version 0.4.2. The complete OBS configuration was backed up before inspection. At the user's request, no Computer Use or live scene/capture changes were performed while the user was gaming.
+
+Read-only OBS WebSocket inspection confirmed the template and Full Game scenes, exactly one group for each of Panel 1–7, locked generated groups and children, one enabled alpha mask per group, a game_capture source assigned to Panel 1, media in Panels 2–4, web sources in Panels 5–7, and all four rendering layers. Broadcasting and recording were off. Private backup and API evidence remain outside this repository.
+
+This does not establish rendered capture output, outside-stroke appearance, collapsed UI state, latest browser-exported ZIP installation, a fresh repeated application, source swap/disable preservation, or populated-scene failure rollback. Those live checks remain pending; main is unchanged and no tag or GitHub Release is authorized by this run.
+
+A Windows-only test portability defect was reproduced: the shared-header language-order test split source on LF-only blank lines, so CRLF checkouts also executed the subsequent DOM initializer and failed. The test now recognizes both LF and CRLF; product code is unchanged by this correction.
+Automated verification after the CRLF test correction: all 111 JavaScript tests and six Python build tests passed. The existing human-readable source naming was retained at the user's direction; cosmetic separator changes are not a release blocker.
