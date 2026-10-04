@@ -5,8 +5,9 @@ import re
 import posixpath
 import tempfile
 
-source = Path(__file__).resolve().parent
-output = source / 'dist' / 'OBS-Streaming-Template.zip'
+repository = Path(__file__).resolve().parent
+source = repository / 'template'
+output = repository / 'dist' / 'OBS-Streaming-Template.zip'
 public_config = (source / 'config.public.js').read_bytes()
 version_source = (source / 'version.js').read_text(encoding='utf-8')
 match = re.fullmatch(r"window\.KMG_VERSION = '([0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?)';\s*", version_source)
@@ -24,8 +25,8 @@ gift_files = {
     'panel-media-hand.html', 'preview.css', 'README.txt',
     'preview.html', 'preview.js', 'version.js', 'wallpaper.html',
 }
-files = [source / name for name in sorted(gift_files)]
-# Gift bundle only. Identity-specific artwork remains in the source folder, outside this allowlist.
+files = [(repository if name in {'CHANGELOG.md', 'LICENSE'} else source) / name for name in sorted(gift_files)]
+# Explicit neutral runtime package allowlist; private settings and artwork are excluded.
 gift_assets = {
     'THIRD-PARTY-NOTICES.md',
     'InterVariable.woff2', 'Inter-LICENSE.txt', 'Lucide-LICENSE.txt',
@@ -33,8 +34,10 @@ gift_assets = {
 files += [source / 'assets' / name for name in sorted(gift_assets)]
 entries = {'config.js': public_config, 'VERSION': (version + '\n').encode()}
 for path in sorted(files):
-    relative = path.relative_to(source).as_posix()
+    relative = path.relative_to(source).as_posix() if path.is_relative_to(source) else path.name
     data = path.read_bytes()
+    if path.name == 'THIRD-PARTY-NOTICES.md':
+        data = data.replace(b'(../../LICENSE)', b'(../LICENSE)')
     if path.suffix == '.html':
         if path.name != 'demo.html':
             data = data.replace(b'src="config.public.js"', b'src="config.js"')
@@ -97,7 +100,7 @@ def build(destination=output):
     finally:
         if temporary is not None:
             temporary.unlink(missing_ok=True)
-    print(f'Built and verified {destination} v{version} ({len(entries)} files; gift bundle, not public-cleared)')
+    print(f'Built and verified {destination} v{version} ({len(entries)} files; neutral prerelease package)')
 
 
 if __name__ == '__main__':

@@ -2,14 +2,14 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const {resolveLayout} = require('../events.js');
+const {resolveLayout} = require('../template/events.js');
 
 test('fill and top frame cover all seven regions', () => {
   const node = () => ({style:{},dataset:{},children:[],append(...children){this.children.push(...children);},addEventListener(){}});
   const config = {layoutVersion:2,layout:{chat:{x:1400,y:40}},backgroundImage:'assets/bg.png',regionBackgrounds:{game:{color:'#654321',image:'assets/game.png',opacity:35,blur:9},chat:{color:'#123456',borderColor:'#abcdef'}}};
   function render(mode){
-    const canvas=node(),context={document:{body:{dataset:{mode}},getElementById:()=>canvas,createElement:node},OverlayEvents:{resolveLayout},window:{OVERLAY_CONFIG:config,KMGGradient:require('../gradient.js')},innerWidth:1920,innerHeight:1080,addEventListener(){}};
-    vm.runInNewContext(fs.readFileSync(require.resolve('../background.js'),'utf8'),context);
+    const canvas=node(),context={document:{body:{dataset:{mode}},getElementById:()=>canvas,createElement:node},OverlayEvents:{resolveLayout},window:{OVERLAY_CONFIG:config,KMGGradient:require('../template/gradient.js')},innerWidth:1920,innerHeight:1080,addEventListener(){}};
+    vm.runInNewContext(fs.readFileSync(require.resolve('../template/background.js'),'utf8'),context);
     return canvas.children;
   }
   const fill=render('fill');
@@ -35,7 +35,7 @@ test('fill and top frame cover all seven regions', () => {
 test('new style hides disabled panels and reaches OBS fill and stroke sources',()=>{
  const node=()=>({style:{},dataset:{},children:[],append(...children){this.children.push(...children);},addEventListener(){}});
  const config={panelEnabled:{chat:false},regionStyleOverrides:{hand:true},regionBackgrounds:{hand:{color:'#334455',borderColor:'#abcdef'}},globalStyle:{background:{mode:'gradient',color:'#000000',color2:'#333333'},fill:{mode:'gradient',color:'#111111',color2:'#222222',opacity:50,blur:8},stroke:{mode:'gradient',color:'#ff0000',color2:'#0000ff',opacity:80,width:6}}};
- function render(mode){const canvas=node(),context={document:{body:{dataset:{mode}},getElementById:()=>canvas,createElement:node},OverlayEvents:{resolveLayout},window:{OVERLAY_CONFIG:config,KMGGradient:require('../gradient.js')},innerWidth:1920,innerHeight:1080,addEventListener(){}};vm.runInNewContext(fs.readFileSync(require.resolve('../background.js'),'utf8'),context);return canvas.children;}
+ function render(mode){const canvas=node(),context={document:{body:{dataset:{mode}},getElementById:()=>canvas,createElement:node},OverlayEvents:{resolveLayout},window:{OVERLAY_CONFIG:config,KMGGradient:require('../template/gradient.js')},innerWidth:1920,innerHeight:1080,addEventListener(){}};vm.runInNewContext(fs.readFileSync(require.resolve('../template/background.js'),'utf8'),context);return canvas.children;}
  const fill=render('fill'),frame=render('frame');
  assert.equal(fill.find(tile=>tile.dataset.region==='chat').style.display,'none');
  assert.match(fill.find(tile=>tile.dataset.region==='game').children[1].style.backgroundImage,/linear-gradient/);
@@ -51,7 +51,7 @@ test('global and regional stop gradients reach fill and frame renderers',()=>{
  const gradient={type:'linear',angle:27,stops:[{position:0,color:'#112233',opacity:100},{position:100,color:'#aabbcc',opacity:50}]},strokeGradient={type:'linear',angle:27,stops:[{position:0,color:'#ff0000',opacity:35},{position:100,color:'#0000ff',opacity:65}]},calls=[];
  const node=()=>({style:{setProperty(name,value){this[name]=value;}},dataset:{},children:[],append(...children){this.children.push(...children);},addEventListener(){}});
  const config={layoutVersion:2,regionStyleOverrides:{hand:true},globalStyle:{background:{mode:'gradient',gradient},fill:{mode:'gradient',gradient,opacity:40,blur:6},stroke:{mode:'gradient',gradient:strokeGradient,opacity:80,width:6}},regionBackgrounds:{hand:{color:'#334455',borderColor:'#abcdef',fill:{mode:'gradient',gradient,opacity:65,blur:4},stroke:{mode:'gradient',gradient:strokeGradient,opacity:55,width:5}}}};
- function render(mode){const canvas=node(),context={document:{body:{dataset:{mode}},getElementById:()=>canvas,createElement:node},OverlayEvents:{resolveLayout},window:{OVERLAY_CONFIG:config,KMGGradient:{css(part){calls.push(part);return `linear-gradient(${part.gradient.angle}deg, #123456, #abcdef)`;}}},innerWidth:1920,innerHeight:1080,addEventListener(){}};vm.runInNewContext(fs.readFileSync(require.resolve('../background.js'),'utf8'),context);return canvas.children;}
+ function render(mode){const canvas=node(),context={document:{body:{dataset:{mode}},getElementById:()=>canvas,createElement:node},OverlayEvents:{resolveLayout},window:{OVERLAY_CONFIG:config,KMGGradient:{css(part){calls.push(part);return `linear-gradient(${part.gradient.angle}deg, #123456, #abcdef)`;}}},innerWidth:1920,innerHeight:1080,addEventListener(){}};vm.runInNewContext(fs.readFileSync(require.resolve('../template/background.js'),'utf8'),context);return canvas.children;}
  const fill=render('fill'),frame=render('frame');
  assert.equal(fill.find(tile=>tile.dataset.region==='game').children[1].style.backgroundImage,'linear-gradient(27deg, #123456, #abcdef)');
  assert.equal(fill.find(tile=>tile.dataset.region==='game').children[1].style.opacity,'0.4');
@@ -74,8 +74,8 @@ test('preview stroke tiles and CSS gradients stay fully opaque for legacy opacit
  }
  const config={layoutVersion:2,name:'PLAYER',platforms:[],slotContent:{custom1:'none',custom2:'none',custom3:'none'},customSlotMedia:{},panelEnabled:{},showSubtitles:false,showChat:false,showSponsor:false,showAlerts:false,globalStyle:{background:{mode:'solid',color:'#000000'},stroke:{mode:'gradient',opacity:15,width:4,gradient}},regionStyleOverrides:{game:true},regionBackgrounds:{game:{stroke:{mode:'gradient',opacity:65,width:4,gradient}}}};
  const document={body:element('body'),getElementById:element,createElement:tag=>element('created '+tag),querySelector(selector){const region=/^\.overlay section\[data-region="([^"]+)"\]$/.exec(selector);return element(region?region[1]:selector);}};
- const context={window:{OVERLAY_CONFIG:config,OVERLAY_PUBLIC_CONFIG:config,Background:{applyConfig(){}},KMGGradient:{css(part){calls.push(part);return 'linear-gradient(20deg, #112233, #aabbcc)';}}},document,OverlayEvents:require('../events.js'),innerWidth:1920,innerHeight:1080,URL,URLSearchParams,location:{search:'?preview=1'},addEventListener(){},setTimeout(){return 0;},clearTimeout(){}};
- vm.runInNewContext(fs.readFileSync(require.resolve('../overlay.js'),'utf8'),context);
+ const context={window:{OVERLAY_CONFIG:config,OVERLAY_PUBLIC_CONFIG:config,Background:{applyConfig(){}},KMGGradient:{css(part){calls.push(part);return 'linear-gradient(20deg, #112233, #aabbcc)';}}},document,OverlayEvents:require('../template/events.js'),innerWidth:1920,innerHeight:1080,URL,URLSearchParams,location:{search:'?preview=1'},addEventListener(){},setTimeout(){return 0;},clearTimeout(){}};
+ vm.runInNewContext(fs.readFileSync(require.resolve('../template/overlay.js'),'utf8'),context);
  const strokes=element('preview-strokes').children;
  assert.equal(strokes.length,7);assert.ok(strokes.every(tile=>tile.style.opacity==='1'));
  assert.equal(strokes[0].style['--stroke-gradient'],'linear-gradient(20deg, #112233, #aabbcc)');

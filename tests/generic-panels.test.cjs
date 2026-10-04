@@ -4,7 +4,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
 
-const root=path.join(__dirname,'..');
+const root=path.join(__dirname,'..','template');
 const preview=fs.readFileSync(path.join(root,'preview.js'),'utf8');
 const html=fs.readFileSync(path.join(root,'preview.html'),'utf8');
 const css=fs.readFileSync(path.join(root,'preview.css'),'utf8');

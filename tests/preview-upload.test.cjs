@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
-const source=fs.readFileSync(path.join(__dirname,'../preview.js'),'utf8');
+const source=fs.readFileSync(path.join(__dirname,'../template/preview.js'),'utf8');
 const start=source.indexOf('  async function readUpload('),end=source.indexOf('  async function handleUpload(',start);
 function harness(){
  const pending=[],uploadRequests=new Map(),status={textContent:''};

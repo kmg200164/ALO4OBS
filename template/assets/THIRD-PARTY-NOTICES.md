@@ -1,6 +1,6 @@
 # Third-party notices
 
-The project's own code is licensed under MIT in `../LICENSE`. The assets below
+The project's own code is licensed under MIT in [LICENSE](../../LICENSE). The assets below
 keep their separate terms. These notices do not imply endorsement.
 
 ## Figma Simple Design System icons

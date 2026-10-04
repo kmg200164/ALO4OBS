@@ -32,7 +32,7 @@ function editorHarness(language='en'){
  const document=new Node('document');document.documentElement={lang:language};document.body=new Node('body');
  document.createElement=tag=>{const node=new Node(tag);node.ownerDocument=document;return node;};
  const window=new Node('window');window.document=document;window.innerWidth=1400;window.innerHeight=1000;document.defaultView=window;
- const context={window,document};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../gradient.js'),'utf8'),context);
+ const context={window,document};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../template/gradient.js'),'utf8'),context);
  const anchor=new Node('button');anchor.getBoundingClientRect=()=>({left:10,top:10,bottom:42});
  const changes=[];const open=part=>window.KMGGradient.open(anchor,part,value=>changes.push(JSON.parse(JSON.stringify(value))));
  const find=(root,className)=>[root,...root.children.flatMap(function walk(node){return [node,...node.children.flatMap(walk)];})].find(node=>node.className.split(' ').includes(className));

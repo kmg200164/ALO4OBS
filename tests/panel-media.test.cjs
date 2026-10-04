@@ -4,7 +4,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
 
-const root=path.join(__dirname,'..');
+const root=path.join(__dirname,'..','template');
 const script=fs.readFileSync(path.join(root,'panel-media.js'),'utf8');
 const keys=['game','custom1','custom2','custom3','chat','translation','hand'];
 
@@ -32,7 +32,7 @@ test('video plays muted in the media page and inactive or unsafe media stays bla
   assert.equal(video.video.src,'assets/camera.webm');
   assert.equal(video.video.played,true);
   assert.equal(video.video.hidden,false);
-  for(const item of [{type:'media',url:'../secret.png'},{type:'media',url:'file:///secret.png'},{type:'source',url:'assets/sample.png'}]){
+  for(const item of [{type:'media',url:'../template/secret.png'},{type:'media',url:'file:///secret.png'},{type:'source',url:'assets/sample.png'}]){
     const result=render('hand',item);
     assert.equal(result.image.src,undefined);
     assert.equal(result.video.src,undefined);

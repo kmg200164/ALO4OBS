@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
 const path=require('node:path');
-const api=require('../gradient.js');
+const api=require('../template/gradient.js');
 
 test('default gradient uses a neutral two-stop fallback',()=>{
  const gradient=api.normalize({});
@@ -79,7 +79,7 @@ test('CSS includes ordered stops, direction, and alpha',()=>{
 
 test('browser build exposes the same API on window.KMGGradient',()=>{
  const window={};
- vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../gradient.js'),'utf8'),{window});
+ vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../template/gradient.js'),'utf8'),{window});
  assert.equal(typeof window.KMGGradient.normalize,'function');
  assert.equal(typeof window.KMGGradient.css,'function');
  assert.equal(typeof window.KMGGradient.open,'function');

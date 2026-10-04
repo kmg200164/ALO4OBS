@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const api = fs.existsSync(require('node:path').join(__dirname,'../events.js')) ? require('../events.js') : {};
+const api = fs.existsSync(require('node:path').join(__dirname,'../template/events.js')) ? require('../template/events.js') : {};
 test('same source event is deduplicated; other platforms remain distinct', () => {
  assert.equal(typeof api.createEventStore,'function');
  const store = api.createEventStore(3);

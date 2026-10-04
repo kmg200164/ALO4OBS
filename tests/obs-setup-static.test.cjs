@@ -2,7 +2,7 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
-const source=fs.readFileSync(path.join(__dirname,'../obs-setup.lua'),'utf8');
+const source=fs.readFileSync(path.join(__dirname,'../template/obs-setup.lua'),'utf8');
 const legacy=source.slice(source.indexOf('local function apply(props,property)'));
 const generic=source.slice(source.indexOf('local function apply_generic(settings)'),source.indexOf('local function apply(props,property)'));
 // These are source guard checks, not an OBS or Lua runtime test.

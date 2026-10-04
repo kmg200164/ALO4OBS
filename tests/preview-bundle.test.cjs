@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
-const source=fs.readFileSync(path.join(__dirname,'../preview.js'),'utf8');
+const source=fs.readFileSync(path.join(__dirname,'../template/preview.js'),'utf8');
 const start=source.indexOf("  byId('bundle').onclick=async()=>{"),end=source.indexOf("  frame.addEventListener('load'",start);
 
 function harness(){

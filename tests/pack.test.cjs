@@ -1,5 +1,5 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
-const api=fs.existsSync(path.join(__dirname,'../pack.js'))?require('../pack.js'):{};
+const api=fs.existsSync(path.join(__dirname,'../template/pack.js'))?require('../template/pack.js'):{};
 test('disabled generic panels preserve invalid drafts without blocking export, then validate on enable',()=>{
  const keys=['game','custom1','custom2','custom3','chat','translation','hand'];
  for(const key of keys)for(const type of ['web','media']){
@@ -65,8 +65,8 @@ test('standalone OBS HTML loads exported positions and reactive mode from config
  const vm=require('node:vm'),elements=new Map();
  function element(key){if(!elements.has(key))elements.set(key,{style:{setProperty(){}},classList:{add(){},contains(){return false}},addEventListener(){},replaceChildren(){},pause(){this.pauses=(this.pauses||0)+1;},load(){this.loads=(this.loads||0)+1;},play(){return Promise.resolve();},removeAttribute(){},querySelector:child=>element(key+' '+child)});return elements.get(key);}
  const config={layoutVersion:2,platforms:[],layout:{custom1:{x:100,y:100}},cameraMode:'reactive',handcam:false};
- const context={window:{OVERLAY_CONFIG:config},document:{getElementById:element,querySelector:selector=>element(selector.replace(/^\.overlay section(?=\[data-region=)/,'')),body:element('body')},OverlayEvents:require('../events.js'),innerWidth:1920,innerHeight:1080,addEventListener(){},location:{search:''},URL,URLSearchParams,clearTimeout};
- vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../overlay.js'),'utf8'),context);
+ const context={window:{OVERLAY_CONFIG:config},document:{getElementById:element,querySelector:selector=>element(selector.replace(/^\.overlay section(?=\[data-region=)/,'')),body:element('body')},OverlayEvents:require('../template/events.js'),innerWidth:1920,innerHeight:1080,addEventListener(){},location:{search:''},URL,URLSearchParams,clearTimeout};
+ vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../template/overlay.js'),'utf8'),context);
  assert.equal(element('[data-region="sponsor"]').style.left,'100px');
  assert.equal(element('[data-region="sponsor"]').style.top,'100px');
  assert.equal(element('sponsor-image').hidden,true);
@@ -132,7 +132,7 @@ test('auto layout export gives OBS the same resized boxes as the preview',()=>{
  const enabled={custom2:false,hand:false};
  const input={layoutVersion:3,layoutOrder:order,panelEnabled:enabled};
  const saved=JSON.parse(new TextDecoder().decode(api.settingsEntries(input)[1].bytes));
- const expected=require('../events.js').autoLayout({order,enabled});
+ const expected=require('../template/events.js').autoLayout({order,enabled});
  assert.equal(saved.layoutVersion,3);
  assert.deepEqual(saved.layout,expected);
  assert.equal(saved.layout.chat.x,32);
@@ -141,7 +141,7 @@ test('auto layout export gives OBS the same resized boxes as the preview',()=>{
  assert.equal(saved.panelEnabled.custom2,false);
 });
 test('hierarchical frame levels survive export as the same OBS boxes',()=>{
- const events=require('../events.js'),placement=events.defaultPlacement();
+ const events=require('../template/events.js'),placement=events.defaultPlacement();
  placement.custom2.level1='right';placement.custom2.level2='bottom';
  const enabled={custom3:false};
  const saved=JSON.parse(new TextDecoder().decode(api.settingsEntries({layoutVersion:3,panelPlacement:placement,panelEnabled:enabled})[1].bytes));
@@ -151,7 +151,7 @@ test('hierarchical frame levels survive export as the same OBS boxes',()=>{
  assert.equal(saved.panelPlacement.custom2.level1,'right');
 });
 test('opposite game and custom rows export the canonical geometry for OBS',()=>{
- const events=require('../events.js'),placement=events.defaultPlacement();
+ const events=require('../template/events.js'),placement=events.defaultPlacement();
  placement.game.level2='bottom';
  const saved=JSON.parse(new TextDecoder().decode(api.settingsEntries({layoutVersion:3,panelPlacement:placement})[1].bytes));
  const expected=events.autoLayout({placement});
@@ -162,7 +162,7 @@ test('opposite game and custom rows export the canonical geometry for OBS',()=>{
  }
 });
 test('OBS export ignores legacy custom level3 ordering and expands enabled numeric slots',()=>{
- const placement=require('../events.js').defaultPlacement();
+ const placement=require('../template/events.js').defaultPlacement();
  placement.game.level2='bottom';
  placement.custom1.level3='right';placement.custom2.level3='left';placement.custom3.level3='center';
  const saved=JSON.parse(new TextDecoder().decode(api.settingsEntries({layoutVersion:3,panelPlacement:placement})[1].bytes));
@@ -203,8 +203,8 @@ test('custom media is stopped when disabled and restored when the same panel is 
   return elements.get(key);
  }
  const input={layoutVersion:2,platforms:[],showSponsor:false,slotContent:{custom1:'video',custom2:'browser',custom3:'image'},customSlotMedia:{custom1:{url:'https://example.org/a.mp4'},custom2:{url:'https://example.org/widget'},custom3:{url:'assets/example.png'}},panelEnabled:{custom1:false,custom2:false,custom3:false}};
- const context={window:{OVERLAY_PUBLIC_CONFIG:input,OVERLAY_CONFIG:input},document:{getElementById:element,querySelector:selector=>element(selector.replace(/^\.overlay section(?=\[data-region=)/,'')),body:element('body'),createElement:()=>element('new')},OverlayEvents:require('../events.js'),innerWidth:1920,innerHeight:1080,addEventListener(){},location:{search:'?preview=1'},URL,URLSearchParams,clearTimeout};
- vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../overlay.js'),'utf8'),context);
+ const context={window:{OVERLAY_PUBLIC_CONFIG:input,OVERLAY_CONFIG:input},document:{getElementById:element,querySelector:selector=>element(selector.replace(/^\.overlay section(?=\[data-region=)/,'')),body:element('body'),createElement:()=>element('new')},OverlayEvents:require('../template/events.js'),innerWidth:1920,innerHeight:1080,addEventListener(){},location:{search:'?preview=1'},URL,URLSearchParams,clearTimeout};
+ vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../template/overlay.js'),'utf8'),context);
  const video=element('[data-region="custom1"] video'),embed=element('[data-region="custom2"] iframe'),image=element('[data-region="custom3"] img');
  assert.equal(video.src,undefined);assert.equal(embed.src,undefined);assert.equal(image.src,undefined);
  context.window.Overlay.applyConfig({...input,panelEnabled:{}});
@@ -225,8 +225,8 @@ test('promotion media follows its active slot and stops across disabled or repla
  const vm=require('node:vm'),elements=new Map();
  function element(key){if(!elements.has(key))elements.set(key,{style:{setProperty(){}},classList:{add(){},contains(){return false}},addEventListener(){},replaceChildren(){},pause(){this.pauses=(this.pauses||0)+1;},load(){},play(){this.plays=(this.plays||0)+1;return Promise.resolve();},removeAttribute(name){delete this[name];},querySelector:child=>element(key+' '+child)});return elements.get(key);}
  const input={layoutVersion:2,platforms:[],showSponsor:true,sponsor:'https://example.org/promo.mp4',sponsorType:'video',slotContent:{custom1:'sponsor',custom2:'none',custom3:'none'},panelEnabled:{}};
- const context={window:{OVERLAY_CONFIG:input},document:{getElementById:element,querySelector:selector=>element(selector.replace(/^\.overlay section(?=\[data-region=)/,'')),body:element('body')},OverlayEvents:require('../events.js'),innerWidth:1920,innerHeight:1080,addEventListener(){},location:{search:''},URL,URLSearchParams,clearTimeout};
- vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../overlay.js'),'utf8'),context);
+ const context={window:{OVERLAY_CONFIG:input},document:{getElementById:element,querySelector:selector=>element(selector.replace(/^\.overlay section(?=\[data-region=)/,'')),body:element('body')},OverlayEvents:require('../template/events.js'),innerWidth:1920,innerHeight:1080,addEventListener(){},location:{search:''},URL,URLSearchParams,clearTimeout};
+ vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../template/overlay.js'),'utf8'),context);
  const video=element('sponsor-video'),embed=element('sponsor-embed');
  assert.equal(video.src,input.sponsor);
  context.window.Overlay.applyConfig({...input,panelEnabled:{custom1:false}});assert.equal(video.src,undefined);

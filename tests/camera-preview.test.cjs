@@ -1,6 +1,6 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
-const {create}=require('../camera-preview.js');
+const {create}=require('../template/camera-preview.js');
 
 function fakeStream(deviceId='cam-1'){
  const track={stopped:false,stop(){this.stopped=true;},getSettings(){return {deviceId};}};

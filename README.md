@@ -6,8 +6,8 @@ Current version: 0.4.0-dev.1 (pre-release QA)
 
 A local seven-panel bento layout that keeps cameras, chat, and captions beside the game. This is a development prerelease; macOS and Chrome upload verification are still in progress.
 
-1. Choose **Code → Download ZIP** on GitHub, extract it, and open [guide-en.html](guide-en.html) in your browser.
-2. Open [preview.html](preview.html), choose English in the language menu, and configure Panel 1–7. Each panel supports None, OBS source, Web address, or Image/Video.
+1. Choose **Code → Download ZIP** on GitHub, extract it, and open [guide-en.html](template/guide-en.html) in your browser.
+2. Open [preview.html](template/preview.html), choose English in the language menu, and configure Panel 1–7. Each panel supports None, OBS source, Web address, or Image/Video.
 3. Save the settings ZIP and extract it into the same folder as `obs-setup.lua` and `overlay.html`, replacing the generated settings files. Keep personal widget links and settings ZIPs private.
 4. In OBS, set the base canvas to 1920 × 1080. Open **Tools → Scripts → +** and select `obs-setup.lua`. For panels using OBS sources, choose distinct existing individual video sources; scenes and groups are not supported. Enable **English UI (reload after changing)** if needed, reload, then click **Apply saved settings / Auto layout**.
 
@@ -20,7 +20,7 @@ A local seven-panel bento layout that keeps cameras, chat, and captions beside t
 
 **개발 사전 공개 버전입니다. macOS·Chrome 업로드 검증은 진행 중입니다.**
 
-GitHub **Code → Download ZIP**으로 받아 압축을 풀고 `guide.html`을 엽니다. 한국어/영어/일본어를 선택할 수 있습니다.
+GitHub **Code → Download ZIP**으로 받아 압축을 풀고 `template/guide.html`을 엽니다. 한국어/영어/일본어를 선택할 수 있습니다.
 
 1. `preview.html`에서 패널 1~7을 하나씩 선택합니다. 각 패널의 **콘텐츠**를 `없음`, `OBS 소스`, `웹 주소`, `이미지/영상` 중에서 고르고, 활성화와 상위·하위 프레임 위치를 지정합니다. 웹 위젯은 해당 서비스가 제공한 **OBS 표시용 URL**을 입력합니다. 전체 배경·패널 채우기·테두리도 이 화면에서 설정합니다. 변경 사항은 미리보기에 즉시 반영되고, 미리보기의 숫자는 칸을 구별하기 위한 안내이며 OBS 출력에는 나오지 않습니다.
 2. **ZIP 파일로 저장**을 눌러 받은 `OBS-settings.zip`을 `obs-setup.lua`와 `overlay.html`이 있는 폴더에 풉니다. `config.js`, `obs-settings.json`, 업로드 자산과 패널 마스크를 함께 교체합니다. 설정 ZIP에는 개인 위젯 주소가 들어갈 수 있으므로 공개하지 마세요.
@@ -82,7 +82,7 @@ Windows는 Python 명령을 `py`로 바꿀 수 있습니다. 테스트는 Node �
 
 이 저장소는 개인 Vault 이력을 가져오지 않은 독립 공개 저장소입니다. 개인 `config.js`, `obs-settings.json`, 설정 ZIP과 검수 자료는 추적하지 않습니다. 공개 중립 설정은 `config.public.js`이며, 배포 빌드는 이를 `config.js`로 넣습니다. 개인 위젯 주소가 포함된 설정 ZIP은 공유하지 마세요.
 
-자체 코드는 [MIT 라이선스](LICENSE)를 사용합니다. Figma Simple Design System 아이콘(CC BY 4.0), Lucide 아이콘(ISC), Inter 폰트(OFL)의 출처와 변경 사항은 [제3자 자산 고지](assets/THIRD-PARTY-NOTICES.md)에 있습니다. GitHub 헤더 링크는 변형 마크 대신 텍스트로 표시합니다.
+자체 코드는 [MIT 라이선스](LICENSE)를 사용합니다. Figma Simple Design System 아이콘(CC BY 4.0), Lucide 아이콘(ISC), Inter 폰트(OFL)의 출처와 변경 사항은 [제3자 자산 고지](template/assets/THIRD-PARTY-NOTICES.md)에 있습니다. GitHub 헤더 링크는 변형 마크 대신 텍스트로 표시합니다.
 
 ## Windows와 macOS
 
@@ -97,3 +97,12 @@ Run `python build.py` to create `dist/OBS-Streaming-Template.zip` with neutral d
 ## Development
 
 This project uses two permanent branches: `main` for verified snapshots and `dev` for ongoing development and QA. Work on `dev`, then merge into `main` after reviewing the diff and running `node --test tests/*.test.cjs` and `python -m unittest discover -s tests -p test_build.py`.
+
+## Repository layout
+
+- `template/`: runnable HTML, scripts, styles, OBS Lua, and runtime assets.
+- `tests/`: regression checks.
+- `build.py`: builds the neutral ZIP into `dist/`.
+- Root documentation and licenses describe the project.
+
+Device checks and remaining work: [QA and handoff](docs/QA.md).
