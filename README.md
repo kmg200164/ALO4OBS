@@ -86,4 +86,4 @@ Run `python build.py` to create `dist/OBS-Streaming-Template.zip` with neutral d
 
 ## Development
 
-`main` contains verified snapshots. Use a short-lived branch such as `codex/release-qa` for ongoing changes, then merge after reviewing the diff and running `node --test tests/*.test.cjs` and `python -m unittest discover -s tests -p test_build.py`. A separate long-lived `dev` branch is not required for this solo project.
+This project uses two permanent branches: `main` for verified snapshots and `dev` for ongoing development and QA. Work on `dev`, then merge into `main` after reviewing the diff and running `node --test tests/*.test.cjs` and `python -m unittest discover -s tests -p test_build.py`.
