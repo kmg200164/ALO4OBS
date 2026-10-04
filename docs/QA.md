@@ -8,7 +8,7 @@ Confirmed during the current QA run: seven-panel rendering, live external widget
 
 Remaining Windows checks, in order:
 
-1. In Chrome, open `template/preview.html`, upload an image/video, save the settings ZIP, extract it beside the Lua script, and verify its actual OBS output. Earlier Chrome file-chooser automation timed out; an in-app browser upload is separate evidence.
+1. Verify direct `file://` execution in Chrome, then apply the actual browser-exported settings ZIP in OBS and inspect its output. HTTP Chrome upload, settings ZIP export, and restoration after reopening already passed independently on snapshot `cb4c2a8`: a 73-byte PNG was uploaded in source and built-package entry points, and ZIP CRC, asset SHA, settings JSON, and restoration on a fresh origin were checked. The separate neutral-fixture OBS tests do not prove the actual browser-exported ZIP-to-OBS step.
 2. Verify rollback when a previously populated template is changed and an apply fails; the isolated new-scene test below does not establish that guarantee.
 
 ## Isolated Lua failure and recovery (Windows)
