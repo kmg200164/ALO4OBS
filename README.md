@@ -8,6 +8,8 @@ You are on GitHub, a website where people share programs. This page is the instr
 
 **[Download the template ZIP](https://github.com/kmg200164/OBS-streaming-template/archive/refs/heads/dev.zip)**
 
+![Setup flow: download the ZIP, extract it, open guide-en.html, configure seven panels, extract OBS-settings.zip into the template folder, then add obs-setup.lua through OBS Tools > Scripts > + and apply.](docs/images/setup-workflow.png)
+
 A ZIP is a folder packed into one file for downloading. On Windows:
 
 1. Click the **Download the template ZIP** link above. Your browser saves the file, usually in **Downloads**.
