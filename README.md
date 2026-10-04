@@ -30,6 +30,19 @@ Follow these six steps. You do not need a GitHub account or a code editor.
 5. Unpack `OBS-settings.zip` **into the same template folder**. Its files, including `obs-settings.json`, must sit beside `obs-setup.lua` and `overlay.html`, not inside another subfolder. Replace the older generated settings files if asked. Keep this settings ZIP private if it contains personal widget links.
 6. In [OBS Studio](https://obsproject.com/) **30.1 or newer**, set the base canvas to **1920 × 1080**. Open **Tools → Scripts → +** and add that folder's `obs-setup.lua`. For every panel set to **OBS source**, choose a different existing individual source in its numbered selector. Then click **Apply saved settings / Auto layout**. The template scene appears in OBS; the guide explains these OBS controls in detail.
 
+<details>
+<summary>Show the actual OBS buttons</summary>
+
+Use the **+** button at the bottom of the Scripts window to add `obs-setup.lua`. Your OBS menus may use a different language; the **+** icon is the same.
+
+![Actual OBS Scripts window with the plus button at the bottom left.](docs/images/obs-add-script.jpg)
+
+After selecting each required OBS source, click **Apply saved settings / Auto layout** on the right.
+
+![Actual loaded template script showing Panel 1–7 source selectors and the Apply saved settings / Auto layout button.](docs/images/obs-apply-settings.jpg)
+
+</details>
+
 Keep the unpacked folder where you want to store the template. OBS will continue to use files in that folder.
 
 The template starts in English. You can select Korean or Japanese from its language button.
