@@ -15,6 +15,9 @@ local areas={{'chatUrl','OBS Template · Chat','chat','showChat'},
 function script_description()
  return 'OBS Streaming Template: configure seven panels in preview.html, extract OBS-settings.zip beside this script, select a different existing OBS source for each panel that needs one, then Apply. Existing scenes and capture settings are preserved.'
 end
+function script_defaults(settings)
+ obs.obs_data_set_default_bool(settings,'english',true)
+end
 function script_update(settings)
  if cfg~=nil then obs.obs_data_release(cfg) end
  cfg=settings;obs.obs_data_addref(cfg)
@@ -703,7 +706,7 @@ local function apply(props,property)
 end
 function script_properties()
  local p=obs.obs_properties_create()
- local en=cfg~=nil and obs.obs_data_get_bool(cfg,'english')
+ local en=cfg==nil or obs.obs_data_get_bool(cfg,'english')
  obs.obs_properties_add_bool(p,'english','English UI (reload after changing)')
  local file=io.open(script_path()..'obs-settings.json','r')
  local generic=false

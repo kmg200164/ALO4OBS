@@ -166,3 +166,8 @@ test('full-screen preview keeps an exit control visible and translated',()=>{
  assert.equal(i18n.localize('Esc 키로 종료','en'),'Press Esc to exit');
  assert.equal(i18n.localize('설정으로 돌아가기','ja'),'設定に戻る');
 });
+
+ test('fresh and invalid preferences default to English while saved Korean and Japanese persist',()=>{
+ for(const value of [null,'','unsupported']){const app=boot('/preview.html',value);assert.equal(app.document.documentElement.lang,'en');assert.equal(app.guide.href,'guide-en.html');assert.equal(app.nodes[0].nodeValue,'Solid');}
+ for(const value of ['ko','ja']){const app=boot('/preview.html',value);assert.equal(app.document.documentElement.lang,value);}
+});
