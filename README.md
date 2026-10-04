@@ -21,13 +21,14 @@ You are on GitHub, a website where people share programs. This page is the instr
 
 ![Setup flow: download the ZIP, extract it, open guide-en.html, configure seven panels, extract OBS-settings.zip into the template folder, then add obs-setup.lua through OBS Tools > Scripts > + and apply.](docs/images/setup-workflow.png)
 
-A ZIP is a folder packed into one file for downloading. On Windows:
+Follow these six steps. You do not need a GitHub account or a code editor.
 
-1. Click the **Download the template ZIP** link above. Your browser saves the file, usually in **Downloads**.
-2. Open **Downloads** in File Explorer. Right-click the downloaded ZIP and choose **Extract All**, then **Extract**. This unpacks the files into a normal folder. Do not open the pages from inside the ZIP.
-3. Open the unpacked folder, then open the folder named **template**.
-4. Double-click **guide-en.html**. This opens the setup instructions in your browser. You do not need a code editor.
-5. Follow that guide to choose what goes in each space and add the layout to **OBS Studio**, the program you use to broadcast. If OBS Studio is not installed yet, get it from [obsproject.com](https://obsproject.com/) first.
+1. Click **Download the template ZIP** above. This link downloads the current `dev` test version. Find the downloaded file in **Downloads**.
+2. Unpack it: on Windows, right-click the ZIP and choose **Extract All → Extract**; on macOS, double-click it. Open the unpacked folder, then open **template**. Do not open pages while they are still inside the ZIP.
+3. Double-click **guide-en.html** in **template**. It opens the full setup guide in your browser. Click the gear-shaped settings icon at the top to open **preview.html**, or double-click **preview.html** in the same folder.
+4. In the preview, choose the content and position of Panels 1–7. Click **Save as ZIP**. This downloads `OBS-settings.zip`.
+5. Unpack `OBS-settings.zip` **into the same template folder**. Its files, including `obs-settings.json`, must sit beside `obs-setup.lua` and `overlay.html`, not inside another subfolder. Replace the older generated settings files if asked. Keep this settings ZIP private if it contains personal widget links.
+6. In [OBS Studio](https://obsproject.com/) **30.1 or newer**, set the base canvas to **1920 × 1080**. Open **Tools → Scripts → +** and add that folder's `obs-setup.lua`. For every panel set to **OBS source**, choose a different existing individual source in its numbered selector. Then click **Apply saved settings / Auto layout**. The template scene appears in OBS; the guide explains these OBS controls in detail.
 
 Keep the unpacked folder where you want to store the template. OBS will continue to use files in that folder.
 
@@ -35,13 +36,7 @@ The template starts in English. You can select Korean or Japanese from its langu
 
 Version: **0.4.2 — test version**. This download is for trying the template and reporting problems. Installation and recovery checks are still in progress; see [QA results](docs/QA.md).
 
-## Quick start
-
-1. Choose **Code → Download ZIP** on GitHub and extract the archive. Open [template/guide-en.html](template/guide-en.html) for the full setup guide.
-2. Open [template/preview.html](template/preview.html). Configure Panel 1–7, their enabled state, parent/child frame positions, and global or individual styles. Changes appear immediately in the preview.
-3. Click **Save ZIP** and extract `OBS-settings.zip` into the folder containing `obs-setup.lua` and `overlay.html`, replacing the generated settings files together. The ZIP includes configuration, uploaded assets, and rounded-corner masks. Keep personal settings ZIPs private.
-4. Set the OBS base canvas to **1920 × 1080**. Open **Tools → Scripts → +** and add `obs-setup.lua`. For each panel configured as an OBS source, choose a distinct existing individual video source in its numbered selector. Scenes and groups are not supported, and one source cannot be assigned to two panels. Seven camera panels require seven distinct camera sources.
-5. Click **Apply saved settings / Auto layout**. For later changes, replace the settings ZIP files and apply again. If you previously selected Korean script controls, enable **English UI (reload after changing)** and reload the script to switch.
+To change the layout later, save a new settings ZIP, replace its files in **template**, and click **Apply saved settings / Auto layout** again. OBS scenes and groups cannot be selected as a panel's OBS source, and the same source cannot be assigned to two panels. Seven camera panels need seven distinct camera sources. If the script controls appear in Korean, enable **English UI (reload after changing)** and reload the script.
 
 The template creates its own scene and automatically locks its items. It does not start a broadcast, alter stream keys, or change capture-device settings. Source content keeps its original aspect ratio. Rounded masks apply to template groups rather than changing the original source in other scenes.
 
