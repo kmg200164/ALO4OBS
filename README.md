@@ -2,6 +2,16 @@
 
 Current version: 0.4.0-dev.1 (pre-release QA)
 
+## English quick start
+
+A local seven-panel bento layout that keeps cameras, chat, and captions beside the game. This is a development prerelease; macOS and Chrome upload verification are still in progress.
+
+1. Choose **Code → Download ZIP** on GitHub, extract it, and open [guide-en.html](guide-en.html) in your browser.
+2. Open [preview.html](preview.html), choose English in the language menu, and configure Panel 1–7. Each panel supports None, OBS source, Web address, or Image/Video.
+3. Save the settings ZIP and extract it into the same folder as `obs-setup.lua` and `overlay.html`, replacing the generated settings files. Keep personal widget links and settings ZIPs private.
+4. In OBS, set the base canvas to 1920 × 1080. Open **Tools → Scripts → +** and select `obs-setup.lua`. For panels using OBS sources, choose distinct existing individual video sources; scenes and groups are not supported. Enable **English UI (reload after changing)** if needed, reload, then click **Apply saved settings / Auto layout**.
+
+
 변경 기록: [CHANGELOG.md](CHANGELOG.md)
 
 게임 화면과 캠·채팅 같은 콘텐츠를 벤토 그리드의 서로 다른 칸에 놓아 가리지 않게 하는 OBS 로컬 템플릿입니다. 1920×1080 화면에는 패널 1~7이 있으며, **어느 칸도 게임·채팅·캠 같은 용도로 고정되지 않습니다.** 각 칸의 콘텐츠와 활성화 여부를 따로 정하고, 남은 칸은 자동으로 정렬됩니다. OBS 소스와 웹 위젯은 사용자가 선택한 것만 연결합니다. 별도 온라인 서비스 없이 로컬 파일과 OBS Lua 스크립트로 사용합니다.
