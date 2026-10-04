@@ -1,6 +1,17 @@
 # OBS Streaming Template
 
-This template gives your stream seven separate spaces. Put your game, camera, chat, or captions in them. They line up automatically, so chat and cameras do not cover your game.
+This is a ready-made screen layout for live broadcasting. It gives your stream seven separate spaces. Put your game, camera, chat, or captions in them. They line up automatically, so chat and cameras do not cover your game.
+
+<details>
+<summary>New words? GitHub, README, OBS, ZIP, and MIT explained</summary>
+
+- **GitHub** is the website you are viewing. People use it to share programs and keep their updates in one place. You do not need an account to download this template.
+- **README** means this instruction page. Start here; you do not need to understand programming.
+- **OBS Studio** is a free program that puts your game, camera, and other pictures together for recording or live broadcasting. This template arranges those pictures; OBS does the broadcasting.
+- **ZIP** is a folder packed into one downloadable file. **Extract** means unpack it into a normal folder before using it.
+- **[MIT license](https://opensource.org/license/mit)** is the permission statement for this project's original code. It allows you to use, change, and share the code, including commercially, while keeping the copyright and license notice. It does not promise that the software is error-free. Included fonts and icons have their own terms.
+
+</details>
 
 ## First time here? Start here
 
@@ -94,6 +105,19 @@ The `layoutVersion 4` schema uses internal keys `game`, `custom1`, `custom2`, `c
 - `docs/QA.md`: device evidence and remaining verification.
 - `build.py`: neutral distributable builder.
 - Root README, CHANGELOG, and LICENSE: project documentation.
+
+## Who made this, and how?
+
+KMG set the product direction, design, and requirements, and evaluates how it works in real use. The code implementation was produced with **OpenAI Codex**, using a **vibe coding** workflow.
+
+<details>
+<summary>What are Codex and vibe coding?</summary>
+
+**[Codex](https://openai.com/codex/)** is an AI coding assistant: you describe what you want in everyday words, and it helps write, change, and test the program's code.
+
+**Vibe coding** means building software by describing the desired result to an AI and iterating on what it produces. It does not mean every result is correct. Human review and real installation and broadcasting tests are still necessary. This project's current verification results and unfinished checks are recorded in [QA results](docs/QA.md).
+
+</details>
 
 ## License and feedback
 
