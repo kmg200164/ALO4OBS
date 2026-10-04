@@ -33,13 +33,15 @@ Follow these six steps. You do not need a GitHub account or a code editor.
 <details>
 <summary>Show the actual OBS buttons</summary>
 
-Use the **+** button at the bottom of the Scripts window to add `obs-setup.lua`. Your OBS menus may use a different language; the **+** icon is the same.
+Open **Tools → Scripts**. These screenshots show OBS on macOS; Windows uses the same menu and button names.
 
-![Actual OBS Scripts window with the plus button at the bottom left.](docs/images/obs-add-script.jpg)
+![Actual English OBS Tools menu with Scripts selected.](docs/images/obs-tools-scripts.png)
+
+Use the **+** button at the bottom left of the Scripts window to add `obs-setup.lua`.
+
+![Actual OBS Scripts window with the plus button at the bottom left.](docs/images/obs-add-script.png)
 
 After selecting each required OBS source, click **Apply saved settings / Auto layout** on the right.
-
-![Actual loaded template script showing Panel 1–7 source selectors and the Apply saved settings / Auto layout button.](docs/images/obs-apply-settings.jpg)
 
 </details>
 
