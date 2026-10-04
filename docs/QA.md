@@ -9,7 +9,15 @@ Confirmed during the current QA run: seven-panel rendering, live external widget
 Remaining Windows checks, in order:
 
 1. In Chrome, open `template/preview.html`, upload an image/video, save the settings ZIP, extract it beside the Lua script, and verify its actual OBS output. Earlier Chrome file-chooser automation timed out; an in-app browser upload is separate evidence.
-2. Exercise a Lua apply failure in an isolated QA scene, verify the existing layout and original sources survive, then restore and reapply successfully.
+2. Verify rollback when a previously populated template is changed and an apply fails; the isolated new-scene test below does not establish that guarantee.
+
+## Isolated Lua failure and recovery (Windows)
+
+On the 0.4.1 QA snapshot, an instrumented copy created Panel 1 in a new, separately named scene and deliberately failed before Panel 2. The expected failure log was observed. OBS API inspection showed the partial QA group/input cleanup and unchanged original scene items and input settings. A recovery copy then applied successfully: two distinct media groups, locked groups/children, one alpha mask per group, and all four rendering layers. Broadcast and recording stayed off. The successful QA scene was removed and the original scene selected again. Temporary script registration and residual QA input cleanup remain separate housekeeping tasks.
+
+This proves recovery from the tested clean new-scene failure, not transactional rollback of arbitrary changes to an existing populated template. Private fixture settings and API evidence remain outside the repository.
+
+Independent Chrome QA also verified that exported local settings override neutral defaults in both source and built-package entry points after the 0.4.1 restore fix. This is separate from the complete Chrome upload-to-OBS check above.
 
 ## macOS checks
 
