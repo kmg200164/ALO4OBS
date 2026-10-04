@@ -1,0 +1,107 @@
+"""Delivery integrity regressions; builds only into a temporary directory."""
+import importlib.util
+from contextlib import contextmanager
+from pathlib import Path
+import tempfile
+import unittest
+from unittest.mock import patch
+from zipfile import ZipFile
+
+
+spec = importlib.util.spec_from_file_location('overlay_build', Path(__file__).parents[1] / 'build.py')
+builder = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(builder)
+
+
+@contextmanager
+def temporary_destination():
+    # Use a file in system TEMP: the Windows sandbox can reject mkdtemp's 0700 directory.
+    with tempfile.NamedTemporaryFile(prefix='QA-test-build-', suffix='.zip', delete=False) as handle:
+        destination = Path(handle.name)
+    try:
+        yield destination
+    finally:
+        destination.unlink(missing_ok=True)
+
+
+class BuildTests(unittest.TestCase):
+    def test_delivery_filename_contract(self):
+        self.assertEqual(builder.output.name, 'OBS-Streaming-Template.zip')
+
+    def test_neutral_defaults_inventory_and_crc(self):
+        with temporary_destination() as destination:
+            builder.build(destination)
+            with ZipFile(destination) as archive:
+                self.assertIsNone(archive.testzip())
+                self.assertEqual(archive.read('streaming-template/config.js'), builder.public_config)
+                self.assertNotIn('streaming-template/obs-settings.json', archive.namelist())
+                self.assertIn('streaming-template/assets/THIRD-PARTY-NOTICES.md', archive.namelist())
+                self.assertIn('streaming-template/internal/panel-media.js', archive.namelist())
+                self.assertIn("script_path()..'internal/panel-media.js'", archive.read('streaming-template/obs-setup.lua').decode('utf-8'))
+                self.assertNotIn('streaming-template/assets/asset-sources.md', archive.namelist())
+                self.assertNotIn('streaming-template/assets/platform-sources.md', archive.namelist())
+                self.assertIn('streaming-template/LICENSE', archive.namelist())
+                self.assertEqual(archive.read('streaming-template/VERSION').decode().strip(), builder.version)
+                names = set(archive.namelist())
+                private_assets = {
+                    'sample-handcam-topview.png', 'sample-mission-widget.png', 'season-11-lobby.png',
+                    'team-tgm25.jpg', 'tgm26-logo.png', 'tgm26-qualified-banner.png',
+                }
+                self.assertFalse(any(name.rsplit('/', 1)[-1] in private_assets for name in names))
+                unused_assets = {
+                    'demo-player.svg', 'neutral-logo.svg',
+                    'header-github.svg', 'header-guide.svg', 'header-language.svg',
+                    'header-theme.svg', 'header-accent.svg', 'header-background.svg',
+                    'header-moon-figma.svg', 'header-square-figma.svg', 'header-settings-figma.svg',
+                    'action-play.svg', 'action-clear.svg', 'action-example.svg',
+                    'action-apply.svg', 'action-reset.svg', 'action-save.svg',
+                }
+                self.assertFalse(any(name.rsplit('/', 1)[-1] in unused_assets for name in names))
+                for logo in ('chzzk.png', 'soop.ico', 'twitch.png', 'youtube.png'):
+                    self.assertNotIn('streaming-template/assets/' + logo, names)
+                overlay = archive.read('streaming-template/internal/overlay.js').decode('utf-8')
+                self.assertIn("badge.className='platform-label'", overlay)
+                demo_html = archive.read('streaming-template/demo.html').decode('utf-8')
+                demo_js = archive.read('streaming-template/internal/demo.js').decode('utf-8')
+                self.assertIn('config.public.js', demo_html)
+                self.assertNotIn('config.js', demo_html)
+                self.assertNotRegex(demo_js, r'team-tgm|tgm26|sample-mission|season-11|sample-handcam')
+
+    def test_inline_css_missing_font_preserves_existing_zip(self):
+        with temporary_destination() as destination:
+            destination.write_bytes(b'previous delivery')
+            incomplete = dict(builder.entries)
+            del incomplete['assets/InterVariable.woff2']
+            with patch.object(builder, 'entries', incomplete):
+                with self.assertRaisesRegex(ValueError, 'Missing package reference'):
+                    builder.build(destination)
+            self.assertEqual(destination.read_bytes(), b'previous delivery')
+
+    def test_missing_demo_script_is_rejected(self):
+        incomplete = dict(builder.entries)
+        del incomplete['internal/demo.js']
+        with self.assertRaisesRegex(ValueError, 'Missing package reference'):
+            builder.verify_entries(incomplete)
+
+    def test_replace_failure_preserves_existing_zip(self):
+        with temporary_destination() as destination:
+            destination.write_bytes(b'previous delivery')
+            temporary_paths = []
+            create_temporary = builder.tempfile.NamedTemporaryFile
+
+            def track_temporary(*args, **kwargs):
+                handle = create_temporary(*args, **kwargs)
+                temporary_paths.append(Path(handle.name))
+                return handle
+
+            with patch.object(Path, 'replace', side_effect=PermissionError('locked destination')), \
+                    patch.object(builder.tempfile, 'NamedTemporaryFile', side_effect=track_temporary):
+                with self.assertRaises(PermissionError):
+                    builder.build(destination)
+            self.assertEqual(destination.read_bytes(), b'previous delivery')
+            self.assertTrue(temporary_paths)
+            self.assertTrue(all(not path.exists() for path in temporary_paths))
+
+
+if __name__ == '__main__':
+    unittest.main()

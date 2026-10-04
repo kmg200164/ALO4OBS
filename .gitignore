@@ -7,3 +7,4 @@ obs-settings.json
 node_modules/
 __pycache__/
 .qa-private/
+dist/

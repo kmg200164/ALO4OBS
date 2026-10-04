@@ -1,0 +1,27 @@
+:root{
+  --guide-frame-canvas:#fff;
+  --guide-frame-parent:#808080;
+  --guide-frame-child:#000;
+  --guide-frame-text:#fff;
+}
+body[data-theme=light]{
+  --guide-frame-canvas:#000;
+  --guide-frame-child:#fff;
+  --guide-frame-text:#000;
+}
+.guide-layout-figure{width:min(100%,694px);min-width:0;margin:4px 0 8px;container-type:inline-size}
+.guide-layout-canvas{--guide-layout-unit:1.67cqw;--guide-layout-half:.835cqw;--guide-layout-quarter:.4175cqw;--guide-layout-double:3.34cqw;width:100%;aspect-ratio:16/9;display:grid;grid-template-columns:minmax(0,3.125fr) minmax(0,1fr);gap:var(--guide-layout-unit);padding:var(--guide-layout-unit);overflow:hidden;border-radius:var(--guide-layout-double);background:var(--guide-frame-canvas)}
+.guide-layout-parent{min-width:0;min-height:0;display:grid;gap:var(--guide-layout-unit);padding:var(--guide-layout-unit);overflow:hidden;border-radius:var(--guide-layout-unit);background:var(--guide-frame-parent)}
+.guide-layout-parent--left{grid-template-rows:minmax(0,2.58fr) minmax(0,1fr)}
+.guide-layout-parent--right{grid-template-rows:repeat(3,minmax(0,1fr))}
+.guide-layout-custom-band{display:grid;padding:var(--guide-layout-unit);border-radius:var(--guide-layout-half);background:var(--guide-frame-child)}
+.guide-layout-customs{min-width:0;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:minmax(0,1fr);gap:var(--guide-layout-unit)}
+.guide-layout-child{min-width:0;min-height:0;border-radius:var(--guide-layout-half);background:var(--guide-frame-child);color:var(--guide-frame-text)}
+.guide-layout-custom-item{min-width:0;min-height:0;border-radius:var(--guide-layout-quarter);background:var(--guide-frame-parent)}
+.guide-layout-caption{display:flex;flex-direction:column;gap:8px;margin-top:10px;color:var(--muted);font-size:13px;line-height:1.45}
+.guide-layout-legend{display:flex;flex-wrap:wrap;gap:12px}
+.guide-layout-legend>span{display:inline-flex;align-items:center;gap:6px}
+.guide-layout-swatch{width:14px;height:14px;display:inline-block;border-radius:3px}
+.guide-layout-swatch--parent{background:var(--guide-frame-parent)}
+.guide-layout-swatch--child{background:var(--guide-frame-child);outline:1px solid var(--line)}
+@media(max-width:760px){.guide-layout-caption{font-size:12px}}

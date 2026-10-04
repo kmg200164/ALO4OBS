@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OBS Streaming Template · Overlay</title><link rel="stylesheet" href="overlay.css"></head>
+<body><script>if(new URLSearchParams(location.search).has('preview')){document.body.classList.add('preview-mode');document.documentElement.style.background='#000';}</script><main class="overlay" aria-label="Broadcast overlay">
+  <img id="preview-wallpaper" alt="" hidden><div id="canvas" aria-hidden="true"></div>
+  <div class="frame-left">
+    <section class="capture game" data-region="game" aria-label="Game capture"><span class="preview-label">GAME CAPTURE · 1384 × 778</span></section>
+    <div class="frame-bottom">
+      <section class="panel sponsor" data-region="sponsor" aria-label="Sponsor"><img id="sponsor-image" alt="Sponsor"><video id="sponsor-video" muted loop playsinline autoplay></video><iframe id="sponsor-embed" title="Sponsor" sandbox="allow-scripts allow-presentation" referrerpolicy="no-referrer"></iframe></section>
+      <section class="panel translation" data-region="translation" aria-label="English subtitles"><div id="subtitles" class="subtitle-feed" aria-live="polite"></div></section>
+    </div>
+  </div>
+  <div class="frame-right">
+    <section class="panel alerts" data-region="alerts" aria-label="Stream alerts"><div id="alert-default"><img id="brand-logo" alt=""><span id="player-name"></span></div><div id="alert-active" hidden><div id="alert-kind"></div><strong id="alert-name"></strong><div id="alert-text"></div></div></section>
+    <section class="panel chat" data-region="chat" aria-label="Chat"><div id="chat-feed"></div></section>
+    <section class="capture hand" data-region="hand" aria-label="Camera"><span class="preview-label">CAM · 440 × 318</span></section>
+  </div>
+  <section class="panel custom-media" data-region="custom1" aria-label="Custom slot 1" hidden><img alt=""><video muted loop playsinline autoplay></video><iframe title="Custom web widget" referrerpolicy="no-referrer"></iframe><span class="preview-label"></span></section>
+  <section class="panel custom-media" data-region="custom2" aria-label="Custom slot 2" hidden><img alt=""><video muted loop playsinline autoplay></video><iframe title="Custom web widget" referrerpolicy="no-referrer"></iframe><span class="preview-label"></span></section>
+  <section class="panel custom-media" data-region="custom3" aria-label="Custom slot 3" hidden><img alt=""><video muted loop playsinline autoplay></video><iframe title="Custom web widget" referrerpolicy="no-referrer"></iframe><span class="preview-label"></span></section>
+  <div id="preview-strokes" aria-hidden="true"></div>
+</main><script src="config.public.js"></script><script src="config.public.js"></script><script src="events.js"></script><script src="gradient.js"></script><script src="background.js"></script><script src="overlay.js"></script></body></html>

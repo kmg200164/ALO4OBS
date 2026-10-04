@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>OBS Streaming Template · Demo</title>
+  <link rel="stylesheet" href="overlay.css">
+  <style>
+    body.demo{background:#1f1f1f}
+    .demo .overlay{background:#000;overflow:hidden}
+    .demo-upper-frame{position:absolute;background:#858585;border-radius:28px}
+    .demo-tile{position:absolute;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;border:0;outline:4px solid #f4f4f4;border-radius:12px;background:#292929;color:#f4f4f4;padding:24px}
+    .demo-tile[data-region="game"]{background:linear-gradient(145deg,#252525,#383838)}
+    .demo-tile[data-content="web"]{background:#303030}
+    .demo-tile[data-content="media"]{background:linear-gradient(145deg,#434343,#252525)}
+    .demo-panel-number{font-size:22px;font-weight:700;line-height:1.2}
+    .demo-content-type{align-self:flex-start;padding:10px 14px;border:1px solid #b5b5b5;border-radius:8px;color:#d5d5d5;font-size:18px;font-weight:600;letter-spacing:.03em}
+    .demo-tile[data-region="game"] .demo-panel-number{font-size:34px}
+    .demo-tile[data-region="game"] .demo-content-type{font-size:24px}
+  </style>
+</head>
+<body class="demo">
+  <main id="demo-stage" class="overlay" aria-label="Seven configurable panels in a Bento grid">
+    <div id="demo-panels"></div>
+  </main>
+  <script src="config.public.js"></script>
+  <script src="events.js"></script>
+  <script src="demo.js"></script>
+</body>
+</html>

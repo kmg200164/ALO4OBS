@@ -1,0 +1,26 @@
+.app-header{--header-icon-size:32px;height:64px;min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0;background:var(--accent);color:#000;position:sticky;top:0;z-index:10}
+html body:not([data-theme=light]){background:#1E1E1E}
+html body[data-theme=light]{background:#E8E8E8}
+.app-header .brand{display:flex;align-items:center;gap:32px;min-width:0;flex:1;padding-left:32px;white-space:nowrap;text-decoration:none;color:#000}
+.app-header .brand h1{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.app-header .brand h1,.app-header .brand span{font-size:32px;line-height:1.2;font-weight:600;margin:0}
+.app-header .brand span{font-weight:400;opacity:.5}
+.app-header .header-tools{height:64px;display:flex;flex:none;max-width:100%;overflow:visible}
+.app-header .icon-button{font-weight:500;width:64px;height:64px;flex:none;display:flex;align-items:center;justify-content:center;position:relative;padding:16px;border:0;background:transparent;color:#000;text-decoration:none;cursor:pointer}
+.app-header .icon-button:hover,.app-header .icon-button:focus-visible{background:#000;color:var(--accent)}
+.app-header .icon-button:disabled{opacity:.5;cursor:default}
+.app-header .icon-button:disabled:hover,.app-header .icon-button:disabled:focus-visible,.app-header .icon-button[aria-disabled="true"]:hover,.app-header .icon-button[aria-disabled="true"]:focus-visible{background:transparent;color:#000}
+.app-header .icon-button[aria-disabled="true"]{opacity:.5;cursor:default}
+.app-header .button-svg{display:block;width:var(--header-icon-size);height:var(--header-icon-size);flex:none;pointer-events:none}
+.color-swatch{appearance:none;-webkit-appearance:none;width:32px;height:32px;flex:none;padding:0;border:0;border-radius:4px;background:transparent;cursor:pointer;overflow:hidden}
+.color-swatch::-webkit-color-swatch-wrapper{padding:0}
+.color-swatch::-webkit-color-swatch{width:100%;height:100%;padding:0;border:0;border-radius:4px}
+.color-swatch::-moz-color-swatch{width:100%;height:100%;padding:0;border:0;border-radius:4px}
+.app-header .icon-picker select,.app-header .icon-picker input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.app-header .icon-picker:has(select:hover),.app-header .icon-picker:has(input:hover){background:#000;color:var(--accent)}
+body[data-theme=light] .theme-icon-sun,body:not([data-theme=light]) .theme-icon-moon{display:none}
+@media(max-width:920px){.app-header{height:auto;min-height:64px;flex-wrap:wrap}.app-header .brand{padding-left:16px;gap:8px}.app-header .brand h1{font-size:18px}.app-header .brand span{font-size:16px}.app-header .header-tools{width:100%;height:64px;justify-content:flex-end}.app-header .icon-button{font-weight:500;width:64px;height:64px;padding:16px}}
+
+@media(max-width:480px){.app-header .header-tools{height:auto;flex-wrap:wrap;justify-content:center}}
+
+html[lang=ko] button{font-weight:600}
