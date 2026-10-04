@@ -1,10 +1,26 @@
 # OBS Streaming Template
 
-Version: **0.4.1 — development prerelease**
+This template gives your stream seven separate spaces. Put your game, camera, chat, or captions in them. They line up automatically, so chat and cameras do not cover your game.
 
-A local OBS template that arranges seven independent panels in a bento grid. Cameras, chat, captions, and other content stay beside the game instead of covering it. No panel has a fixed role: each can contain None, an OBS source, a Web address, or Image/Video content.
+## First time here? Start here
 
-English is the default interface language. Korean and Japanese remain available in the language menu, and your saved selection is preserved. This is not a production-ready release: macOS and Chrome upload verification are still in progress. See [QA and device handoff](docs/QA.md).
+You are on GitHub, a website where people share programs. This page is the instruction sheet, called a **README**. You can download the template without creating a GitHub account.
+
+**[Download the template ZIP](https://github.com/kmg200164/OBS-streaming-template/archive/refs/heads/dev.zip)**
+
+A ZIP is a folder packed into one file for downloading. On Windows:
+
+1. Click the **Download the template ZIP** link above. Your browser saves the file, usually in **Downloads**.
+2. Open **Downloads** in File Explorer. Right-click the downloaded ZIP and choose **Extract All**, then **Extract**. This unpacks the files into a normal folder. Do not open the pages from inside the ZIP.
+3. Open the unpacked folder, then open the folder named **template**.
+4. Double-click **guide-en.html**. This opens the setup instructions in your browser. You do not need a code editor.
+5. Follow that guide to choose what goes in each space and add the layout to **OBS Studio**, the program you use to broadcast. If OBS Studio is not installed yet, get it from [obsproject.com](https://obsproject.com/) first.
+
+Keep the unpacked folder where you want to store the template. OBS will continue to use files in that folder.
+
+The template starts in English. You can select Korean or Japanese from its language button.
+
+Download version: **0.4.2 — test version**. This download is for trying the template and reporting problems. Installation and recovery checks are still in progress; see [QA results](docs/QA.md).
 
 ## Quick start
 
