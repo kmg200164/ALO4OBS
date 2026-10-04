@@ -21,7 +21,7 @@ Independent Chrome QA also verified that exported local settings override neutra
 
 ## macOS checks
 
-macOS QA is in progress. Use the independent repository on `dev`; do not develop in an old Vault checkout. The observations below are scoped to the tested Mac and do not establish complete platform compatibility.
+macOS QA stopped at the user’s request on 2026-10-04 because Windows is the only planned broadcasting and gaming platform. Use the independent repository on `dev`; do not develop in an old Vault checkout. The observations below are partial Mac evidence, not complete platform compatibility. Mac-only checks are not a release gate for a Windows-only release.
 
 1. Open `template/guide-en.html` or `template/guide.html` directly from the extracted files, then configure `template/preview.html`.
 2. Verify file upload, settings ZIP export/extraction, and restoration after reopening the page.
@@ -35,7 +35,7 @@ Keep personal widget links and exported settings private. Record the commit ID, 
 
 Continue fixes on `dev`. After the required checks pass, merge the verified version into `main`, tag the release, build `dist/OBS-Streaming-Template.zip`, and attach the neutral ZIP to a GitHub Release. No production-ready claim or release tag has been made yet.
 
-## macOS evidence (2026-10-04, in progress)
+## macOS evidence (2026-10-04, partial and stopped)
 
 Baseline: `a75e518`, version 0.4.1, OBS Studio 32.2.2. The independent clone matched `origin/dev` at handoff. Original OBS configuration was backed up and the backup CRC verified before starting; tests use a separate scene collection. The original scene-collection JSON remained byte-identical to its backup during this check. Private settings, fixtures, screenshots and backups stay outside this repository.
 
@@ -47,4 +47,6 @@ Baseline: `a75e518`, version 0.4.1, OBS Studio 32.2.2. The independent clone mat
 - Direct file launch: the user reported English startup before the menu fix. The browser connection explicitly blocks file:// access even after the user enabled extension file access. Agent verification of direct-file upload, export and restoration remains unverified; HTTP results do not substitute for it.
 - Shogun Showdown launched through Steam after the user closed the active Windows Steam session. The game window was visible and listed in OBS macOS window capture. Selecting that window and confirming its rendered output remains pending; launch alone is not a capture pass.
 
-Remaining: actual game capture inside the template, built-package OBS application, source swapping/disabling and duplicate rejection, capture/camera permission rejection and recovery, camera availability, populated-scene injected failure/reapplication, and cleanup with original-content comparison. No full transactional rollback or 1.0.0 readiness claim is established.
+At handoff, the isolated QA scene collection was removed after its JSON was copied to a private backup. The original scene-collection JSON and OBS global.ini remained byte-identical to the pre-test backup; broadcasting and recording were never started. Shogun Showdown was closed.
+
+Unverified on Mac: actual game capture inside the template, built-package OBS application, source swapping/disabling and duplicate rejection, capture/camera permission rejection and recovery, camera availability, and populated-scene injected failure/reapplication. These checks are not required for a Windows-only release but cannot be claimed as passed. The remaining Windows checks above still gate 1.0.0 readiness.
