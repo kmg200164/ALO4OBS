@@ -33,16 +33,18 @@ class BuildTests(unittest.TestCase):
             builder.build(destination)
             with ZipFile(destination) as archive:
                 self.assertIsNone(archive.testzip())
-                self.assertEqual(archive.read('streaming-template/config.js'), builder.public_config)
-                self.assertNotIn('streaming-template/obs-settings.json', archive.namelist())
-                self.assertIn('streaming-template/assets/THIRD-PARTY-NOTICES.md', archive.namelist())
-                self.assertIn('streaming-template/internal/panel-media.js', archive.namelist())
-                self.assertIn("script_path()..'internal/panel-media.js'", archive.read('streaming-template/obs-setup.lua').decode('utf-8'))
-                self.assertNotIn('streaming-template/assets/asset-sources.md', archive.namelist())
-                self.assertNotIn('streaming-template/assets/platform-sources.md', archive.namelist())
-                self.assertIn('streaming-template/LICENSE', archive.namelist())
-                self.assertEqual(archive.read('streaming-template/VERSION').decode().strip(), builder.version)
+                self.assertEqual(archive.read('files/config.js'), builder.public_config)
+                self.assertNotIn('files/obs-settings.json', archive.namelist())
+                self.assertIn('files/assets/THIRD-PARTY-NOTICES.md', archive.namelist())
+                self.assertIn('files/internal/panel-media.js', archive.namelist())
+                self.assertIn("script_path()..'internal/panel-media.js'", archive.read('files/obs-setup.lua').decode('utf-8'))
+                self.assertNotIn('files/assets/asset-sources.md', archive.namelist())
+                self.assertNotIn('files/assets/platform-sources.md', archive.namelist())
+                self.assertIn('files/LICENSE', archive.namelist())
+                self.assertEqual(archive.read('files/VERSION').decode().strip(), builder.version)
                 names = set(archive.namelist())
+                self.assertEqual({name.split('/')[0] for name in names}, {'Start.html', 'files'})
+                self.assertIn('files/guide-en.html', archive.read('Start.html').decode())
                 private_assets = {
                     'sample-handcam-topview.png', 'sample-mission-widget.png', 'season-11-lobby.png',
                     'team-tgm25.jpg', 'tgm26-logo.png', 'tgm26-qualified-banner.png',
@@ -58,11 +60,11 @@ class BuildTests(unittest.TestCase):
                 }
                 self.assertFalse(any(name.rsplit('/', 1)[-1] in unused_assets for name in names))
                 for logo in ('chzzk.png', 'soop.ico', 'twitch.png', 'youtube.png'):
-                    self.assertNotIn('streaming-template/assets/' + logo, names)
-                overlay = archive.read('streaming-template/internal/overlay.js').decode('utf-8')
+                    self.assertNotIn('files/assets/' + logo, names)
+                overlay = archive.read('files/internal/overlay.js').decode('utf-8')
                 self.assertIn("badge.className='platform-label'", overlay)
-                demo_html = archive.read('streaming-template/demo.html').decode('utf-8')
-                demo_js = archive.read('streaming-template/internal/demo.js').decode('utf-8')
+                demo_html = archive.read('files/demo.html').decode('utf-8')
+                demo_js = archive.read('files/internal/demo.js').decode('utf-8')
                 self.assertIn('config.public.js', demo_html)
                 self.assertNotIn('config.js', demo_html)
                 import re
