@@ -15,11 +15,11 @@ Seven panels automatically arrange your game, camera, chat, and captions without
 
 ## Get started
 
-**[Download the template ZIP](https://github.com/kmg200164/OBS-streaming-template/archive/refs/heads/dev.zip)**
+**[Download the template ZIP](https://github.com/kmg200164/OBS-streaming-template/archive/refs/heads/main.zip)**
 
 ![Setup: download, extract, open guide-en.html, configure panels, unpack saved settings, add the OBS script.](docs/images/setup-workflow.png)
 
-1. Click the download link above for the current `dev` test version. Find the ZIP in **Downloads**.
+1. Click the download link above. Find the ZIP in **Downloads**.
 2. Extract it: Windows **right-click → Extract All → Extract**; macOS **double-click**. Open the unpacked **template** folder. Do not open pages inside the ZIP.
 3. Double-click **guide-en.html**, then its gear icon to open settings. You can also open **preview.html** directly.
 4. Configure Panels 1–7, then click **Save as ZIP** to download `OBS-settings.zip`.
@@ -40,7 +40,7 @@ Select the required sources, then click **Apply saved settings / Auto layout** o
 
 Keep the installation folder in place; OBS uses its files. English is the default language, with Korean and Japanese available.
 
-**Download: 0.4.2 — test version.** Installation checks remain incomplete; see [QA results](docs/QA.md).
+**Download: 0.4.1 — test version.** Installation checks remain incomplete; see [QA results](docs/QA.md).
 
 To update your layout, repeat steps 4–6. Each source can serve only one panel; scenes and groups cannot be selected. Seven camera panels require seven distinct sources. For Korean script controls, enable **English UI (reload after changing)** and reload.
 
