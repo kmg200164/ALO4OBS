@@ -6,7 +6,7 @@ const vm=require('node:vm');
 
 const root=path.join(__dirname,'..','template');
 const preview=fs.readFileSync(path.join(root,'preview.js'),'utf8');
-const html=fs.readFileSync(path.join(root,'preview.html'),'utf8');
+const html=fs.readFileSync(path.join(root,'settings.html'),'utf8');
 const css=fs.readFileSync(path.join(root,'preview.css'),'utf8');
 const overlay=fs.readFileSync(path.join(root,'overlay.js'),'utf8');
 const background=fs.readFileSync(path.join(root,'background.js'),'utf8');

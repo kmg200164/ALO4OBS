@@ -1,6 +1,6 @@
 OBS Streaming Template v0.4.1 — Development prerelease
 
-Open guide-en.html for setup instructions and preview.html to configure Panel 1–7.
+Open guide-en.html for setup instructions and settings.html to configure Panel 1–7.
 English is the default. Korean and Japanese are available in the language menu.
 Each panel supports None, OBS source, Web address, or Image/Video.
 Select distinct individual OBS video sources in the Lua script. Scenes/groups and duplicate source assignments are not supported.

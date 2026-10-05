@@ -40,7 +40,7 @@ Select the required sources, then click **Apply saved settings / Auto layout** o
 
 Keep the installation folder in place; OBS uses its files. English is the default language, with Korean and Japanese available.
 
-**0.4.5 — test version.** Installation checks remain incomplete; see [QA results](docs/QA.md).
+**0.4.6 — test version.** Installation checks remain incomplete; see [QA results](docs/QA.md).
 
 To update your layout, repeat steps 4–6. Each source can serve only one panel; scenes and groups cannot be selected. Seven camera panels require seven distinct sources. For Korean script controls, enable **English UI (reload after changing)** and reload.
 
@@ -82,7 +82,7 @@ Browser drafts do not update OBS; apply exported settings through steps 5–6. E
 
 Source downloads use `template/`; built packages use `streaming-template/`. Both keep settings beside the Lua file, with paths relative to that folder.
 
-Capture permissions and available sources vary by OS. macOS verification is partial. Browsers may restrict local content; HTTP preview does not prove direct-file compatibility. For development, run the server below and open `http://127.0.0.1:8873/template/preview.html`.
+Capture permissions and available sources vary by OS. macOS verification is partial. Browsers may restrict local content; HTTP preview does not prove direct-file compatibility. For development, run the server below and open `http://127.0.0.1:8873/template/settings.html`.
 
 ## Development
 

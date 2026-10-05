@@ -10,7 +10,7 @@ function attributeNode(values){
  const attributes={...values};
  return {getAttribute:name=>Object.hasOwn(attributes,name)?attributes[name]:null,setAttribute:(name,value)=>{attributes[name]=value;},attributes};
 }
-function boot(pathname='/preview.html',savedLanguage='ko'){
+function boot(pathname='/settings.html',savedLanguage='ko'){
  const nodes=[textNode('단색'),textNode('그라디언트 설정을 읽지 못했습니다'),textNode('왼쪽','OPTION')];
  const selector={value:'ko',addEventListener(_name,handler){this.change=handler;}};
  const guide={href:'guide.html'};
@@ -74,7 +74,7 @@ test('text, select-option text, placeholder, title, and aria-label survive ko-ja
 });
 
 test('guide links follow the selected language and guide pages route on language changes',()=>{
- const preview=boot('/preview.html');
+ const preview=boot('/settings.html');
  preview.i18n.set('ja');assert.equal(preview.guide.href,'guide-ja.html');
  preview.i18n.set('en');assert.equal(preview.guide.href,'guide-en.html');
  preview.i18n.set('ko');assert.equal(preview.guide.href,'guide.html');
@@ -152,7 +152,7 @@ test('fullscreen failures log only request diagnostics with activation captured 
 });
 
 test('full-screen preview keeps an exit control visible and translated',()=>{
- const html=fs.readFileSync(path.join(__dirname,'../template/preview.html'),'utf8');
+ const html=fs.readFileSync(path.join(__dirname,'../template/settings.html'),'utf8');
  const css=fs.readFileSync(path.join(__dirname,'../template/preview.css'),'utf8');
  const preview=fs.readFileSync(path.join(__dirname,'../template/preview.js'),'utf8');
  assert.match(html,/<div id="preview-fullscreen"[^>]*>[\s\S]*?<div class="screen-content">[\s\S]*?<div class="fullscreen-toolbar" hidden><span class="fullscreen-hint">Esc 키로 종료<\/span><button id="return-to-settings" type="button">설정으로 돌아가기<\/button><\/div><\/div>/);
@@ -166,8 +166,8 @@ test('full-screen preview keeps an exit control visible and translated',()=>{
 });
 
  test('fresh and invalid preferences default to English while saved Korean and Japanese persist',()=>{
- for(const value of [null,'','unsupported']){const app=boot('/preview.html',value);assert.equal(app.document.documentElement.lang,'en');assert.equal(app.guide.href,'guide-en.html');assert.equal(app.nodes[0].nodeValue,'Solid');}
- for(const value of ['ko','ja']){const app=boot('/preview.html',value);assert.equal(app.document.documentElement.lang,value);}
+ for(const value of [null,'','unsupported']){const app=boot('/settings.html',value);assert.equal(app.document.documentElement.lang,'en');assert.equal(app.guide.href,'guide-en.html');assert.equal(app.nodes[0].nodeValue,'Solid');}
+ for(const value of ['ko','ja']){const app=boot('/settings.html',value);assert.equal(app.document.documentElement.lang,value);}
 });
 
 
