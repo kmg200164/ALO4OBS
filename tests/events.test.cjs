@@ -146,12 +146,12 @@ test('auto layout fills vacated bottom and right space', () => {
  assert.deepEqual(four.chat,{x:1448,y:32,width:440,height:1016});
 });
 
-test('auto layout gives the remaining panels all usable space', () => {
+test('empty right frame remains reserved while left panels fill only their parent', () => {
  const two=api.autoLayout({enabled:{custom1:false,custom2:false,custom3:false,translation:false,hand:false}});
  assert.deepEqual(two.game,{x:32,y:32,width:1384,height:1016});
  assert.deepEqual(two.chat,{x:1448,y:32,width:440,height:1016});
  const one=api.autoLayout({enabled:{custom1:false,custom2:false,custom3:false,chat:false,translation:false,hand:false}});
- assert.deepEqual(one.game,{x:32,y:32,width:1856,height:1016});
+ assert.deepEqual(one.game,{x:32,y:32,width:1384,height:1016});
 });
 
 test('moving a panel into the lead position changes its dimensions', () => {

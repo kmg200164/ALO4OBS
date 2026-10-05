@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.0 — 2026-10-05 21:58:01 +09:00
+
+- Add Auto / Manual height controls for every panel and width controls for Panels 2–4 while preserving automatic placement. Panels 1, 5, 6 and 7 keep automatic width and hide width controls.
+- Keep the parent grid at three columns on the left and one on the right; size every panel independently without forcing Panel 1 to 16:9.
+- Add synchronized number inputs and sliders with meaningful limits based on the active layout, parent boundaries and sibling space; clamp out-of-range values.
+- Show eligible 1:1 and 16:9 slider marks recalculated from the other dimension, with optional snapping while dragging.
+- Combine each axis label and Auto / Manual selector in one card header, with full-width sizing controls below and more internal spacing; preserve panel selection buttons when committing numeric input.
+- Restore uploaded image and video files after reopening the same settings page, including their bytes in exported settings ZIPs.
+- Keep the last saved draft intact when browser file storage is unavailable or restored files are missing.
+
 ## 0.5.2 — 2026-10-05 11:52:06 +09:00
 
 - Remove manual resizing from the sample message field; scroll vertically when content exceeds its height.

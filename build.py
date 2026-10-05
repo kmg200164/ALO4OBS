@@ -23,7 +23,7 @@ gift_files = {
     'panel-media-game.html', 'panel-media-custom1.html', 'panel-media-custom2.html',
     'panel-media-custom3.html', 'panel-media-chat.html', 'panel-media-translation.html',
     'panel-media-hand.html', 'preview.css', 'README.txt',
-    'settings.html', 'preview.js', 'version.js', 'wallpaper.html',
+    'settings.html', 'preview.js', 'upload-storage.js', 'version.js', 'wallpaper.html',
 }
 files = [(repository if name in {'CHANGELOG.md', 'LICENSE'} else source) / name for name in sorted(gift_files)]
 # Explicit neutral runtime package allowlist; private settings and artwork are excluded.
@@ -52,7 +52,7 @@ for path in sorted(files):
 # locally by the explicitly loaded Lua script, rather than downloaded as .js.
 import base64
 import json
-runtime_names = [name for name in entries if name not in {'config.js', 'VERSION', 'OBS-script.lua'} and not name.startswith(('guide', 'settings', 'README', 'CHANGELOG')) and not name.startswith('internal/preview')]
+runtime_names = [name for name in entries if name not in {'config.js', 'VERSION', 'OBS-script.lua'} and not name.startswith(('guide', 'settings', 'README', 'CHANGELOG')) and not name.startswith(('internal/preview', 'internal/upload-storage'))]
 js_names = [name for name in runtime_names if name.endswith('.js')]
 lua = entries['OBS-script.lua'].decode('utf-8')
 install = ['-- Install bundled browser runtime when this OBS script is loaded.']

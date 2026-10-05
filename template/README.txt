@@ -1,10 +1,15 @@
-OBS Streaming Template v0.4.1 — Development prerelease
+OBS Streaming Template
 
-Open guide-en.html for setup instructions and settings.html to configure Panel 1–7.
-English is the default. Korean and Japanese are available in the language menu.
-Each panel supports None, OBS source, Web address, or Image/Video.
-Select distinct individual OBS video sources in the Lua script. Scenes/groups and duplicate source assignments are not supported.
-Save the settings ZIP, extract it beside OBS-script.lua, then apply in OBS.
-Items are locked by default. Disabling strokes keeps panel content and fills visible.
+Open settings.html in the extracted template folder.
+Select Panels 1-7 and choose their content, placement, and style.
+Choose Auto or Manual for width and height; use the number or slider.
+Limits follow active panels, gaps, and fixed sizes. Out-of-range values are adjusted.
+Uploaded images/videos are retained in this browser for the same settings page.
+Save a settings ZIP for a portable backup before clearing browser data or moving files.
+
+Save OBS-settings.zip and extract it into a new folder.
+In OBS Tools > Scripts > +, select OBS-script.lua from that extracted folder.
+Select the required sources, then apply the saved settings / auto layout.
+Keep that folder in place; OBS uses its files.
+
 Personal widget addresses and settings ZIPs must remain private.
-Cross-platform QA is still in progress; this is not a production-ready release.

@@ -72,49 +72,97 @@
     }
     return placement;
   }
-  function hierarchicalLayout(placement,enabled) {
-    if(!placement || typeof placement!=='object' || Array.isArray(placement))throw new Error('Invalid panel placement');
-    placement=normalizePlacement(placement);
-    const layout=baseLayout(),active=[];
+  function canResizeWidth(key){return ['custom1','custom2','custom3'].includes(key);}
+  function normalizeSizing(input) {
+    if(input!==undefined&&(!input||typeof input!=='object'||Array.isArray(input)))throw new Error('Invalid panel size');
+    if(input&&Object.keys(input).some(key=>!panelKeys.includes(key)))throw new Error('Invalid panel size: unknown panel');
+    const defaults=baseLayout(),result={};
     for(const key of panelKeys){
-      const path=placement[key];
-      if(enabled[key]!==false)active.push({key,...path});
+      const value=input?.[key];
+      if(value!==undefined&&(!value||typeof value!=='object'||Array.isArray(value)))throw new Error('Invalid panel size: '+key);
+      const entry=result[key]={widthMode:'auto',width:defaults[key].width,heightMode:'auto',height:defaults[key].height,...(value||{})};
+      for(const axis of ['width','height']){
+        if(!['auto','fixed'].includes(entry[axis+'Mode']))throw new Error('Invalid panel size: '+key+' '+axis+' mode');
+        const maximum=axis==='width'?1856:1016;
+        if(!Number.isInteger(entry[axis])||entry[axis]<1||entry[axis]>maximum)throw new Error('Invalid panel size: '+key+' '+axis+' must be an integer from 1 to '+maximum);
+      }
+      if(!canResizeWidth(key)){entry.widthMode='auto';entry.width=defaults[key].width;}
     }
-    if(!active.length)return layout;
-    const gap=32,outer=32,extentW=1856,extentH=1016;
-    const left=active.filter(item=>item.level1==='left');
-    const right=active.filter(item=>item.level1==='right');
-    const leftWidth=left.length&&right.length?1384:extentW;
-    const rightX=left.length?outer+leftWidth+gap:outer;
-    const rightWidth=left.length&&right.length?440:extentW;
-    function split(keys,x,y,width,height,axis){
-      if(!keys.length)return;
-      const span=axis==='x'?width:height;
-      const first=Math.floor((span-gap*(keys.length-1))/keys.length);
-      let offset=0;
-      keys.forEach((item,index)=>{const size=index===keys.length-1?span-offset:first;
-        layout[item.key]={x:x+(axis==='x'?offset:0),y:y+(axis==='y'?offset:0),width:axis==='x'?size:width,height:axis==='y'?size:height};
-        offset+=size+gap;});
+    return result;
+  }
+  // Each frame reserves fixed sizes first; automatic peers divide the remainder.
+  // Minimums include descendant fixed sizes, so an automatic frame never clips them.
+  function allocateSizes(entries,extent,axis) {
+    const available=extent-32*(entries.length-1),sizes=entries.map(entry=>entry.fixed??null);
+    const required=entries.reduce((sum,entry)=>sum+(entry.fixed??entry.minimum??1),0);
+    if(entries.some(entry=>entry.fixed!==undefined&&(entry.fixed<(entry.minimum??1)||entry.fixed>(entry.maximum??extent))))throw new Error('Fixed panel sizes exceed available '+axis+': keep each panel within its usable range');
+    if(required>available)throw new Error('Fixed panel sizes exceed available '+axis+': sizes and 32-pixel gaps must fit');
+    let remaining=available-sizes.reduce((sum,size)=>sum+(size??0),0);
+    let automatic=entries.map((entry,index)=>index).filter(index=>sizes[index]===null);
+    while(automatic.length){
+      const weight=automatic.reduce((sum,index)=>sum+(entries[index].weight??1),0);
+      const constrained=automatic.filter(index=>Math.floor(remaining*(entries[index].weight??1)/weight)<(entries[index].minimum??1));
+      if(constrained.length){
+        for(const index of constrained){sizes[index]=entries[index].minimum??1;remaining-=sizes[index];}
+        automatic=automatic.filter(index=>!constrained.includes(index));
+        continue;
+      }
+      let used=0;
+      automatic.forEach((index,position)=>{
+        sizes[index]=position===automatic.length-1?remaining-used:Math.floor(remaining*(entries[index].weight??1)/weight);
+        used+=sizes[index];
+      });
+      break;
     }
-    if(left.length){
-      const rows=['top','bottom'].map(level=>({level,items:left.filter(item=>item.level2===level)
-        .sort((a,b)=>['left','center','right'].indexOf(a.level3)-['left','center','right'].indexOf(b.level3))})).filter(row=>row.items.length);
-      let y=outer;
-      const gameBandLayout=rows.length===2&&rows.some(row=>row.items.some(item=>item.key==='game'));
-      rows.forEach((row,index)=>{
-        const remaining=extentH-gap*(rows.length-1);
-        const height=gameBandLayout
-          ?row.items.some(item=>item.key==='game')?778:206
-          :index===rows.length-1?outer+extentH-y:Math.floor(remaining/rows.length);
-        split(row.items,outer,y,leftWidth,height,'x');y+=height+gap;
+    return sizes;
+  }
+  function sizedLayout(leftRows,right,sizing,constrained=true) {
+    const layout=baseLayout();
+    const reference=constrained?sizedLayout(leftRows,right,normalizeSizing(),false):null;
+    const limits=(key,axis)=>reference?{minimum:Math.ceil(reference[key][axis]/2),maximum:Math.floor(reference[key][axis]*1.5)}:{minimum:1};
+    const fixed=(key,axis)=>sizing[key][axis+'Mode']==='fixed'?sizing[key][axis]:undefined;
+    // Four equal tracks, with 32 px outer margins and gaps: left spans three.
+    // Empty frames stay reserved; fixed children never resize these parents.
+    if(leftRows.length){
+      const heights=allocateSizes(leftRows.map(row=>{
+        const values=row.items.map(key=>fixed(key,'height')).filter(value=>value!==undefined);
+        for(const key of row.items){const value=fixed(key,'height'),range=limits(key,'height');if(value!==undefined&&(value<range.minimum||value>(range.maximum??1016)))throw new Error('Fixed panel sizes exceed available height: keep each panel within its usable range');}
+        return {fixed:values.length?Math.max(...values):undefined,minimum:Math.max(...row.items.map(key=>limits(key,'height').minimum)),weight:row.weight};
+      }),1016,'height');
+      let y=32;
+      leftRows.forEach((row,rowIndex)=>{
+        const height=heights[rowIndex];
+        const widths=allocateSizes(row.items.map(key=>({fixed:fixed(key,'width'),...limits(key,'width')})),1384,'width');
+        let x=32;
+        row.items.forEach((key,index)=>{
+          let width=widths[index],panelHeight=fixed(key,'height')??height;
+          layout[key]={x,y,width,height:panelHeight};x+=widths[index]+32;
+        });
+        y+=height+32;
       });
     }
     if(right.length){
-      const rows=right.sort((a,b)=>['top','center','bottom'].indexOf(a.level2)-['top','center','bottom'].indexOf(b.level2)
-        ||['left','center','right'].indexOf(a.level3)-['left','center','right'].indexOf(b.level3));
-      split(rows,rightX,outer,rightWidth,extentH,'y');
+      const heights=allocateSizes(right.map(key=>({fixed:fixed(key,'height'),...limits(key,'height')})),1016,'height');
+      let y=32;
+      right.forEach((key,index)=>{
+        const width=fixed(key,'width')??440,range=limits(key,'width');
+        if(width<range.minimum||width>Math.min(440,range.maximum??440))throw new Error('Fixed panel sizes exceed available width: right frame stays one column wide');
+        layout[key]={x:1448,y,width,height:heights[index]};y+=heights[index]+32;
+      });
     }
     return layout;
+  }
+  function hierarchicalLayout(placement,enabled,sizing) {
+    placement=normalizePlacement(placement);
+    const active=panelKeys.filter(key=>enabled[key]!==false);
+    const left=active.filter(key=>placement[key].level1==='left');
+    const right=active.filter(key=>placement[key].level1==='right').sort((a,b)=>
+      ['top','center','bottom'].indexOf(placement[a].level2)-['top','center','bottom'].indexOf(placement[b].level2)
+      ||['left','center','right'].indexOf(placement[a].level3)-['left','center','right'].indexOf(placement[b].level3));
+    const rows=['top','bottom'].map(level=>({items:left.filter(key=>placement[key].level2===level)
+      .sort((a,b)=>['left','center','right'].indexOf(placement[a].level3)-['left','center','right'].indexOf(placement[b].level3)),weight:1})).filter(row=>row.items.length);
+    if(rows.length===2&&left.includes('game'))for(const row of rows)row.weight=row.items.includes('game')?778:206;
+    return sizedLayout(rows,right,sizing);
   }
   function resolveLayout(positions = {}) {
     const layout=baseLayout();
@@ -128,41 +176,42 @@
     }
     return layout;
   }
-  function autoLayout({order=panelKeys,placement,enabled={}}={}) {
-    if(!Array.isArray(order) || !enabled || typeof enabled!=='object' || Array.isArray(enabled))throw new Error('Invalid auto layout');
-    if(placement!==undefined)return hierarchicalLayout(placement,enabled);
+  function autoLayout({order=panelKeys,placement,enabled={},sizing}={}) {
+    if(!Array.isArray(order)||!enabled||typeof enabled!=='object'||Array.isArray(enabled))throw new Error('Invalid auto layout');
+    sizing=normalizeSizing(sizing);
+    if(placement!==undefined)return hierarchicalLayout(placement,enabled,sizing);
     const seen=new Set();
-    for(const key of order){
-      if(!panelKeys.includes(key) || seen.has(key))throw new Error('Invalid panel order');
-      seen.add(key);
+    for(const key of order){if(!panelKeys.includes(key)||seen.has(key))throw new Error('Invalid panel order');seen.add(key);}
+    const ordered=[...order,...panelKeys.filter(key=>!seen.has(key))],active=ordered.filter(key=>enabled[key]!==false);
+    if(!active.length)return baseLayout();
+    const lead=active[0],bottom=ordered.slice(1,4).filter(key=>key!==lead&&enabled[key]!==false),right=ordered.slice(4).filter(key=>key!==lead&&enabled[key]!==false);
+    const rows=[{items:[lead],weight:778}];if(bottom.length)rows.push({items:bottom,weight:206});
+    return sizedLayout(rows,right,sizing);
+  }
+  function sizingBounds(options={},key,axis) {
+    if(!panelKeys.includes(key)||!['width','height'].includes(axis))throw new Error('Invalid panel size: unknown panel or axis');
+    const enabled={...options.enabled,[key]:true},reference=autoLayout({...options,enabled,sizing:undefined});
+    const sizing=normalizeSizing(options.sizing),otherAxis=axis==='width'?'height':'width';
+    // Reference the all-automatic layout, so dragging never moves its own limits.
+    for(const panel of panelKeys){
+      sizing[panel][otherAxis+'Mode']='auto';
+      sizing[panel][axis]=Math.min(Math.min(Math.floor(reference[panel][axis]*1.5),axis==='width'?reference[panel].x>=1448?440:1384:1016),Math.max(Math.ceil(reference[panel][axis]/2),sizing[panel][axis]));
     }
-    const ordered=[...order,...panelKeys.filter(key=>!seen.has(key))];
-    const active=ordered.filter(key=>enabled[key]!==false);
-    const layout=baseLayout();
-    if(!active.length)return layout;
-    const gap=32, outer=32, contentWidth=1920-outer*2, contentHeight=1080-outer*2;
-    const lead=active[0];
-    // Keep each panel in its chosen row when a peer is hidden. Only a deliberate
-    // reorder changes rows; hiding a bottom panel cannot pull a right panel down.
-    const bottom=ordered.slice(1,4).filter(key=>key!==lead&&enabled[key]!==false);
-    const right=ordered.slice(4).filter(key=>key!==lead&&enabled[key]!==false);
-    const leftWidth=right.length?1384:contentWidth;
-    const topHeight=bottom.length?778:contentHeight;
-    layout[lead]={x:outer,y:outer,width:leftWidth,height:topHeight};
-    function distribute(keys,x,y,width,height,axis) {
-      if(!keys.length)return;
-      const extent=axis==='x'?width:height;
-      const firstSize=Math.floor((extent-gap*(keys.length-1))/keys.length);
-      let offset=0;
-      keys.forEach((key,index)=>{
-        const size=index===keys.length-1?extent-offset:firstSize;
-        layout[key]={x:x+(axis==='x'?offset:0),y:y+(axis==='y'?offset:0),width:axis==='x'?size:width,height:axis==='y'?size:height};
-        offset+=size+gap;
-      });
+    sizing[key][axis+'Mode']='fixed';
+    function fits(value){
+      sizing[key][axis]=value;
+      try{autoLayout({...options,enabled,sizing});return true;}
+      catch(error){if(error.message.startsWith('Fixed panel sizes exceed available'))return false;throw error;}
     }
-    distribute(bottom,outer,outer+topHeight+gap,leftWidth,contentHeight-topHeight-gap,'x');
-    distribute(right,outer+leftWidth+gap,outer,contentWidth-leftWidth-gap,contentHeight,'y');
-    return layout;
+    const minimum=Math.ceil(reference[key][axis]/2);
+    let low=minimum,high=Math.min(Math.floor(reference[key][axis]*1.5),axis==='width'?(reference[key].x>=1448?440:1384):1016);
+    while(low<high){const middle=Math.ceil((low+high)/2);if(fits(middle))low=middle;else high=middle-1;}
+    return {min:minimum,max:low};
+  }
+  function aspectStops(box,axis,bounds) {
+    const other=axis==='width'?box.height:box.width;
+    return [[1,'1:1'],[16/9,'16:9']].map(([ratio,label])=>({label,value:Math.round(axis==='width'?other*ratio:other/ratio)}))
+      .filter(stop=>stop.value>=bounds.min&&stop.value<=bounds.max);
   }
   function validateLayout(layout) {
     if(!layout || typeof layout!=='object' || Array.isArray(layout))throw new Error('Invalid layout');
@@ -192,7 +241,7 @@
     if(mode==='user'){let hash=0;for(const c of platform+':'+nickname)hash=(Math.imul(hash,31)+c.codePointAt(0))|0;return `hsl(${(hash>>>0)%360} 72% 75%)`;}
     return {chzzk:'#00ffa3',twitch:'#bf94ff',youtube:'#ff6464',soop:'#55cfff'}[platform]||'#dddddd';
   }
-  const api = {normalizeEvent,createEventStore,handcamLayout,resolveLayout,defaultPlacement,normalizePlacement,autoLayout,validateLayout,resolveSlots,nicknameColor};
+  const api = {normalizeEvent,createEventStore,handcamLayout,resolveLayout,defaultPlacement,normalizePlacement,normalizeSizing,canResizeWidth,sizingBounds,aspectStops,autoLayout,validateLayout,resolveSlots,nicknameColor};
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.OverlayEvents = api;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -9,7 +9,19 @@
   const initialPlacement=OverlayEvents.defaultPlacement();
   const uploads=new Map();
   const uploadRequests=new Map();
-  let config=structuredClone(defaults), selected=null, hovered=null;
+  let draftReady=false,storageWarning='';
+  const missingUploads=new Set();
+  function showStatus(message,isError=false){
+    status.textContent=window.KMGI18n?.localize(message)||message;
+    status.classList.toggle('sr-only',!isError);
+    status.setAttribute('role',isError?'alert':'status');
+  }
+  const uploadStorage=window.OverlayUploadStorage.create({storage:{setItem:(...args)=>window.localStorage.setItem(...args)},indexedDB:window.indexedDB,scope:window.location.href.split(/[?#]/)[0],onWarning:message=>{
+    const previous=storageWarning;storageWarning=message;
+    if(message)showStatus(message,true);
+    else if(previous&&!missingUploads.size)showStatus('설정 미리보기 준비 완료');
+  }});
+  let config=structuredClone(defaults), selected=null, hovered=null, sizeConstraintTarget=null, snappingSlider=null;
   const highlight=()=>send(frame,'highlight',{keys:document.fullscreenElement?[]:[selected,hovered].filter(Boolean),color:getComputedStyle(document.body).getPropertyValue('--accent').trim()});
   let cameraState={status:'unavailable',devices:[],selectedDeviceId:'',errorName:'NotSupportedError'},cameraController=null,cameraActive=false;
   const cameraVideo=byId('camera-preview-video');
@@ -93,6 +105,7 @@
   function normalize(input){
     const next={...structuredClone(defaults),...structuredClone(input||{})};
     next.layoutVersion=4;
+    next.panelSizing=OverlayEvents.normalizeSizing(next.panelSizing);
     next.panelContent=migratePanelContent(input||next);
     for(const legacy of ['chatUrl','translationUrl','reactiveUrl','donationChzzk','donationTwitch','donationYoutube','donationSoop','sponsor','sponsorType','slotContent','customSlotMedia','cameraMode','handcam','platforms','showSponsor','showSubtitles','showChat','showAlerts'])delete next[legacy];
     next.panelEnabled=Object.fromEntries(keys.map(key=>[key,next.panelEnabled?.[key]!==false]));
@@ -231,6 +244,7 @@
     const placement=structuredClone(config.panelPlacement);
     placement[key][level]=input.value;
     config.panelPlacement=OverlayEvents.normalizePlacement(placement,level==='level2'?key:undefined);
+    sizeConstraintTarget=key;
     renderPlacement();
     return true;
   }
@@ -249,6 +263,10 @@
     const kinds=[['none','없음'],['source','OBS 소스'],['web','웹 주소'],['media','이미지/영상']];
     const section=(title,html)=>`<div class="property-section"><h4>${title}</h4><div class="property-group">${html}</div></div>`;
     const content=section('콘텐츠',`${editorSelect('콘텐츠 종류','panelContentType',kinds,item.type)}<div id="panel-content-extra" class="property-group"></div>`);
+    const size=config.panelSizing[key],sizeModes=[['auto','자동'],['fixed','수동']];
+    const sizeControl=axis=>{const title=axis==='width'?'너비':'높이',name=axis==='width'?'panelWidth':'panelHeight';if(axis==='width'&&!OverlayEvents.canResizeWidth(key))return '';return editorRow(title,`<select name="${name}Mode">${optionHtml(sizeModes,size[axis+'Mode'])}</select><div class="size-controls" data-fixed-size="${axis}"${size[axis+'Mode']==='fixed'?'':' hidden'}><input name="${name}" type="number" min="1" step="1" aria-label="${title} (px)"><input name="${name}Slider" type="range" min="1" step="1" list="${name}-ratios" aria-label="${title} 슬라이더"><datalist id="${name}-ratios"></datalist><div class="size-ratio-marks" data-ratio-marks="${axis}"></div><span class="editor-help" data-size-range="${axis}"></span></div>`,'property-row--size');};
+    const sizing=section('크기',`${sizeControl('width')}${sizeControl('height')}<div class="size-help"><p class="editor-help"><span>현재 비율</span>: <span data-panel-ratio></span></p><p class="editor-help">자동: 남은 공간을 채웁니다. 수동: 입력한 픽셀 크기를 유지합니다.</p><p class="editor-help">슬라이더의 1:1·16:9 눈금에 가까이 드래그하면 해당 비율에 맞춰집니다.</p></div>`);
+
     const fill=region.fill||{mode:'solid',color:region.color||'#ffffff',opacity:region.opacity??20,blur:region.blur??16};
     const stroke=region.stroke||{mode:region.borderVisible===false?'none':'solid',color:region.borderColor||'#ffffff',opacity:100,width:4};
     const useRegionOverride=!!config.regionStyleOverrides[key];
@@ -267,8 +285,9 @@
       ${fieldHtml('이미지 경로 또는 URL','regionImage','text','placeholder="assets/image.png 또는 https://…"',true)}
       ${editorFile('이미지 파일','region','image/png,image/jpeg,image/webp,image/gif')}
       </div>`);
-    byId('panel-editor').innerHTML=`<h4 class="editor-title"><span class="panel-number">${names[key]}</span></h4>${content}<div class="divider"></div>${regionInputs}`;
+    byId('panel-editor').innerHTML=`<h4 class="editor-title"><span class="panel-number">${names[key]}</span></h4>${sizing}<div class="divider"></div>${content}<div class="divider"></div>${regionInputs}`;
     for(const [name,value] of Object.entries({regionColor:fill.color||region.color||'#ffffff',regionOpacity:nearestPreset(fill.opacity??region.opacity,opacityPresets,20),regionBlur:nearestPreset(fill.blur??region.blur,blurPresets,16),regionBorderColor:stroke.color||region.borderColor||'#ffffff',regionStrokeWidth:nearestPreset(stroke.width,strokeWidthPresets,4),regionImage:region.image||''})){const input=control(name);if(input)input.value=value;}
+    syncSizeControls();
     renderContentExtra();
     paintGradientControls();
   }
@@ -319,6 +338,7 @@
   function readEditor(){
     if(!selected)return;
     const key=selected,r=config.regionBackgrounds[key]||{},fill=r.fill||{},stroke=r.stroke||{};
+    config.panelSizing[key]={widthMode:control('panelWidthMode')?.value||'auto',width:control('panelWidth')?Number(control('panelWidth').value):config.panelSizing[key].width,heightMode:control('panelHeightMode').value,height:Number(control('panelHeight').value)};
     const fillMode=control('regionFillMode')?.value||fill.mode||'solid',strokeMode=control('regionStrokeMode')?.value||stroke.mode||(r.borderVisible===false?'none':'solid');
     r.color=fillMode==='gradient'&&fill.gradient?.stops?.length?fill.gradient.stops[0].color:control('regionColor').value;
     r.opacity=Number(control('regionOpacity').value);r.blur=Number(control('regionBlur').value);
@@ -355,26 +375,57 @@
   }
   function savedConfig(source){
     const saved=structuredClone(source);
-    for(const [key,entry] of uploads){
-      if(key==='whole'&&saved.backgroundImage===entry.path){saved.backgroundImage='';saved.globalStyle.background.url='';saved.globalStyle.background.mode='solid';}
-      else if(key==='sponsor'&&saved.sponsor===entry.path)saved.sponsor='';
-      else if(key.startsWith('region-')){const panel=key.slice(7);if(saved.regionBackgrounds[panel]?.image===entry.path)saved.regionBackgrounds[panel].image='';}
-      else if(saved.panelContent[key]?.url===entry.path)saved.panelContent[key]={type:'none',url:''};
-    }
+    delete saved._localUploads;delete saved._sourceFingerprint;
     return saved;
   }
+  function clampPanelSizes(){
+    // Sanitize raw number input before shared geometry validation.
+    for(const key of keys)for(const axis of ['width','height']){const size=config.panelSizing[key],limit=axis==='width'?1856:1016;size[axis]=Math.min(limit,Math.max(1,Math.round(Number(size[axis])||1)));}
+    config.panelSizing=OverlayEvents.normalizeSizing(config.panelSizing);
+    // Clamp the changed panel first so editing it cannot shrink valid fixed peers.
+    const target=sizeConstraintTarget||selected,ordered=target?[target,...keys.filter(key=>key!==target)]:keys;
+    sizeConstraintTarget=null;
+    // Recompute against active siblings and gaps after any frame change.
+    for(const key of ordered)for(const axis of ['width','height']){
+      const size=config.panelSizing[key];
+      if(size[axis+'Mode']!=='fixed'||config.panelEnabled[key]===false)continue;
+      const bounds=OverlayEvents.sizingBounds({placement:config.panelPlacement,enabled:config.panelEnabled,sizing:config.panelSizing},key,axis);
+      size[axis]=Math.min(bounds.max,Math.max(bounds.min,Math.round(size[axis]||bounds.min)));
+    }
+  }
+  function syncSizeControls(){
+    if(!selected||!control('panelHeight'))return;
+    for(const axis of ['width','height']){
+      const name=axis==='width'?'panelWidth':'panelHeight';if(!control(name))continue;const bounds=OverlayEvents.sizingBounds({placement:config.panelPlacement,enabled:config.panelEnabled,sizing:config.panelSizing},selected,axis);
+      for(const input of [control(name),control(name+'Slider')]){input.min=bounds.min;input.max=bounds.max;input.value=config.panelSizing[selected][axis+'Mode']==='fixed'?config.panelSizing[selected][axis]:(config.layout?.[selected]?.[axis]||config.panelSizing[selected][axis]);}
+      byId('panel-editor').querySelector(`[data-size-range="${axis}"]`).textContent=`${bounds.min}–${bounds.max} px`;
+      const box=config.layout?.[selected]||config.panelSizing[selected],stops=OverlayEvents.aspectStops(box,axis,bounds);
+      byId(name+'-ratios').innerHTML=stops.map(stop=>`<option value="${stop.value}" label="${stop.label}"></option>`).join('');
+      byId('panel-editor').querySelector(`[data-ratio-marks="${axis}"]`).innerHTML=stops.map(stop=>`<span style="left:${(stop.value-bounds.min)/Math.max(1,bounds.max-bounds.min)*100}%">${stop.label}</span>`).join('');
+    }
+    const box=config.layout?.[selected]||config.panelSizing[selected],ratio=box.width/box.height;
+    byId('panel-editor').querySelector('[data-panel-ratio]').textContent=Math.abs(box.width-box.height)<=1?'1:1':Math.abs(box.height-box.width*9/16)<=1?'16:9':ratio.toFixed(2)+':1';
+  }
   function current(){
-    readEditor();readGlobal();
-    config.layout=OverlayEvents.autoLayout({placement:config.panelPlacement,enabled:config.panelEnabled});
-    return structuredClone(config);
+    readEditor();readGlobal();clampPanelSizes();
+    config.layout=OverlayEvents.autoLayout({placement:config.panelPlacement,enabled:config.panelEnabled,sizing:config.panelSizing});
+    syncSizeControls();return structuredClone(config);
   }
   function drawHits(layout){
     updateCameraOverlay(layout);
     const target=byId('event-target');
     if(target){for(const option of target.options)option.disabled=!config.panelEnabled[option.value];if(!config.panelEnabled[target.value])target.value=keys.find(key=>config.panelEnabled[key])||'';}
-    byId('panel-hit-areas').innerHTML=keys.filter(key=>config.panelEnabled[key]).map(key=>{
-      const b=layout[key],label=`${names[key]} 설정`,accessibleName=window.KMGI18n?.localize(label)||label,visibleNumber=window.KMGI18n?.localize(names[key])||names[key];return `<button class="panel-hit" type="button" data-hit="${key}" aria-label="${accessibleName}" aria-pressed="${selected===key}" style="left:${b.x/1920*100}%;top:${b.y/1080*100}%;width:${b.width/1920*100}%;height:${b.height/1080*100}%;border-radius:${16/b.width*100}% / ${16/b.height*100}%"><span class="panel-number" aria-hidden="true">${visibleNumber}</span></button>`;
-    }).join('');
+    const hits=byId('panel-hit-areas');
+    for(const button of [...hits.children])if(!config.panelEnabled[button.dataset.hit])button.remove();
+    for(const key of keys.filter(key=>config.panelEnabled[key])){
+      const b=layout[key],label=`${names[key]} 설정`,accessibleName=window.KMGI18n?.localize(label)||label,visibleNumber=window.KMGI18n?.localize(names[key])||names[key];
+      let button=hits.querySelector(`[data-hit="${key}"]`);
+      if(!button){button=document.createElement('button');button.className='panel-hit';button.type='button';button.dataset.hit=key;const number=document.createElement('span');number.className='panel-number';number.setAttribute('aria-hidden','true');button.append(number);hits.append(button);}
+      // Keep focused and pressed nodes alive when committing an input updates layout.
+      button.setAttribute('aria-label',accessibleName);button.setAttribute('aria-pressed',String(selected===key));
+      button.style.cssText=`left:${b.x/1920*100}%;top:${b.y/1080*100}%;width:${b.width/1920*100}%;height:${b.height/1080*100}%;border-radius:${16/b.width*100}% / ${16/b.height*100}%`;
+      button.firstElementChild.textContent=visibleNumber;
+    }
     highlight();
   }
   function apply(message){
@@ -383,21 +434,36 @@
       syncCamera();
       drawHits(data.layout);
       send(frame,'apply',live);
-      try{localStorage.setItem('obs-overlay-config',JSON.stringify(savedConfig(data)));localStorage.setItem('obs-overlay-source-config',sourceFingerprint);}catch{}
-      status.textContent=message||'설정 미리보기 준비 완료';
-    }catch(error){status.textContent=window.KMGI18n?.localize(error.message)||error.message;}
+      if(draftReady&&!missingUploads.size)void uploadStorage.save(savedConfig(data),uploads,sourceFingerprint);
+      const warning=missingUploads.size?'저장한 파일을 복원하지 못했습니다. 파일을 다시 선택하세요.':storageWarning;
+      showStatus(warning||message||'설정 미리보기 준비 완료',!!warning);
+    }catch(error){showStatus(error.message,true);}
   }
-  function selectPanel(key){if(!keys.includes(key)||!config.panelEnabled[key])return;readEditor();selected=selected===key?null:key;if(selected)byId('event-target').value=selected;renderEditor();syncCamera();drawHits(config.layout||OverlayEvents.autoLayout({placement:config.panelPlacement,enabled:config.panelEnabled}));}
-  function reset(){uploadRequests.clear();uploads.clear();cameraActive=false;cameraController?.disconnect();config=normalize(defaults);selected=null;renderGlobal();renderPlacement();renderEditor();apply('기본 설정을 복원했습니다');}
+  function selectPanel(key){if(!keys.includes(key)||!config.panelEnabled[key])return;readEditor();selected=selected===key?null:key;if(selected)byId('event-target').value=selected;renderEditor();syncCamera();drawHits(config.layout||OverlayEvents.autoLayout({placement:config.panelPlacement,enabled:config.panelEnabled,sizing:config.panelSizing}));}
+  function reset(){draftReady=true;form.inert=false;byId('bundle').disabled=false;byId('reset').disabled=false;uploadStorage.reset();uploadRequests.clear();missingUploads.clear();storageWarning='';uploads.clear();cameraActive=false;cameraController?.disconnect();config=normalize(defaults);selected=null;renderGlobal();renderPlacement();renderEditor();apply('기본 설정을 복원했습니다');}
 
   form.addEventListener('input',event=>{
     const input=event.target;
+    if(['panelWidth','panelHeight'].includes(input.name))return; // Commit typed numbers on change, so partial digits are not rewritten.
+    if(['panelWidthSlider','panelHeightSlider'].includes(input.name)){
+      if(input===snappingSlider){
+        const axis=input.name==='panelWidthSlider'?'width':'height',bounds={min:Number(input.min),max:Number(input.max)},stops=OverlayEvents.aspectStops(config.layout[selected],axis,bounds);
+        const nearest=stops.sort((a,b)=>Math.abs(a.value-Number(input.value))-Math.abs(b.value-Number(input.value)))[0];
+        if(nearest&&Math.abs(nearest.value-Number(input.value))<=(bounds.max-bounds.min)*0.012)input.value=nearest.value;
+      }
+      control(input.name.replace('Slider','')).value=input.value;
+    }
     if(input.matches('[data-enabled]')){
       const key=input.dataset.enabled;
       if(!input.checked&&selected===key){readEditor();selected=null;renderEditor();}
-      config.panelEnabled[key]=input.checked;
+      config.panelEnabled[key]=input.checked;sizeConstraintTarget=key;
     }
     if(input.matches('[data-placement-level]'))return;
+    if(selected&&['panelWidthMode','panelHeightMode'].includes(input.name)){
+      const axis=input.name==='panelWidthMode'?'width':'height';
+      if(input.value==='fixed'&&config.panelSizing[selected][axis+'Mode']==='auto')control(axis==='width'?'panelWidth':'panelHeight').value=config.layout[selected][axis];
+      byId('panel-editor').querySelector(`[data-fixed-size="${axis}"]`).hidden=input.value!=='fixed';
+    }
     if(input.matches('input[type=color]')){const label=form.querySelector(`[data-color-label="${input.name}"]`);if(label)label.textContent=input.value.toUpperCase();}
     apply();
     paintGradientControls();
@@ -420,6 +486,11 @@
     }
   });
   form.addEventListener('click',event=>{const cameraButton=event.target.closest('[data-camera-action]');if(cameraButton){event.preventDefault();if(cameraButton.dataset.cameraAction==='refresh')void cameraController?.refresh();else if(cameraButton.dataset.cameraAction==='connect')void cameraController?.connect(control('cameraDevice')?.value||'');else if(cameraButton.dataset.cameraAction==='disconnect')cameraController?.disconnect();return;}const button=event.target.closest('[data-gradient-edit]');if(button){event.preventDefault();openGradient(button.dataset.gradientEdit,button);}});
+  form.addEventListener('pointerdown',event=>{snappingSlider=event.target.matches('input[type=range]')?event.target:null;});
+  window.addEventListener('pointerup',()=>{snappingSlider=null;});
+  window.addEventListener('pointercancel',()=>{snappingSlider=null;});
+  form.addEventListener('focusout',event=>{if(['panelWidth','panelHeight'].includes(event.target.name))apply();});
+  form.addEventListener('keydown',event=>{if(event.key==='Enter'&&['panelWidth','panelHeight'].includes(event.target.name)){event.preventDefault();apply();}});
   form.addEventListener('submit',event=>event.preventDefault());
   byId('panel-hit-areas').addEventListener('pointerover',event=>{hovered=event.target.closest('[data-hit]')?.dataset.hit||null;highlight();});
   byId('panel-hit-areas').addEventListener('pointerleave',()=>{hovered=null;highlight();});
@@ -480,6 +551,7 @@
   }
   async function handleUpload(input){
     const file=input.files?.[0];if(!file)return;
+    if(!(file.size>0)){showStatus('빈 파일은 사용할 수 없습니다. 다른 파일을 선택하세요.',true);return;}
     const ext=file.name.split('.').pop().toLowerCase(),video=['mp4','webm'].includes(ext);
     if(!['png','jpg','jpeg','webp','gif','mp4','webm'].includes(ext))return void(status.textContent='지원하지 않는 파일 형식입니다');
     if(video&&['whole','region'].includes(input.dataset.upload))return void(status.textContent='배경에는 이미지를 선택하세요');
@@ -488,7 +560,7 @@
     const key=kind==='panel'?panelKey:kind==='region'?'region-'+panelKey:kind;
     const path=kind==='whole'?'assets/background-whole.'+ext:kind==='region'?'assets/background-'+panelKey+'.'+ext:kind==='sponsor'?'assets/team-promo.'+ext:'assets/'+panelKey+'.'+ext;
     const url=await readUpload(key,file);if(url===null)return;
-    uploads.set(key,{file,path,url});
+    uploads.set(key,{file,path,url});missingUploads.delete(key);
     if(kind==='whole'){config.globalStyle.background.mode='file';config.globalStyle.background.url=path;renderGlobal();}
     else if(kind==='region'){config.regionBackgrounds[panelKey].image=path;if(selected===panelKey&&control('regionImage'))control('regionImage').value=path;}
     else if(kind==='sponsor'){config.sponsor=path;config.sponsorType=video?'video':'image';if(selected===panelKey)renderContentExtra();}
@@ -524,8 +596,31 @@
       status.textContent='Extract OBS-settings.zip, then select OBS-script.lua from that folder in OBS.';
     }catch(error){if(error.name==='AbortError')return;status.textContent=window.KMGI18n?.localize(error.message)||error.message;}
   };
-  frame.addEventListener('load',()=>send(frame,'apply',liveConfig(current())));
-  let saved,savedSource;try{saved=JSON.parse(localStorage.getItem('obs-overlay-config'));savedSource=localStorage.getItem('obs-overlay-source-config');}catch{}
-  config=normalize(restoredSettings(sourceConfig,saved,savedSource));
-  renderGlobal();renderPlacement();renderEditor();apply();
+  frame.addEventListener('load',()=>{if(draftReady)send(frame,'apply',liveConfig(current()));});
+  async function restoreDraft(){
+    form.inert=true;byId('bundle').disabled=true;byId('reset').disabled=true;
+    showStatus('저장한 설정과 파일을 불러오는 중입니다');
+    let saved,savedSource;try{saved=JSON.parse(localStorage.getItem('obs-overlay-config'));savedSource=saved?._sourceFingerprint??localStorage.getItem('obs-overlay-source-config');}catch{}
+    const restored=restoredSettings(sourceConfig,saved,savedSource);
+    const clean=structuredClone(restored);delete clean._localUploads;delete clean._sourceFingerprint;
+    config=normalize(clean);
+    if(restored===saved){
+      const recovered=await uploadStorage.restore(saved);
+      for(const key of recovered.missing)missingUploads.add(key);
+      for(const [key,entry] of recovered.entries){
+        try{uploads.set(key,{...entry,url:await previewData(entry.file)});}
+        catch{missingUploads.add(key);}
+      }
+    }
+    draftReady=true;form.inert=false;byId('bundle').disabled=false;byId('reset').disabled=false;
+    renderGlobal();renderPlacement();renderEditor();apply();
+  }
+  function recoverDraft(error){
+    config=normalize(defaults);selected=null;uploads.clear();missingUploads.clear();
+    draftReady=true;form.inert=false;byId('bundle').disabled=false;byId('reset').disabled=false;
+    renderGlobal();renderPlacement();renderEditor();drawHits(config.layout);send(frame,'apply',liveConfig(config));
+    // Preserve the failed draft until an explicit user edit or reset replaces it.
+    showStatus(error.message,true);
+  }
+  void restoreDraft().catch(recoverDraft);
 })();
