@@ -43,8 +43,8 @@ class BuildTests(unittest.TestCase):
                 self.assertIn('files/LICENSE', archive.namelist())
                 self.assertEqual(archive.read('files/VERSION').decode().strip(), builder.version)
                 names = set(archive.namelist())
-                self.assertEqual({name.split('/')[0] for name in names}, {'Setting.html', 'files'})
-                self.assertIn('files/guide-en.html', archive.read('Setting.html').decode())
+                self.assertEqual({name.split('/')[0] for name in names}, {'settings.html', 'files'})
+                self.assertIn('files/guide-en.html', archive.read('settings.html').decode())
                 private_assets = {
                     'sample-handcam-topview.png', 'sample-mission-widget.png', 'season-11-lobby.png',
                     'team-tgm25.jpg', 'tgm26-logo.png', 'tgm26-qualified-banner.png',
