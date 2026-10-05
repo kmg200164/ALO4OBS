@@ -1,3 +1,11 @@
+## 0.4.5
+
+- Hide panel selection and hover highlighting during fullscreen preview; restore it on exit.
+
+## 0.4.4
+
+- Export JSON settings without executable JavaScript; generate browser configuration locally in OBS.
+
 # 변경 기록
 
 ## 0.4.2 — 2026-10-04 (development prerelease)

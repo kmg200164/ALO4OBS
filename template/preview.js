@@ -462,7 +462,8 @@
     try{await fullscreenSurface.requestFullscreen();}
     catch(error){logFullscreenFailure('enter',error,activation);showFullscreenMessage('전체 화면을 시작하지 못했습니다. 브라우저 권한을 확인하세요.');}
   };
-  document.addEventListener('fullscreenchange',()=>{updateFullscreenLabel();highlight();});
+  document.addEventListener('fullscreenchange',updateFullscreenLabel);
+  document.addEventListener('fullscreenchange',highlight);
   document.addEventListener('fullscreenerror',()=>showFullscreenMessage('전체 화면을 시작하지 못했습니다. 브라우저 권한을 확인하세요.'));
   window.addEventListener('kmg-language-change',()=>{apply();updateFullscreenLabel();});
 
