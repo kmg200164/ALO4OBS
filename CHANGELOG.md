@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.1 — 2026-10-05 11:50:43 +09:00
+
+- Save settings through the browser native file picker when available; retain download fallback for other browsers.
+- Package the license as LICENSE.txt instead of an extensionless file.
+- Native Windows extraction verification remains pending.
+
 Dates with times identify the change's Git commit, in Korea Standard Time (UTC+09:00). Earlier entries retain their recorded dates; exact times are unavailable in this repository.
 
 ## 0.5.0 — 2026-10-05 11:40:05 +09:00

@@ -19,7 +19,7 @@ function harness(options={}){
   byId:id=>id==='bundle'?bundle:null,current:()=>structuredClone(data),
   alphaMask:async(_,name)=>{await maskGate;return {name,bytes:new Uint8Array([1])};},
   OverlayPack:{settingsEntries:input=>[{name:'obs-settings.json',bytes:new TextEncoder().encode(JSON.stringify(input))}],zip:entries=>{captured=entries;return new Uint8Array([0]);}},
-  document:{createElement:()=>({click(){}})},window:{OBS_EXPORT_RUNTIME:{}}
+  document:{createElement:()=>({click(){}})},window:{OBS_EXPORT_RUNTIME:{},showSaveFilePicker:options.showSaveFilePicker}
  };
  vm.runInNewContext(source.slice(start,end),context);
  return {uploads,bundle,status,releaseMasks,get captured(){return captured;}};
@@ -51,4 +51,14 @@ test('unreadable restored media prevents an incomplete ZIP download',async()=>{
  h.releaseMasks();await h.bundle.onclick();
  assert.equal(h.captured,undefined);
  assert.match(h.status.textContent,/Re-upload local files/);
+});
+
+test('native save writes ZIP and closes without triggering a download',async()=>{
+ let written,closed=false;
+ const h=harness({showSaveFilePicker:async options=>{assert.equal(options.suggestedName,'OBS-settings.zip');return {createWritable:async()=>({write:async blob=>{written=blob;},close:async()=>{closed=true;},abort:async()=>{}})};}});
+ h.releaseMasks();await h.bundle.onclick();assert.equal(written.type,'application/zip');assert.ok(closed);
+});
+test('canceling the save picker does not build a ZIP',async()=>{
+ const h=harness({showSaveFilePicker:async()=>{throw Object.assign(new Error('cancel'),{name:'AbortError'});}});
+ await h.bundle.onclick();assert.equal(h.captured,undefined);assert.equal(h.status.textContent,undefined);
 });
