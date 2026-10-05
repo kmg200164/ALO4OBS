@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.1 — 2026-10-05 23:39:36 +09:00
+
+- Set the minimum width of Panels 2–4 from their 16:9 reference row height (206 px in the default layout), capped by the available automatic width.
+- Keep this minimum unchanged when Panel 1 switches to 21:9 or 32:9, without locking the actual panel width.
+- Apply the same minimum in layout validation, numeric clamping and slider ranges; update the guides.
+
 ## 0.7.0 — 2026-10-05 23:20:19 +09:00
 
 - Replace Panel 1's height slider with Auto, 16:9 (default), 21:9, and 32:9 aspect choices.

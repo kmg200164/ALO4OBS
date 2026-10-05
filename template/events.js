@@ -122,10 +122,15 @@
     }
     return sizes;
   }
+  function sizingMinimum(reference,key,axis){
+    // Lower-panel widths use the baseline row height, independent of the main aspect.
+    if(axis==='width'&&canResizeWidth(key))return Math.min(reference[key].height,reference[key].width);
+    return Math.ceil(reference[key][axis]/2);
+  }
   function sizedLayout(leftRows,right,sizing,constrained=true) {
     const layout=baseLayout();
     const reference=constrained?sizedLayout(leftRows,right,normalizeSizing(),false):null;
-    const limits=(key,axis)=>key==='game'&&axis==='height'&&sizing[key].aspect&&sizing[key].aspect!=='auto'?{minimum:1,maximum:1016}:reference?{minimum:Math.ceil(reference[key][axis]/2),maximum:Math.floor(reference[key][axis]*1.5)}:{minimum:1};
+    const limits=(key,axis)=>key==='game'&&axis==='height'&&sizing[key].aspect&&sizing[key].aspect!=='auto'?{minimum:1,maximum:1016}:reference?{minimum:sizingMinimum(reference,key,axis),maximum:Math.floor(reference[key][axis]*1.5)}:{minimum:1};
     const fixed=(key,axis)=>{
       if(constrained&&key==='game'&&axis==='height'&&sizing[key].aspect&&sizing[key].aspect!=='auto'){
         const row=leftRows.find(row=>row.items.includes(key));
@@ -210,7 +215,7 @@
     // Reference the all-automatic layout, so dragging never moves its own limits.
     for(const panel of panelKeys){
       sizing[panel][otherAxis+'Mode']='auto';
-      sizing[panel][axis]=Math.min(Math.min(Math.floor(reference[panel][axis]*1.5),axis==='width'?reference[panel].x>=1448?440:1384:1016),Math.max(Math.ceil(reference[panel][axis]/2),sizing[panel][axis]));
+      sizing[panel][axis]=Math.min(Math.min(Math.floor(reference[panel][axis]*1.5),axis==='width'?reference[panel].x>=1448?440:1384:1016),Math.max(sizingMinimum(reference,panel,axis),sizing[panel][axis]));
     }
     sizing[key][axis+'Mode']='fixed';
     function fits(value){
@@ -218,7 +223,7 @@
       try{autoLayout({...options,enabled,sizing});return true;}
       catch(error){if(error.message.startsWith('Fixed panel sizes exceed available'))return false;throw error;}
     }
-    const minimum=Math.ceil(reference[key][axis]/2);
+    const minimum=sizingMinimum(reference,key,axis);
     let low=minimum,high=Math.min(Math.floor(reference[key][axis]*1.5),axis==='width'?(reference[key].x>=1448?440:1384):1016);
     while(low<high){const middle=Math.ceil((low+high)/2);if(fits(middle))low=middle;else high=middle-1;}
     return {min:minimum,max:low};

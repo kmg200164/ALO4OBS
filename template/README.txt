@@ -5,6 +5,7 @@ Select Panels 1-7 and choose their content, placement, and style.
 Choose Auto or Manual for the height of Panels 5-7 and the width of Panels 2-4.
 Panels 1, 5, 6 and 7 use automatic width; their width controls are hidden.
 Panels 2-4 use automatic height. Panel 1 offers Auto, 16:9 (default), 21:9, and 32:9. Auto fills the remaining height, including the entire left parent when Panels 2-4 are disabled. Ratio choices keep the selected ratio.
+Panels 2-4 use a minimum width based on the 16:9 reference row height (206 px by default), capped by the available automatic width. Main-panel aspect changes keep this minimum; larger widths remain adjustable.
 Use the number input or slider for manual sizing.
 Limits follow active panels, gaps, and fixed sizes. Out-of-range values are adjusted.
 Uploaded images/videos are retained in this browser for the same settings page.

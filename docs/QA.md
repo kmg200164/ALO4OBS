@@ -1,6 +1,13 @@
 # QA and device handoff
 
-Current implementation: 0.7.0. The sections below preserve evidence from their named versions; automated checks do not establish live platform compatibility.
+Current implementation: 0.7.1. The sections below preserve evidence from their named versions; automated checks do not establish live platform compatibility.
+
+## Lower-panel minimum width correction (0.7.1)
+
+- All 152 JavaScript checks pass. The lower panels retain a 206 px default minimum across Auto, 16:9, 21:9 and 32:9 main-panel modes; widths above the minimum remain adjustable. Active-panel combinations, input clamping and frame boundaries are covered.
+- All seven Python packaging checks pass; the neutral 0.7.1 ZIP was rebuilt and copied to downloads/.
+- Actual Chrome HTTP inspection confirmed that a 100 px entry clamps to 206 px and is square at 16:9; switching to 32:9 retains the 206 px minimum and still permits a 500 px width.
+- The square reference minimum is capped by the automatic width if a different placement cannot accommodate a square. Historical live OBS evidence below remains scoped to the tested versions.
 
 ## Main-panel aspect choices and simplified sizing (0.7.0)
 

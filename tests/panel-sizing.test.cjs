@@ -75,11 +75,11 @@ test('active-panel limits preserve readable automatic siblings over all visibili
   const reference=layout({},enabled);
   for(const key of keys.filter(key=>enabled[key]))for(const axis of ['width','height']){
    const range=api.sizingBounds({placement:api.defaultPlacement(),enabled},key,axis);
-   assert.ok(range.min>=Math.ceil(reference[key][axis]/2));assert.ok(range.max>=range.min);
+   assert.equal(range.min,axis==='width'&&api.canResizeWidth(key)?Math.min(reference[key].height,reference[key].width):Math.ceil(reference[key][axis]/2));assert.ok(range.max>=range.min);
    for(const value of [range.min,range.max]){
     const boxes=layout({[key]:fixed(axis,value)},enabled);separate(boxes,enabled);
     for(const peer of keys.filter(peer=>enabled[peer])){
-     assert.ok(boxes[peer][axis]>=Math.ceil(reference[peer][axis]/2));
+     assert.ok(boxes[peer][axis]>=(axis==='width'&&api.canResizeWidth(peer)?Math.min(reference[peer].height,reference[peer].width):Math.ceil(reference[peer][axis]/2)));
      if(api.defaultPlacement()[peer].level1==='right'){assert.equal(boxes[peer].x,1448);assert.ok(boxes[peer].width<=440);}
      else assert.ok(boxes[peer].x+boxes[peer].width<=1416);
     }
@@ -89,12 +89,12 @@ test('active-panel limits preserve readable automatic siblings over all visibili
 });
 test('usable bounds stay within fixed parents and track sibling counts and fixed peers',()=>{
  const options={placement:api.defaultPlacement(),sizing:{custom1:fixed('width',500),custom2:fixed('width',300),chat:fixed('width',400)}};
- assert.deepEqual(api.sizingBounds(options,'custom3','width'),{min:220,max:520});
+ assert.deepEqual(api.sizingBounds(options,'custom3','width'),{min:206,max:520});
  assert.deepEqual(api.sizingBounds({},'game','width'),{min:692,max:1384});
  assert.deepEqual(api.sizingBounds({},'game','height'),{min:389,max:881});
  assert.deepEqual(api.sizingBounds({},'chat','width'),{min:220,max:440});
- assert.deepEqual(api.sizingBounds({placement:api.defaultPlacement(),enabled:{custom2:false}},'custom1','width'),{min:338,max:1014});
- assert.deepEqual(api.sizingBounds({placement:api.defaultPlacement(),enabled:{custom2:false,custom3:false}},'custom1','width'),{min:692,max:1384});
+ assert.deepEqual(api.sizingBounds({placement:api.defaultPlacement(),enabled:{custom2:false}},'custom1','width'),{min:206,max:1014});
+ assert.deepEqual(api.sizingBounds({placement:api.defaultPlacement(),enabled:{custom2:false,custom3:false}},'custom1','width'),{min:206,max:1384});
  assert.throws(()=>api.sizingBounds({},'unknown','width'),/Invalid panel size/);
  assert.throws(()=>api.sizingBounds({},'game','depth'),/Invalid panel size/);
 });
@@ -140,5 +140,17 @@ test('main aspect uses its actual width with row peers or a right-side parent',(
   const boxes=layout({game:{aspect}}, {}, placement);
   assert.equal(boxes.game.height,Math.floor(boxes.game.width*9/Number(aspect.split(':')[0])));
   separate(boxes);
+ }
+});
+
+test('lower-panel minimum widths stay at the 16:9 baseline across main aspects',()=>{
+ for(const aspect of ['auto','16:9','21:9','32:9'])for(const key of ['custom1','custom2','custom3']){
+  const sizing={game:{aspect},[key]:fixed('width',206)};
+  const options={placement:api.defaultPlacement(),sizing};
+  assert.equal(api.sizingBounds(options,key,'width').min,206);
+  const boxes=layout(sizing);assert.equal(boxes[key].width,206);separate(boxes);
+  if(aspect==='16:9')assert.equal(boxes[key].height,206);
+  const larger=layout({game:{aspect},[key]:fixed('width',500)});
+  assert.equal(larger[key].width,500);
  }
 });

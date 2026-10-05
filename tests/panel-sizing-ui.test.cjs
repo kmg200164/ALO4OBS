@@ -14,7 +14,7 @@ function clamp(sizing,selected='custom1',enabled={},target=null){
  context.clampPanelSizes();return config;
 }
 test('numeric input clamps before validation, with fixed peers preserved',()=>{
- for(const [raw,expected] of [[-4,220],[0,220],[2.5,220],[9999,660]]){
+ for(const [raw,expected] of [[-4,206],[0,206],[2.5,206],[9999,660]]){
   const config=clamp({custom1:{widthMode:'fixed',width:raw}});
   assert.equal(config.panelSizing.custom1.width,expected);events.validateLayout(events.autoLayout({placement:config.panelPlacement,sizing:config.panelSizing}));
  }
