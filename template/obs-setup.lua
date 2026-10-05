@@ -13,7 +13,7 @@ local areas={{'chatUrl','OBS Template · Chat','chat','showChat'},
  {'donationSoop','OBS Template · SOOP Alerts','alerts','showAlerts'},
  {'reactiveUrl','OBS Template · Discord Reactive','hand','reactive'}}
 function script_description()
- return 'OBS Streaming Template: configure seven panels in preview.html, extract OBS-settings.zip beside this script, select a different existing OBS source for each panel that needs one, then Apply. Existing scenes and capture settings are preserved.'
+ return 'OBS Streaming Template: configure seven panels in settings.html, extract OBS-settings.zip beside this script, select a different existing OBS source for each panel that needs one, then Apply. Existing scenes and capture settings are preserved.'
 end
 function script_defaults(settings)
  obs.obs_data_set_default_bool(settings,'english',true)
@@ -584,7 +584,7 @@ local function apply_generic(settings)
 end
 local function apply(props,property)
  local file=io.open(script_path()..'obs-settings.json','r')
- if file==nil then obs.script_log(obs.LOG_WARNING,'Save the OBS settings ZIP in preview.html and extract it into the overlay folder first.');return false end
+ if file==nil then obs.script_log(obs.LOG_WARNING,'Save the OBS settings ZIP in settings.html and extract it into the overlay folder first.');return false end
  local json=file:read('*a');file:close()
  local settings=obs.obs_data_create_from_json(json)
  if settings==nil then obs.script_log(obs.LOG_WARNING,'Invalid obs-settings.json. Export settings again.');return false end

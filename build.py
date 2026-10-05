@@ -23,7 +23,7 @@ gift_files = {
     'panel-media-game.html', 'panel-media-custom1.html', 'panel-media-custom2.html',
     'panel-media-custom3.html', 'panel-media-chat.html', 'panel-media-translation.html',
     'panel-media-hand.html', 'preview.css', 'README.txt',
-    'preview.html', 'preview.js', 'version.js', 'wallpaper.html',
+    'settings.html', 'preview.js', 'version.js', 'wallpaper.html',
 }
 files = [(repository if name in {'CHANGELOG.md', 'LICENSE'} else source) / name for name in sorted(gift_files)]
 # Explicit neutral runtime package allowlist; private settings and artwork are excluded.

@@ -1,3 +1,7 @@
+## 0.4.6
+
+- Rename the configuration page to settings.html and update navigation and package links.
+
 ## 0.4.5
 
 - Hide panel selection and hover highlighting during fullscreen preview; restore it on exit.
