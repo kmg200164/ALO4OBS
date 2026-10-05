@@ -1,107 +1,114 @@
-## 0.5.0
+# Changelog
 
-- Save a complete OBS package with OBS-script.lua; extract and select that script in the same folder.
+Dates with times identify the change's Git commit, in Korea Standard Time (UTC+09:00). Earlier entries retain their recorded dates; exact times are unavailable in this repository.
 
-## 0.4.7
+## 0.5.0 — 2026-10-05 11:40:05 +09:00
 
-- Explain both ZIP files, copying settings into files, and where to select the OBS script.
+- Save a complete OBS package containing `OBS-script.lua`. Extract the ZIP and select that script from the extracted folder.
 
-## 0.4.6
+## 0.4.7 — 2026-10-05 11:32:35 +09:00
 
-- Rename the configuration page to settings.html and update navigation and package links.
+- Clarify the two ZIP files, settings extraction, and OBS script selection. The installation flow is replaced in 0.5.0.
 
-## 0.4.5
+## 0.4.6 — 2026-10-05 11:24:18 +09:00
 
-- Hide panel selection and hover highlighting during fullscreen preview; restore it on exit.
+- Rename the configuration page to `settings.html`; update navigation and package links.
 
-## 0.4.4
+## 0.4.5 — 2026-10-05 11:21:37 +09:00
 
-- Export JSON settings without executable JavaScript; generate browser configuration locally in OBS.
+- Hide panel selection and hover highlights in fullscreen preview; restore them on exit.
 
-# 변경 기록
+## 0.4.4 — 2026-10-05 11:19:45 +09:00
 
-## 0.4.2 — 2026-10-04 (development prerelease)
+- Export JSON settings without JavaScript files; generate browser configuration locally in OBS.
 
-- Put English first in the shared language menu while preserving saved Korean and Japanese selections.
-- Preserve local image and video bytes when a restored settings package is exported again; stop an incomplete export if a referenced local asset cannot be read.
-- Record the scoped macOS QA evidence and remaining checks in docs/QA.md.
+## 0.4.3 — 2026-10-05 11:01:21 +09:00
 
-## 0.4.1 — 2026-10-04
+- Synchronize the public download with the 0.4.3 test package.
+- Highlight the actual panel stroke rather than a separate outline.
 
-- Restore exported local settings after replacing config.js in a GitHub source ZIP. Runtime pages load neutral defaults once, then optional local settings. Source and built ZIPs use the same order; the demo remains neutral.
+## 0.4.2 — 2026-10-04 22:42:16 +09:00 (development preview)
 
-## 0.4.0 — 2026-10-04 (공개 전 검수)
+- Put English first in the language menu; preserve saved Korean and Japanese selections.
+- Preserve restored image and video bytes when exporting again. Stop export if a required local asset cannot be read.
+- Record partial macOS verification and remaining checks in `docs/QA.md`.
 
-- 일곱 위치를 `패널 1~7`로 통일하고 모든 칸에서 `없음 · OBS 소스 · 웹 주소 · 이미지/영상`을 선택할 수 있게 했습니다. 미리보기에는 번호를 표시하고 OBS 출력에서는 숨깁니다.
-- OBS 소스를 패널별로 독립 선택하며 같은 소스의 중복 배치를 차단합니다. 기존 게임·캠·채팅 고정 역할과 예전 `OBS Template ·` 항목을 새 `OST ·` 구조로 교체합니다.
-- 템플릿이 배치한 OBS 장면 항목의 위치를 기본 잠금으로 설정했습니다. `Panel Stroke` 표시와 `Panel Fill` 표시는 서로 독립적이며, 테두리는 콘텐츠 바깥쪽에 그립니다.
-- 전체화면 미리보기에 `Esc` 안내와 설정 복귀 버튼을 추가했습니다. 채팅 플랫폼 배지는 로고 파일 대신 텍스트로 표시하며, 재배포 권리가 불분명한 파비콘은 ZIP에서 제외했습니다.
-- 비활성 패널의 웹·미디어 입력은 보존하되 저장과 OBS 적용의 연결 검증에서는 제외합니다. 다시 활성화하면 검증하며, 설정 화면 오류는 Panel 번호와 선택한 언어로 표시합니다.
-- 패널 콘텐츠 교체·그룹 제거 전에 사용자 OBS 소스를 숨김·잠금 항목으로 보존하도록 보강했습니다. 새 그룹의 기본 접힘과 함께 새 Lua의 OBS 실기 재검증은 남아 있습니다.
-- 코드·Chrome·OBS 실기 검수를 진행 중입니다. 이 항목은 공개 릴리스가 아닙니다.
+## 0.4.1 — 2026-10-04 21:07:41 +09:00
 
-## 0.3.3 — 2026-10-04
+- Restore exported settings after replacing `config.js`. Source and built packages load neutral defaults before local settings; the demo remains neutral.
 
-- 내용이 비어 있는 홍보 칸과 대기 중인 알림 칸에서 기본 예시 카드가 OBS 방송 화면에 나타나지 않게 했습니다. 실제 홍보 미디어와 알림 이벤트는 계속 표시합니다.
-- 새 OBS 장면·소스 이름을 OBS Streaming Template로 정리하고, 캡처용 내부 중첩 장면을 사용자 목록에서 숨기도록 했습니다. 이전 OBS 장면은 자동 삭제하지 않습니다.
-- 프로젝트 코드의 MIT 라이선스와 저작권자 KMG를 명시하고 LICENSE를 전달 ZIP에 포함했습니다. 타사 자산은 별도 조건을 따릅니다.
+## 0.4.0 — 2026-10-04 21:04:20 +09:00 (pre-release review)
 
-## 0.3.2 — 2026-10-04
+- Number all seven panels. Each supports None, OBS source, Web address, or Image/video. Show numbers in preview and hide them in OBS output.
+- Select OBS sources independently; reject duplicate assignments. Replace fixed game/camera/chat roles and legacy source names with the `OST ·` structure.
+- Lock generated scene items by default. Control panel fill and stroke independently; draw strokes outside content.
+- Add fullscreen exit guidance and a return button. Replace platform logo badges with text; exclude favicons with uncertain redistribution rights.
+- Preserve disabled panel inputs; validate their connections only when enabled. Show errors with the panel number and selected language.
+- Preserve user OBS sources as hidden, locked items before replacing content or removing groups. Native verification of the new Lua script and collapsed groups remains pending.
+- Code, Chrome, and OBS review was ongoing; this entry did not represent a verified release.
 
-- 현재 미리보기 제목을 한국어·영어·일본어에 맞게 현지화했습니다(QA030-04).
-- 새 배포·초기화·첫 그라디언트 편집의 전역 배경 seed를 135°의 #303030→#909090으로 맞췄습니다. 단색 기본값 #000000은 유지하며, 저장된 legacy 색상과 명시적 그라디언트는 보존합니다(QA030-05).
+## 0.3.3 — 2026-10-04 (time unavailable)
 
-## 0.3.1 — 2026-10-04
+- Hide placeholder promotion and notification cards in OBS; keep real media and events visible.
+- Standardize new scene and source names. Hide internal capture scenes; retain existing user scenes.
+- Include the MIT license and KMG copyright notice. Third-party assets retain their own terms.
 
-- 동적 패널 편집 컨트롤의 접근 가능한 이름을 행 제목과 연결하고 색상 입력에는 현재 색상값도 포함했습니다(QA030-01).
-- 전체화면 요청 실패 시 오류·브라우저 권한·요청 전 사용자 활성화·focus/visibility 진단을 JSON 문자열로 개발자 콘솔에 기록합니다(QA030-02). 실제 브라우저 전체화면 성공은 확인되지 않았습니다.
-- custom1–3 배치 버튼과 iframe UI 접근성 이름을 현재 UI 언어에 맞췄으며 KO/EN/JA 실제 Chrome 확인을 통과했습니다(QA030-03).
+## 0.3.2 — 2026-10-04 (time unavailable)
 
-## 0.3.0 — 2026-10-04
+- Localize the preview title in Korean, English, and Japanese (QA030-04).
+- Initialize background gradients at 135 degrees, from `#303030` to `#909090`. Keep the solid default `#000000` and preserve saved colors and explicit gradients (QA030-05).
 
-- 패널 Fill 불투명도·블러와 Stroke 두께를 다섯 단계 선택값으로 맞추고, 저장·가져오기 때 기존 숫자도 가장 가까운 선택값으로 정규화합니다.
-- 전역·패널 Stroke는 단색과 그라디언트 모두 항상 100% 불투명하게 표시합니다. 그라디언트 정지점과 레거시 `borderOpacity`도 저장할 때 100%로 정규화하며 Fill 투명도는 유지합니다.
-- 한국어·영어·일본어 가이드의 4단계 번호를 카드 제목에 넣고 단일 열로 배치했습니다. 프레임 다이어그램은 유지하고 가이드 카드의 배경 블러는 제거했습니다.
+## 0.3.1 — 2026-10-04 (time unavailable)
 
-## 0.2.5 — 2026-10-04
+- Associate accessible control names with row labels; include current color values (QA030-01).
+- Log fullscreen failure diagnostics: error, permissions, user activation, focus, and visibility. Successful native fullscreen remained unverified (QA030-02).
+- Localize custom-panel buttons and iframe accessibility labels. Verify Korean, English, and Japanese in Chrome (QA030-03).
 
-- 데모를 중립 플레이어/설정으로 전환했습니다. 공개 기본 설정(`config.public.js`)과 단색 배경을 사용하며 개인용 후원·대회·캠 이미지 참조를 제거했습니다.
-- 전달 ZIP 허용 목록에서 개인 식별 가능성이 있는 손캠·게임 배경·대회 아트워크 6개를 제외했습니다. 원본 파일은 소스 폴더에 보존합니다.
-- 제품 안내와 새 배포 파일명을 `OBS Streaming Template` 및 `OBS-Streaming-Template.zip`으로 맞췄습니다. 사용자 설정 ZIP은 `OBS-settings.zip`입니다.
-- 미리보기 상단 동작을 **샘플 표시**, **샘플 비우기**, **전체화면 보기** 세 가지로 정리했습니다. 샘플 표시는 오른쪽 샘플 테스트 입력란의 샘플 1개를 선택한 채팅·번역·알림 영역에 표시합니다. 샘플 비우기는 현재 샘플 내용을 모두 지우고 설정은 유지합니다. 전체화면 보기는 현재 미리보기를 확대하고 `Esc`로 복귀합니다. 자동 시퀀스 재생과 중복 버튼은 제거했습니다.
+## 0.3.0 — 2026-10-04 (time unavailable)
 
-## 0.2.4 — 2026-10-04
+- Use five choices for fill opacity, blur, and stroke width; normalize imported numeric values to the nearest choice.
+- Keep solid and gradient strokes fully opaque. Normalize gradient stops and legacy `borderOpacity`; preserve fill transparency.
+- Arrange the four guide steps in one column with numbered titles. Keep the frame diagram; remove card background blur.
 
-- 패널 편집기에서 게임·채팅·번역·캠·커스텀 패널의 콘텐츠 섹션 제목을 통일했습니다. 게임 패널에는 게임 캡처를 OBS 스크립트에서 기존 게임 소스로 선택하라는 안내를 추가했으며, OBS 선택기 명칭과 맞췄습니다.
-- 전달용 데모의 개인 방송명을 중립 예시로 바꿨습니다. 빌드는 HTML 내부 CSS와 정적 JavaScript 자산 참조도 검사하며, ZIP 구성·내용·CRC 검증이 끝난 뒤 기존 ZIP을 교체합니다. 검증이나 교체 실패 시 기존 전달 파일을 보존합니다.
-- 자산별 출처·재배포 권리의 미확인 항목과 코드 라이선스 미선택 상태를 기록했습니다. 전달용 자산 허용 목록은 공개 가능한 목록으로 변경하지 않았습니다.
-- 영어 도움말의 손상된 문구·링크와 언어 변경 후 오류·테마 버튼·그라디언트 중지점의 접근성 이름을 수정했습니다.
-- 카메라 새로고침이 연결 대기 상태를 덮는 문제, 비활성 패널의 영상·웹 위젯이 계속 연결되는 문제, 비활성 OBS 패널의 과거 소스 선택이 전체 적용을 막는 문제를 수정했습니다.
-- 내보낸 `config.js`를 다시 읽어 편집 설정을 복원합니다. 초기화는 중립 기본값을 유지합니다. 파일 읽기나 ZIP 생성 중 초기화·새 파일 선택이 이전 설정 또는 저장 자산을 덮지 않도록 처리했습니다.
-- 그라디언트 첫 선택을 즉시 미리보기에 반영하고, 중지점 위치를 교차한 뒤 추가할 때 올바른 구간을 사용합니다. 배치 옵션 행 내부 간격은 8px로 맞췄습니다. 실제 Chrome 화면·카메라 장치·OBS 적용·macOS는 이번 독립 QA에서 미검증입니다.
+## 0.2.5 — 2026-10-04 (time unavailable)
 
-## 0.2.3 — 2026-10-04
+- Use neutral demo players, public defaults, and a solid background; remove personal sponsor, tournament, and camera references.
+- Exclude six personal media assets from distribution; retain originals locally.
+- Standardize the product name and `OBS-Streaming-Template.zip`. Keep `OBS-settings.zip` for user settings.
+- Simplify preview actions to Show sample, Clear samples, and View full screen. Show one sample in the selected panel; clearing preserves settings. Remove automatic sequences and duplicate buttons.
 
-- 가이드의 복잡한 프레임 선택 칩을 공통 레이아웃 다이어그램으로 바꿨습니다. 왼쪽 상위 프레임에는 게임 밴드와 커스텀 밴드, 아래 밴드에는 커스텀 항목 1–3을 표시합니다. 오른쪽 상위 프레임에는 채팅·번역·캠의 세 하위 프레임을 표시합니다. 의미별 색상 범례와 밝은 테마 색상 반전을 적용했습니다.
+## 0.2.4 — 2026-10-04 (time unavailable)
 
-## 0.2.2 — 2026-10-04
+- Standardize content section headings and explain selecting an existing game capture in OBS.
+- Replace the personal demo name with a neutral example. Validate references, archive contents, and CRC before replacing the distribution ZIP; preserve the previous ZIP on failure.
+- Record unresolved asset redistribution rights and code licensing. The asset allowlist was not yet approved for public release.
+- Repair English help text, links, and accessible names after language changes.
+- Fix camera refresh state, connections for disabled media/widgets, and stale source selections blocking OBS application.
+- Restore exported configuration. Prevent resets and new uploads from overwriting settings during file reads or ZIP generation.
+- Update gradients immediately and insert stops into the correct interval after crossing existing stops. Use 8px layout spacing. Native camera, OBS, macOS, and visual Chrome checks were outside this independent review.
 
-- 설정 페이지의 사용자 지정 HTML 배경 기능을 제거했습니다. 다크 페이지 배경은 `#1E1E1E`, 라이트 페이지 배경은 `#E8E8E8`로 고정했습니다. 공통 헤더의 강조 색상은 유지합니다.
-- 한국어 버튼 글자 굵기는 600, 영어·일본어는 500으로 설정했습니다.
-- 사용자 설정 ZIP 이름을 `OBS-settings.zip`, 배포 ZIP 이름을 `KMG-streaming-template.zip`, 배포 ZIP 내부 루트 폴더 이름을 `streaming-template`으로 정리했습니다.
-- 설정은 입력 즉시 미리보기에 반영되며, 중복 적용 버튼을 제거했습니다.
+## 0.2.3 — 2026-10-04 (time unavailable)
 
-## 0.2.1 — 2026-10-04
+- Replace frame-selection chips with a shared diagram showing game/custom bands and chat/translation/camera frames. Add a color legend and light-theme inversion.
 
-- 배치 UI를 상위 프레임·하위 프레임 두 단계로 단순화했습니다. 커스텀 패널은 1, 2, 3 순서로 고정됩니다. 이전 저장 설정의 커스텀 패널 순서는 자동으로 정규화되며, 비활성 커스텀 패널이 있으면 남은 패널이 사용 가능한 폭을 균등하게 나눕니다.
+## 0.2.2 — 2026-10-04 (time unavailable)
 
-## 0.2.0 — 2026-10-04
+- Remove custom HTML page backgrounds. Use `#1E1E1E` for dark mode and `#E8E8E8` for light mode; retain the header accent.
+- Set Korean button weight to 600 and English/Japanese to 500.
+- Name settings archives `OBS-settings.zip`, distribution archives `KMG-streaming-template.zip`, and their root folder `streaming-template`.
+- Update preview immediately; remove the duplicate apply button.
 
-- 설정과 가이드 페이지에 공통 헤더를 적용했습니다. Figma SVG 아이콘, 테마·강조 색상, HTML 배경 설정, 배경 적용 중 버튼 로딩 표시, 500 굵기 버튼과 8px 배치 간격을 반영했습니다.
-- 1920×1080 방송 화면과 16:9 미리보기의 크기·패널 정렬을 맞추고, 게임·커스텀 세 칸·채팅·번역·캠의 7개 영역을 다룹니다. 배치 계산과 초기 설정 검증을 OBS Lua 설정 흐름과 연결했습니다.
-- 패널 활성화와 계층형 자동 배치를 추가했습니다. 왼쪽에 게임과 커스텀 패널이 함께 놓일 때 두 그룹은 위·아래의 반대 밴드에 배치되며, 게임 밴드는 큰 영역을 사용합니다. 오른쪽 영역은 위·가운데·아래 위치를 유지합니다. 패널 위치 변경·비활성화 때 남은 영역을 다시 계산하며, 미리보기에서 선택한 패널을 다시 눌러 선택 해제할 수 있습니다. 비활성 패널은 선택 대상에서 제외되고, 개별 스타일 설정을 끄면 세부 입력을 숨깁니다.
-- 전체 배경·Fill·Stroke와 개별 패널 Fill·Stroke에 공유 그라디언트 구조를 적용했습니다. 여러 색상 정지점, 위치, 불투명도, 각도 편집과 실제 색상 견본 미리보기를 지원합니다. 기존 단색·두 색상 설정도 계속 읽습니다.
-- Inter와 운영체제별 한글·일본어 글꼴 대체 목록을 적용하고, 한국어·영어·일본어 가이드 및 언어 선택을 제공합니다.
-- 설정 미리보기의 캠 패널에서 브라우저 카메라 장치를 확인하고, 사용자가 연결을 눌렀을 때 선택한 장치의 비디오만 요청합니다. 연결 상태·권한 거부·장치 없음·사용 중 상태를 표시하며, 연결 해제나 패널 미리보기 종료 시 스트림을 정리합니다. 실제 카메라 장치에서 동작을 검증한 기록은 포함하지 않습니다.
-- 설정 안내, 가이드, 시작 문서와 온보딩 내용을 업데이트했습니다.
-- 설정 내보내기에서 그라디언트 정지점 구조를 확인합니다. ZIP에는 허용 목록의 파일만 포함하고 중립 기본 설정을 `config.js`로 내보내며, 현재 버전을 `VERSION`에 기록합니다. 기존 OBS 설정 스키마와 레거시 색상 필드 호환성을 유지합니다.
+## 0.2.1 — 2026-10-04 (time unavailable)
+
+- Simplify layout to parent and child frames. Fix custom-panel order to 1, 2, 3; normalize older settings and divide available width evenly among enabled panels.
+
+## 0.2.0 — 2026-10-04 (time unavailable)
+
+- Add a shared header, Figma icons, theme/accent controls, background settings, loading feedback, and consistent button spacing.
+- Align the 1920 x 1080 output and 16:9 preview across seven areas. Connect layout calculations and configuration validation to OBS Lua.
+- Add panel activation and hierarchical layout. Recalculate available space when panels move or become disabled; support deselection and hide inactive style controls.
+- Share gradient controls across backgrounds, fills, and strokes; support multiple stops, positions, opacity, angles, and legacy colors.
+- Add Inter, system font fallbacks, and Korean, English, and Japanese guides.
+- Request camera video only after explicit connection. Show connection and device errors; release streams on disconnect or preview exit. Physical camera verification was not recorded.
+- Update setup and onboarding guidance.
+- Validate gradient stops during export. Package allowlisted files with neutral `config.js` and a `VERSION` file; preserve legacy OBS settings compatibility.
