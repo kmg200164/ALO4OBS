@@ -4,7 +4,7 @@ import pathlib
 import unittest
 
 DLL = pathlib.Path(r"C:\Program Files\obs-studio\bin\64bit\lua51.dll")
-SOURCE = pathlib.Path(__file__).resolve().parents[1] / "template" / "obs-setup.lua"
+SOURCE = pathlib.Path(__file__).resolve().parents[1] / "template" / "OBS-script.lua"
 
 @unittest.skipUnless(DLL.exists(), "OBS LuaJIT runtime is not installed")
 class RollbackTests(unittest.TestCase):

@@ -1,1 +1,1 @@
-window.KMG_VERSION = '0.4.7';
+window.KMG_VERSION = '0.4.8';

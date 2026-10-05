@@ -1,3 +1,7 @@
+## 0.4.8
+
+- Save a complete OBS package with OBS-script.lua; extract and select that script in the same folder.
+
 ## 0.4.7
 
 - Explain both ZIP files, copying settings into files, and where to select the OBS script.
