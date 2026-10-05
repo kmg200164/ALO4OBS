@@ -26,7 +26,7 @@ The template is free, and support is entirely optional. For bug reports, include
 
 ## Get started
 
-**[Download the template ZIP](https://github.com/kmg200164/OBS-streaming-template/raw/d1aecc4db3d0be70b0a841d3ccb575db4e821d14/downloads/OBS-Streaming-Template.zip)**
+**[Download the template ZIP](https://github.com/kmg200164/OBS-streaming-template/raw/2156a9fd89cb88e5ce19cf097d2beec62e610797/downloads/OBS-Streaming-Template.zip)**
 
 ![Setup: download, extract, open settings.html, configure panels, unpack saved settings, add the OBS script.](docs/images/setup-workflow.png)
 
