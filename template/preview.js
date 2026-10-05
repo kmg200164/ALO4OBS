@@ -10,7 +10,7 @@
   const uploads=new Map();
   const uploadRequests=new Map();
   let config=structuredClone(defaults), selected=null, hovered=null;
-  const highlight=()=>send(frame,'highlight',{keys:[selected,hovered].filter(Boolean),color:getComputedStyle(document.body).getPropertyValue('--accent').trim()});
+  const highlight=()=>send(frame,'highlight',{keys:document.fullscreenElement?[]:[selected,hovered].filter(Boolean),color:getComputedStyle(document.body).getPropertyValue('--accent').trim()});
   let cameraState={status:'unavailable',devices:[],selectedDeviceId:'',errorName:'NotSupportedError'},cameraController=null,cameraActive=false;
   const cameraVideo=byId('camera-preview-video');
   byId('app-version').textContent='v'+window.KMG_VERSION;
@@ -462,7 +462,7 @@
     try{await fullscreenSurface.requestFullscreen();}
     catch(error){logFullscreenFailure('enter',error,activation);showFullscreenMessage('전체 화면을 시작하지 못했습니다. 브라우저 권한을 확인하세요.');}
   };
-  document.addEventListener('fullscreenchange',updateFullscreenLabel);
+  document.addEventListener('fullscreenchange',()=>{updateFullscreenLabel();highlight();});
   document.addEventListener('fullscreenerror',()=>showFullscreenMessage('전체 화면을 시작하지 못했습니다. 브라우저 권한을 확인하세요.'));
   window.addEventListener('kmg-language-change',()=>{apply();updateFullscreenLabel();});
 
