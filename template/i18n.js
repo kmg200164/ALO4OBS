@@ -196,7 +196,7 @@ const supportedLanguages=['ko','en','ja'];
 const guideFiles={ko:'guide.html',en:'guide-en.html',ja:'guide-ja.html'};
 const originalByTranslation=new Map();
 Object.assign(translations,{
- '현재 비율':'Current ratio','슬라이더의 1:1·16:9 눈금에 가까이 드래그하면 해당 비율에 맞춰집니다.':'Drag near a 1:1 or 16:9 slider mark to snap to that ratio.',
+ '화면 비율':'Aspect ratio','현재 비율':'Current ratio','슬라이더의 1:1·16:9 눈금에 가까이 드래그하면 해당 비율에 맞춰집니다.':'Drag near a 1:1, 16:9 or 21:9 slider mark to snap to that ratio.',
  '빈 파일은 사용할 수 없습니다. 다른 파일을 선택하세요.':'Empty files cannot be used. Choose another file.','너비 슬라이더':'Width slider','높이 슬라이더':'Height slider','크기':'Size','자동':'Auto','수동':'Manual','너비':'Width','높이':'Height','너비 (px)':'Width (px)','높이 (px)':'Height (px)',
  '자동: 남은 공간을 채웁니다. 수동: 입력한 픽셀 크기를 유지합니다.':'Auto: fill the remaining space. Manual: keep the size you enter in pixels.',
  '파일 또는 설정을 브라우저에 저장하지 못했습니다. 현재 창에서만 유지됩니다. ZIP으로 저장하세요.':'Could not save files or settings in this browser. They remain in this window only. Save a ZIP.',
@@ -204,7 +204,7 @@ Object.assign(translations,{
  '저장한 설정과 파일을 불러오는 중입니다':'Loading saved settings and files'
 });
 Object.assign(japanese,{
- '현재 비율':'現在の比率','슬라이더의 1:1·16:9 눈금에 가까이 드래그하면 해당 비율에 맞춰집니다.':'1:1・16:9 のスライダー目盛りの近くにドラッグすると、その比率に合わせます。',
+ '화면 비율':'画面比率','현재 비율':'現在の比率','슬라이더의 1:1·16:9 눈금에 가까이 드래그하면 해당 비율에 맞춰집니다.':'1:1・16:9・21:9 のスライダー目盛りの近くにドラッグすると、その比率に合わせます。',
  '빈 파일은 사용할 수 없습니다. 다른 파일을 선택하세요.':'空のファイルは使用できません。別のファイルを選択してください。','너비 슬라이더':'幅スライダー','높이 슬라이더':'高さスライダー','크기':'サイズ','자동':'自動','수동':'手動','너비':'幅','높이':'高さ','너비 (px)':'幅 (px)','높이 (px)':'高さ (px)',
  '자동: 남은 공간을 채웁니다. 수동: 입력한 픽셀 크기를 유지합니다.':'自動：残りの空間を埋めます。手動：入力したピクセルサイズを維持します。',
  '파일 또는 설정을 브라우저에 저장하지 못했습니다. 현재 창에서만 유지됩니다. ZIP으로 저장하세요.':'ファイルまたは設定をブラウザーに保存できませんでした。このウィンドウのみで保持されます。ZIP を保存してください。',

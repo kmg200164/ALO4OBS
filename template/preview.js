@@ -106,6 +106,7 @@
     const next={...structuredClone(defaults),...structuredClone(input||{})};
     next.layoutVersion=4;
     next.panelSizing=OverlayEvents.normalizeSizing(next.panelSizing);
+    next.panelSizing.game.aspect ||= '16:9';
     next.panelContent=migratePanelContent(input||next);
     for(const legacy of ['chatUrl','translationUrl','reactiveUrl','donationChzzk','donationTwitch','donationYoutube','donationSoop','sponsor','sponsorType','slotContent','customSlotMedia','cameraMode','handcam','platforms','showSponsor','showSubtitles','showChat','showAlerts'])delete next[legacy];
     next.panelEnabled=Object.fromEntries(keys.map(key=>[key,next.panelEnabled?.[key]!==false]));
@@ -264,8 +265,8 @@
     const section=(title,html)=>`<div class="property-section"><h4>${title}</h4><div class="property-group">${html}</div></div>`;
     const content=section('콘텐츠',`${editorSelect('콘텐츠 종류','panelContentType',kinds,item.type)}<div id="panel-content-extra" class="property-group"></div>`);
     const size=config.panelSizing[key],sizeModes=[['auto','자동'],['fixed','수동']];
-    const sizeControl=axis=>{const title=axis==='width'?'너비':'높이',name=axis==='width'?'panelWidth':'panelHeight';if(axis==='width'&&!OverlayEvents.canResizeWidth(key))return '';return editorRow(title,`<select name="${name}Mode">${optionHtml(sizeModes,size[axis+'Mode'])}</select><div class="size-controls" data-fixed-size="${axis}"${size[axis+'Mode']==='fixed'?'':' hidden'}><input name="${name}" type="number" min="1" step="1" aria-label="${title} (px)"><input name="${name}Slider" type="range" min="1" step="1" list="${name}-ratios" aria-label="${title} 슬라이더"><datalist id="${name}-ratios"></datalist><div class="size-ratio-marks" data-ratio-marks="${axis}"></div><span class="editor-help" data-size-range="${axis}"></span></div>`,'property-row--size');};
-    const sizing=section('크기',`${sizeControl('width')}${sizeControl('height')}<div class="size-help"><p class="editor-help"><span>현재 비율</span>: <span data-panel-ratio></span></p><p class="editor-help">자동: 남은 공간을 채웁니다. 수동: 입력한 픽셀 크기를 유지합니다.</p><p class="editor-help">슬라이더의 1:1·16:9 눈금에 가까이 드래그하면 해당 비율에 맞춰집니다.</p></div>`);
+    const sizeControl=axis=>{const title=axis==='width'?'너비':'높이',name=axis==='width'?'panelWidth':'panelHeight';if(key==='game')return axis==='height'?editorSelect('화면 비율','panelAspect',[['auto','자동'],['16:9','16:9'],['21:9','21:9'],['32:9','32:9']],size.aspect||'16:9'):'';if(axis==='width'&&!OverlayEvents.canResizeWidth(key)||axis==='height'&&!OverlayEvents.canResizeHeight(key))return '';return editorRow(title,`<select name="${name}Mode">${optionHtml(sizeModes,size[axis+'Mode'])}</select><div class="size-controls" data-fixed-size="${axis}"${size[axis+'Mode']==='fixed'?'':' hidden'}><input name="${name}" type="number" min="1" step="1" aria-label="${title} (px)"><input name="${name}Slider" type="range" min="1" step="1" list="${name}-ratios" aria-label="${title} 슬라이더"><datalist id="${name}-ratios"></datalist><div class="size-ratio-marks" data-ratio-marks="${axis}"></div><span class="editor-help" data-size-range="${axis}"></span></div>`,'property-row--size');};
+    const sizing=section('크기',`${sizeControl('width')}${sizeControl('height')}<div class="size-help"><p class="editor-help"><span>현재 비율</span>: <span data-panel-ratio></span></p>${key==='game'?'':'<p class="editor-help">자동: 남은 공간을 채웁니다. 수동: 입력한 픽셀 크기를 유지합니다.</p><p class="editor-help">슬라이더의 1:1·16:9 눈금에 가까이 드래그하면 해당 비율에 맞춰집니다.</p>'}</div>`);
 
     const fill=region.fill||{mode:'solid',color:region.color||'#ffffff',opacity:region.opacity??20,blur:region.blur??16};
     const stroke=region.stroke||{mode:region.borderVisible===false?'none':'solid',color:region.borderColor||'#ffffff',opacity:100,width:4};
@@ -338,7 +339,8 @@
   function readEditor(){
     if(!selected)return;
     const key=selected,r=config.regionBackgrounds[key]||{},fill=r.fill||{},stroke=r.stroke||{};
-    config.panelSizing[key]={widthMode:control('panelWidthMode')?.value||'auto',width:control('panelWidth')?Number(control('panelWidth').value):config.panelSizing[key].width,heightMode:control('panelHeightMode').value,height:Number(control('panelHeight').value)};
+    config.panelSizing[key]={widthMode:control('panelWidthMode')?.value||'auto',width:control('panelWidth')?Number(control('panelWidth').value):config.panelSizing[key].width,heightMode:control('panelHeightMode')?.value||'auto',height:control('panelHeight')?Number(control('panelHeight').value):config.panelSizing[key].height};
+    if(key==='game')config.panelSizing.game.aspect=control('panelAspect')?.value||'16:9';
     const fillMode=control('regionFillMode')?.value||fill.mode||'solid',strokeMode=control('regionStrokeMode')?.value||stroke.mode||(r.borderVisible===false?'none':'solid');
     r.color=fillMode==='gradient'&&fill.gradient?.stops?.length?fill.gradient.stops[0].color:control('regionColor').value;
     r.opacity=Number(control('regionOpacity').value);r.blur=Number(control('regionBlur').value);
@@ -394,7 +396,7 @@
     }
   }
   function syncSizeControls(){
-    if(!selected||!control('panelHeight'))return;
+    if(!selected)return;
     for(const axis of ['width','height']){
       const name=axis==='width'?'panelWidth':'panelHeight';if(!control(name))continue;const bounds=OverlayEvents.sizingBounds({placement:config.panelPlacement,enabled:config.panelEnabled,sizing:config.panelSizing},selected,axis);
       for(const input of [control(name),control(name+'Slider')]){input.min=bounds.min;input.max=bounds.max;input.value=config.panelSizing[selected][axis+'Mode']==='fixed'?config.panelSizing[selected][axis]:(config.layout?.[selected]?.[axis]||config.panelSizing[selected][axis]);}
@@ -404,7 +406,7 @@
       byId('panel-editor').querySelector(`[data-ratio-marks="${axis}"]`).innerHTML=stops.map(stop=>`<span style="left:${(stop.value-bounds.min)/Math.max(1,bounds.max-bounds.min)*100}%">${stop.label}</span>`).join('');
     }
     const box=config.layout?.[selected]||config.panelSizing[selected],ratio=box.width/box.height;
-    byId('panel-editor').querySelector('[data-panel-ratio]').textContent=Math.abs(box.width-box.height)<=1?'1:1':Math.abs(box.height-box.width*9/16)<=1?'16:9':ratio.toFixed(2)+':1';
+    byId('panel-editor').querySelector('[data-panel-ratio]').textContent=Math.abs(box.width-box.height)<=1?'1:1':Math.abs(box.height-box.width*9/16)<=1?'16:9':Math.abs(box.height-box.width*9/21)<=1?'21:9':Math.abs(box.height-box.width*9/32)<=1?'32:9':ratio.toFixed(2)+':1';
   }
   function current(){
     readEditor();readGlobal();clampPanelSizes();

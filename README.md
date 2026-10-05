@@ -2,6 +2,17 @@
 
 Seven panels automatically arrange your game, camera, chat, and captions without covering each other.
 
+## Support and feedback
+
+Found it useful? [Support continued improvements](https://buymeacoffee.com/kmg200164). Found a bug? [Report it here](https://github.com/kmg200164/OBS-streaming-template/issues/new).
+
+The template is free, and support is entirely optional. For bug reports, include what you tried, what happened, your template and OBS versions, and a screenshot if possible.
+
+<p align="center">
+  <a href="https://buymeacoffee.com/kmg200164">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy me a coffee — support KMG" width="360">
+  </a>
+</p>
 <details>
 <summary>Words explained: GitHub, README, OBS, ZIP, MIT</summary>
 
@@ -40,7 +51,7 @@ Select the required sources, then click **Apply saved settings / Auto layout** o
 
 Keep the installation folder in place; OBS uses its files. English is the default language, with Korean and Japanese available.
 
-**Current version: 0.6.0.** The template has been used successfully in a live Windows OBS broadcast. See [QA results](docs/QA.md) for verification by version.
+**Current version: 0.7.0.** The template has been used successfully in a live Windows OBS broadcast. See [QA results](docs/QA.md) for verification by version.
 
 **[Report a problem or suggest an improvement](https://github.com/kmg200164/OBS-streaming-template/issues/new?template=feedback.yml)** — describe what happened in your own words. A screenshot helps; Korean, English, and Japanese are welcome. GitHub sign-in is required.
 
@@ -52,7 +63,7 @@ Generated items are locked automatically. Applying settings does not start broad
 
 The parent frames keep the four-column grid: left spans three columns, right spans one. Hiding panels redistributes space only inside their parent frame. Panel numbers appear only in the preview.
 
-Choose **Auto** or **Manual** for any panel’s height and for the width of Panels 2–4. Panels 1, 5, 6 and 7 always use automatic width; their width controls are hidden. Auto fills remaining space; Manual keeps a pixel size. Enter a number or move the slider. Limits use 50–150% of the all-automatic size for the active layout, capped by the parent frame and space reserved for other panels. Out-of-range values are adjusted to the nearest limit. The sliders show eligible **1:1** and **16:9** marks calculated from the other dimension; dragging near a mark snaps to it. The marks update when dimensions change. Ratios are optional for every panel, including Panel 1; number inputs and keyboard controls remain precise.
+Choose **Auto** or **Manual** for the height of Panels 5–7 and for the width of Panels 2–4. Panels 1, 5, 6 and 7 always use automatic width; their width controls are hidden. Auto fills remaining space; Manual keeps a pixel size. Enter a number or move the slider. Limits use 50–150% of the all-automatic size for the active layout, capped by the parent frame and space reserved for other panels. Out-of-range values are adjusted to the nearest limit. Panels 2–4 use automatic height. Panel 1 offers **Auto**, **16:9** (default), **21:9**, and **32:9**. Auto fills the remaining height; disabling Panels 2–4 lets it fill the entire left parent. Ratio choices keep the selected ratio. Other sliders show eligible **1:1** and **16:9** marks calculated from the other dimension; dragging near a mark snaps to it. The marks update when dimensions change. Ratios are optional for every panel, including Panel 1; number inputs and keyboard controls remain precise.
 
 Uploaded images and videos stay in this browser when you reopen the same settings page. Clearing browser data or changing browsers or file locations can remove access to that draft. Save **OBS-settings.zip** to keep a portable copy of your settings and files.
 
@@ -137,13 +148,3 @@ Before sharing screenshots, hide personal widget links and stream keys. Updates 
 Use `MAJOR.MINOR.PATCH`, without development suffixes. The UI and tags add `v`; `dev` names the branch.
 
 `template/version.js` supplies the UI and package version. During `0.x`, fixes increment PATCH and features increment MINOR. Released versions are never replaced; changes receive a new number.
-
-## Support
-
-This template is free. If it helps you, you can [support this project](https://buymeacoffee.com/kmg200164). Support is optional and helps fund continued improvements.
-
-<p align="center">
-  <a href="https://buymeacoffee.com/kmg200164">
-    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy me a coffee — support KMG" width="360">
-  </a>
-</p>

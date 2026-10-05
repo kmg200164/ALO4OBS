@@ -1,6 +1,15 @@
 # QA and device handoff
 
-Current implementation: 0.6.0. The sections below preserve evidence from their named versions; automated checks do not establish live platform compatibility.
+Current implementation: 0.7.0. The sections below preserve evidence from their named versions; automated checks do not establish live platform compatibility.
+
+## Main-panel aspect choices and simplified sizing (0.7.0)
+
+- All 151 JavaScript checks and seven Python packaging checks pass. New checks cover Auto, 16:9, 21:9 and 32:9 with the lower panels enabled or disabled, matching exported geometry and retained aspect choices. A regression check also covers Panel 1 sharing a left-side row or moving to the right parent; ratio height uses its actual allocated width and preserves minimum space for row peers.
+- Actual Chrome HTTP source inspection confirmed that Panel 1 has an aspect selector and no height slider; 21:9 and 32:9 apply correctly. With Panels 2–4 disabled, Auto fills the 1384 × 1016 left parent, while explicit ratios remain unchanged. Panels 2–4 have no height control; their width control remains.
+- Saved manual heights on Panels 2–4 normalize to automatic. Existing configurations without an aspect choice open with 16:9 in the settings editor; stored explicit choices are preserved.
+- README support and bug reporting now follow the core explanation, with the optional 360 px Buy Me a Coffee button retained.
+- The neutral 0.7.0 ZIP is built in dist/ and copied to downloads/; the README download link identifies its package commit.
+- Live OBS application of 0.7.0, direct-file browser storage and the native Save as ZIP dialog were not exercised in this run. Historical evidence below remains scoped to its named versions.
 
 ## Auto and Manual sizing, uploaded-file restoration (0.6.0)
 

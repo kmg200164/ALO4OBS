@@ -36,11 +36,10 @@ test('right panels ignore saved fixed widths and fill their parent',()=>{
  assert.equal(boxes.hand.width,440);assert.equal(boxes.game.width,1384);
  assert.equal(boxes.chat.x,1448);separate(boxes);
 });
-test('fixed row height changes available height and leaves cross-axis fixed sizes exact',()=>{
- const boxes=layout({custom1:fixed('height',300),custom2:fixed('height',120),game:fixed('width',900)});
- assert.equal(boxes.custom1.height,300);assert.equal(boxes.custom2.height,120);
- assert.equal(boxes.custom3.height,300);assert.equal(boxes.game.height,684);
- assert.equal(boxes.game.width,1384);assert.equal(boxes.chat.width,440);
+test('panels 2-4 ignore saved heights and follow the main panel height',()=>{
+ const boxes=layout({game:fixed('height',593),custom1:fixed('height',300),custom2:fixed('height',120)});
+ assert.equal(boxes.game.height,593);
+ for(const key of ['custom1','custom2','custom3'])assert.equal(boxes[key].height,391);
  separate(boxes);
 });
 test('fixed vertical siblings share remaining right height with automatic panels',()=>{
@@ -113,6 +112,33 @@ test('only panels 2, 3 and 4 can resize width; saved locked widths migrate to au
   assert.equal(api.canResizeWidth(key),editable);
   const sizing=api.normalizeSizing({[key]:{...fixed('width',300),...fixed('height',250)}});
   assert.equal(sizing[key].widthMode,editable?'fixed':'auto');
-  assert.equal(sizing[key].heightMode,'fixed');assert.equal(sizing[key].height,250);
+  assert.equal(api.canResizeHeight(key),!editable);
+  assert.equal(sizing[key].heightMode,editable?'auto':'fixed');
+  if(!editable)assert.equal(sizing[key].height,250);
+ }
+});
+
+test('main aspect choices survive disabled lower panels and settings export',()=>{
+ for(const aspect of ['auto','16:9','21:9','32:9'])for(const enabled of [{},{custom1:false,custom2:false,custom3:false}]){
+  const sizing={game:{aspect}};
+  const boxes=layout(sizing,enabled);
+  assert.equal(boxes.game.width,1384);
+  assert.equal(boxes.game.height,aspect==='auto'?(enabled.custom1===false?1016:778):Math.floor(1384*9/Number(aspect.split(':')[0])));
+  separate(boxes,enabled);
+  const pack=require('../template/pack.js');
+  const saved=JSON.parse(new TextDecoder().decode(pack.settingsEntries({layoutVersion:4,panelPlacement:api.defaultPlacement(),panelEnabled:enabled,panelSizing:sizing,panelContent:Object.fromEntries(keys.map(key=>[key,{type:"none",url:""}]))})[0].bytes));
+  assert.equal(saved.panelSizing.game.aspect,aspect);
+  assert.deepEqual(saved.layout,boxes);
+ }
+ assert.throws(()=>api.normalizeSizing({game:{aspect:'4:3'}}),/aspect/);
+});
+
+test('main aspect uses its actual width with row peers or a right-side parent',()=>{
+ for(const aspect of ['16:9','21:9','32:9'])for(const side of ['left','right']){
+  const placement=api.defaultPlacement();
+  if(side==='left')placement.chat.level1='left';else placement.game.level1='right';
+  const boxes=layout({game:{aspect}}, {}, placement);
+  assert.equal(boxes.game.height,Math.floor(boxes.game.width*9/Number(aspect.split(':')[0])));
+  separate(boxes);
  }
 });

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.0 — 2026-10-05 23:20:19 +09:00
+
+- Replace Panel 1's height slider with Auto, 16:9 (default), 21:9, and 32:9 aspect choices.
+- Keep the selected aspect ratio when Panels 2–4 are disabled; Auto instead fills the remaining parent-frame height.
+- Remove height controls from Panels 2–4 and normalize their saved manual heights to automatic, while retaining their width controls.
+- Move the optional Buy Me a Coffee button and bug-report link directly after the README's core explanation.
+- Update English, Korean and Japanese guides to describe the available dimensions and aspect choices.
+
 ## 0.6.0 — 2026-10-05 21:58:01 +09:00
 
 - Add Auto / Manual height controls for every panel and width controls for Panels 2–4 while preserving automatic placement. Panels 1, 5, 6 and 7 keep automatic width and hide width controls.

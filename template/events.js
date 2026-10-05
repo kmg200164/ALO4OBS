@@ -73,6 +73,7 @@
     return placement;
   }
   function canResizeWidth(key){return ['custom1','custom2','custom3'].includes(key);}
+  function canResizeHeight(key){return !canResizeWidth(key);}
   function normalizeSizing(input) {
     if(input!==undefined&&(!input||typeof input!=='object'||Array.isArray(input)))throw new Error('Invalid panel size');
     if(input&&Object.keys(input).some(key=>!panelKeys.includes(key)))throw new Error('Invalid panel size: unknown panel');
@@ -86,7 +87,12 @@
         const maximum=axis==='width'?1856:1016;
         if(!Number.isInteger(entry[axis])||entry[axis]<1||entry[axis]>maximum)throw new Error('Invalid panel size: '+key+' '+axis+' must be an integer from 1 to '+maximum);
       }
+      if(key==='game'&&entry.aspect!==undefined){
+        if(!['auto','16:9','21:9','32:9'].includes(entry.aspect))throw new Error('Invalid panel size: game aspect');
+        entry.heightMode='auto';
+      }
       if(!canResizeWidth(key)){entry.widthMode='auto';entry.width=defaults[key].width;}
+      if(!canResizeHeight(key)){entry.heightMode='auto';entry.height=defaults[key].height;}
     }
     return result;
   }
@@ -119,15 +125,24 @@
   function sizedLayout(leftRows,right,sizing,constrained=true) {
     const layout=baseLayout();
     const reference=constrained?sizedLayout(leftRows,right,normalizeSizing(),false):null;
-    const limits=(key,axis)=>reference?{minimum:Math.ceil(reference[key][axis]/2),maximum:Math.floor(reference[key][axis]*1.5)}:{minimum:1};
-    const fixed=(key,axis)=>sizing[key][axis+'Mode']==='fixed'?sizing[key][axis]:undefined;
+    const limits=(key,axis)=>key==='game'&&axis==='height'&&sizing[key].aspect&&sizing[key].aspect!=='auto'?{minimum:1,maximum:1016}:reference?{minimum:Math.ceil(reference[key][axis]/2),maximum:Math.floor(reference[key][axis]*1.5)}:{minimum:1};
+    const fixed=(key,axis)=>{
+      if(constrained&&key==='game'&&axis==='height'&&sizing[key].aspect&&sizing[key].aspect!=='auto'){
+        const row=leftRows.find(row=>row.items.includes(key));
+        const width=row?allocateSizes(row.items.map(panel=>({fixed:fixed(panel,'width'),...limits(panel,'width')})),1384,'width')[row.items.indexOf(key)]:440;
+        return Math.floor(width*9/Number(sizing[key].aspect.split(':')[0]));
+      }
+      return sizing[key][axis+'Mode']==='fixed'?sizing[key][axis]:undefined;
+    };
     // Four equal tracks, with 32 px outer margins and gaps: left spans three.
     // Empty frames stay reserved; fixed children never resize these parents.
     if(leftRows.length){
       const heights=allocateSizes(leftRows.map(row=>{
         const values=row.items.map(key=>fixed(key,'height')).filter(value=>value!==undefined);
         for(const key of row.items){const value=fixed(key,'height'),range=limits(key,'height');if(value!==undefined&&(value<range.minimum||value>(range.maximum??1016)))throw new Error('Fixed panel sizes exceed available height: keep each panel within its usable range');}
-        return {fixed:values.length?Math.max(...values):undefined,minimum:Math.max(...row.items.map(key=>limits(key,'height').minimum)),weight:row.weight};
+        const minimum=Math.max(...row.items.map(key=>limits(key,'height').minimum));
+        const reservePeerSpace=row.items.includes('game')&&sizing.game.aspect&&sizing.game.aspect!=='auto';
+        return {fixed:values.length?Math.max(...values,reservePeerSpace?minimum:0):undefined,minimum,weight:row.weight};
       }),1016,'height');
       let y=32;
       leftRows.forEach((row,rowIndex)=>{
@@ -241,7 +256,7 @@
     if(mode==='user'){let hash=0;for(const c of platform+':'+nickname)hash=(Math.imul(hash,31)+c.codePointAt(0))|0;return `hsl(${(hash>>>0)%360} 72% 75%)`;}
     return {chzzk:'#00ffa3',twitch:'#bf94ff',youtube:'#ff6464',soop:'#55cfff'}[platform]||'#dddddd';
   }
-  const api = {normalizeEvent,createEventStore,handcamLayout,resolveLayout,defaultPlacement,normalizePlacement,normalizeSizing,canResizeWidth,sizingBounds,aspectStops,autoLayout,validateLayout,resolveSlots,nicknameColor};
+  const api = {normalizeEvent,createEventStore,handcamLayout,resolveLayout,defaultPlacement,normalizePlacement,normalizeSizing,canResizeWidth,canResizeHeight,sizingBounds,aspectStops,autoLayout,validateLayout,resolveSlots,nicknameColor};
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.OverlayEvents = api;
 })(typeof window !== 'undefined' ? window : globalThis);
