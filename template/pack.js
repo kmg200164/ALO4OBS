@@ -37,7 +37,8 @@
   const panelKeys=['game','custom1','custom2','custom3','chat','translation','hand'];
   if(config.layoutVersion===3||generic){
    if(config.panelPlacement!==undefined)config.panelPlacement=events.normalizePlacement(config.panelPlacement);
-   config.layout=events.autoLayout({order:config.layoutOrder,placement:config.panelPlacement,enabled:config.panelEnabled});
+   config.panelSizing=events.normalizeSizing(config.panelSizing);
+   config.layout=events.autoLayout({order:config.layoutOrder,placement:config.panelPlacement,enabled:config.panelEnabled,sizing:config.panelSizing});
    events.validateLayout(config.layout);
   }else config.layout=events.resolveLayout(config.layoutVersion===2?config.layout:undefined);
   config.layoutVersion=generic?4:config.layoutVersion===3?3:2;

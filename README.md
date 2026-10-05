@@ -40,7 +40,7 @@ Select the required sources, then click **Apply saved settings / Auto layout** o
 
 Keep the installation folder in place; OBS uses its files. English is the default language, with Korean and Japanese available.
 
-**Current version: 0.5.2.** Used successfully in a live Windows OBS broadcast.
+**Current version: 0.6.0.** The template has been used successfully in a live Windows OBS broadcast. See [QA results](docs/QA.md) for verification by version.
 
 **[Report a problem or suggest an improvement](https://github.com/kmg200164/OBS-streaming-template/issues/new?template=feedback.yml)** — describe what happened in your own words. A screenshot helps; Korean, English, and Japanese are welcome. GitHub sign-in is required.
 
@@ -50,7 +50,11 @@ Generated items are locked automatically. Applying settings does not start broad
 
 ## Layout and preview
 
-Parent and child frames determine placement. Disabling panels redistributes the remaining space. Panel numbers appear only in the preview.
+The parent frames keep the four-column grid: left spans three columns, right spans one. Hiding panels redistributes space only inside their parent frame. Panel numbers appear only in the preview.
+
+Choose **Automatic** or **Fixed** for any panel’s height and for the width of Panels 2–4. Panels 1, 5, 6 and 7 always use automatic width; their width controls are hidden. Automatic fills remaining space; Fixed keeps a pixel size. Enter a number or move the slider. Limits use 50–150% of the all-automatic size for the active layout, capped by the parent frame and space reserved for other panels. Out-of-range values are adjusted to the nearest limit. The sliders show eligible **1:1** and **16:9** marks calculated from the other dimension; dragging near a mark snaps to it. The marks update when dimensions change. Ratios are optional for every panel, including Panel 1; number inputs and keyboard controls remain precise.
+
+Uploaded images and videos stay in this browser when you reopen the same settings page. Clearing browser data or changing browsers or file locations can remove access to that draft. Save **OBS-settings.zip** to keep a portable copy of your settings and files.
 
 | Panel | x | y | Width | Height |
 | --- | ---: | ---: | ---: | ---: |

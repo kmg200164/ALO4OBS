@@ -1,6 +1,18 @@
 # QA and device handoff
 
-Development prerelease: 0.4.2. Automated checks do not establish live platform compatibility.
+Current implementation: 0.6.0. The sections below preserve evidence from their named versions; automated checks do not establish live platform compatibility.
+
+## Automatic and Fixed sizing, uploaded-file restoration (0.6.0)
+
+- All 149 JavaScript checks pass, including all-auto legacy geometry, fixed dimensions, active-panel limits, input clamping, export geometry, durable file bytes, failed saves and concurrent-tab recovery.
+- Actual Chrome HTTP inspection of the built 0.6.0 ZIP confirmed synchronized numeric fields and native sliders, independent width/height choices, automatic correction of out-of-range values, updated limits after disabling a sibling, and retained fixed sizes after reload.
+- Earlier source Chrome inspection before the width restrictions confirmed independent Panel 1 dimensions (1000 × 500), recalculated ratio marks, actual pointer snapping to 16:9, a 440 px right-frame width cap, and the unchanged 1384 px left parent after hiding every right-side panel.
+- Each sizing card now contains its axis label on the left and Automatic / Fixed selector on the right, with flexible space between them. Numeric input and the full-width slider sit below that header and collapse in Automatic mode. Internal padding is 16 px, control spacing 12 px and card spacing 16 px. The actual unchanged Chrome viewport showed no control overflow; an independent reviewer inspected the captured rendering and CSS. Numeric commit followed immediately by a different-panel click was also verified after preserving the selection button nodes.
+- Follow-up Chrome inspection confirmed that Panels 1, 5, 6 and 7 have no width controls, Panels 2–4 retain them, and height controls work on every panel. Saved fixed widths on locked panels normalize to automatic.
+- All seven Python packaging checks pass.
+- A generated neutral PNG was uploaded through the file chooser, then the settings page was reloaded. Its background file mode and visible image were restored from browser storage.
+- This run did not change the live OBS scene or broadcast. Direct-file browser storage, the native Save as ZIP dialog and application of the new fixed-size package in OBS remain separate checks. Earlier live Windows evidence below applies to the versions tested then.
+- The neutral 0.6.0 ZIP is built in dist/ and copied to downloads/ for distribution. Its README download link identifies the package commit.
 
 ## Windows evidence
 
