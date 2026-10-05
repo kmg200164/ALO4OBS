@@ -263,9 +263,9 @@
     const kinds=[['none','없음'],['source','OBS 소스'],['web','웹 주소'],['media','이미지/영상']];
     const section=(title,html)=>`<div class="property-section"><h4>${title}</h4><div class="property-group">${html}</div></div>`;
     const content=section('콘텐츠',`${editorSelect('콘텐츠 종류','panelContentType',kinds,item.type)}<div id="panel-content-extra" class="property-group"></div>`);
-    const size=config.panelSizing[key],sizeModes=[['auto','자동'],['fixed','고정']];
+    const size=config.panelSizing[key],sizeModes=[['auto','자동'],['fixed','수동']];
     const sizeControl=axis=>{const title=axis==='width'?'너비':'높이',name=axis==='width'?'panelWidth':'panelHeight';if(axis==='width'&&!OverlayEvents.canResizeWidth(key))return '';return editorRow(title,`<select name="${name}Mode">${optionHtml(sizeModes,size[axis+'Mode'])}</select><div class="size-controls" data-fixed-size="${axis}"${size[axis+'Mode']==='fixed'?'':' hidden'}><input name="${name}" type="number" min="1" step="1" aria-label="${title} (px)"><input name="${name}Slider" type="range" min="1" step="1" list="${name}-ratios" aria-label="${title} 슬라이더"><datalist id="${name}-ratios"></datalist><div class="size-ratio-marks" data-ratio-marks="${axis}"></div><span class="editor-help" data-size-range="${axis}"></span></div>`,'property-row--size');};
-    const sizing=section('크기',`${sizeControl('width')}${sizeControl('height')}<div class="size-help"><p class="editor-help"><span>현재 비율</span>: <span data-panel-ratio></span></p><p class="editor-help">자동: 남은 공간을 채웁니다. 고정: 입력한 픽셀 크기를 유지합니다.</p><p class="editor-help">슬라이더의 1:1·16:9 눈금에 가까이 드래그하면 해당 비율에 맞춰집니다.</p></div>`);
+    const sizing=section('크기',`${sizeControl('width')}${sizeControl('height')}<div class="size-help"><p class="editor-help"><span>현재 비율</span>: <span data-panel-ratio></span></p><p class="editor-help">자동: 남은 공간을 채웁니다. 수동: 입력한 픽셀 크기를 유지합니다.</p><p class="editor-help">슬라이더의 1:1·16:9 눈금에 가까이 드래그하면 해당 비율에 맞춰집니다.</p></div>`);
 
     const fill=region.fill||{mode:'solid',color:region.color||'#ffffff',opacity:region.opacity??20,blur:region.blur??16};
     const stroke=region.stroke||{mode:region.borderVisible===false?'none':'solid',color:region.borderColor||'#ffffff',opacity:100,width:4};
