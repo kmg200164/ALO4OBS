@@ -35,9 +35,10 @@ files += [source / 'assets' / name for name in sorted(gift_assets)]
 entries = {'config.js': public_config, 'VERSION': (version + '\n').encode()}
 for path in sorted(files):
     relative = path.relative_to(source).as_posix() if path.is_relative_to(source) else path.name
+    if relative == 'LICENSE': relative = 'LICENSE.txt'
     data = path.read_bytes()
     if path.name == 'THIRD-PARTY-NOTICES.md':
-        data = data.replace(b'(../../LICENSE)', b'(../LICENSE)')
+        data = data.replace(b'(../../LICENSE)', b'(../LICENSE.txt)')
     if path.suffix == '.html':
         data = re.sub(r'((?:src|href)=")([^"/]+\.(?:js|css))(\")',
                       lambda m: m[1] + ('' if m[2] == 'config.js' else 'internal/') + m[2] + m[3],

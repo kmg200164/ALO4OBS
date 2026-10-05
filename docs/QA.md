@@ -90,3 +90,8 @@ Windows extraction of a browser-generated settings ZIP was blocked at config.js;
 ## Independent saved OBS package (0.4.8)
 
 The built settings page embeds a neutral runtime manifest, so local-file export does not fetch the script. Saved ZIPs contain OBS-script.lua, HTML/CSS/fonts, JSON settings, masks and user media. The explicitly loaded Lua installs its bundled browser JavaScript locally; there are no downloaded .js entries in the settings ZIP. Package manifest checks and 113 JavaScript / 8 Python tests pass. Native Windows extraction and live OBS execution of this package remain pending.
+
+
+### 0.5.1: Windows extraction warning
+
+User screenshot identifies LICENSE as the blocked file. The user-generated ZIP has ZoneId=4 (restricted zone) and a file-origin HostUrl. This does not establish a malware detection. Rename the packaged license to LICENSE.txt and use the browser native save picker when available. Verify write/close and cancellation in automated checks. Actual Windows extraction of the new export remains unverified; do not claim this warning is resolved yet.

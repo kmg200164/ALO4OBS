@@ -505,6 +505,7 @@
     try{
       const data=current(),uploadSnapshot=Array.from(uploads,([key,entry])=>[key,{...entry}]),entries=OverlayPack.settingsEntries(data);
       if(!window.OBS_EXPORT_RUNTIME)throw new Error('Open settings from the downloaded template package before saving.');
+      const saveHandle=window.showSaveFilePicker?await window.showSaveFilePicker({suggestedName:'OBS-settings.zip',types:[{description:'ZIP archive',accept:{'application/zip':['.zip']}}]}):null;
       for(const [name,encoded] of Object.entries(window.OBS_EXPORT_RUNTIME))entries.push({name,bytes:Uint8Array.from(atob(encoded),c=>c.charCodeAt(0))});
       for(const key of keys)entries.push(await alphaMask(data.layout[key],'assets/'+key+'-alpha-mask.png'));
       for(const [key,entry] of uploadSnapshot){const selectedPath=key==='whole'?data.backgroundImage:key==='sponsor'?data.sponsor:key.startsWith('region-')?data.regionBackgrounds[key.slice(7)]?.image:data.panelContent[key]?.url;if(selectedPath===entry.path)entries.push({name:entry.path,bytes:new Uint8Array(await entry.file.arrayBuffer())});}
@@ -517,8 +518,11 @@
           entries.push({name:path,bytes:new Uint8Array(await response.arrayBuffer())});
         }catch{throw new Error('Could not include saved media. Re-upload local files before saving ZIP.');}
       }
-      const blob=new Blob([OverlayPack.zip(entries)],{type:'application/zip'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='OBS-settings.zip';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);status.textContent='설정 ZIP을 오버레이 폴더에 풀고 OBS에서 자동 배치 적용을 누르세요';
-    }catch(error){status.textContent=window.KMGI18n?.localize(error.message)||error.message;}
+      const blob=new Blob([OverlayPack.zip(entries)],{type:'application/zip'});
+      if(saveHandle){const writable=await saveHandle.createWritable();try{await writable.write(blob);await writable.close();}catch(error){await writable.abort().catch(()=>{});throw error;}}
+      else{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='OBS-settings.zip';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+      status.textContent='Extract OBS-settings.zip, then select OBS-script.lua from that folder in OBS.';
+    }catch(error){if(error.name==='AbortError')return;status.textContent=window.KMGI18n?.localize(error.message)||error.message;}
   };
   frame.addEventListener('load',()=>send(frame,'apply',liveConfig(current())));
   let saved,savedSource;try{saved=JSON.parse(localStorage.getItem('obs-overlay-config'));savedSource=localStorage.getItem('obs-overlay-source-config');}catch{}
