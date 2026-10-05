@@ -9,7 +9,8 @@
   const initialPlacement=OverlayEvents.defaultPlacement();
   const uploads=new Map();
   const uploadRequests=new Map();
-  let config=structuredClone(defaults), selected=null;
+  let config=structuredClone(defaults), selected=null, hovered=null;
+  const highlight=()=>send(frame,'highlight',{keys:[selected,hovered].filter(Boolean),color:getComputedStyle(document.body).getPropertyValue('--accent').trim()});
   let cameraState={status:'unavailable',devices:[],selectedDeviceId:'',errorName:'NotSupportedError'},cameraController=null,cameraActive=false;
   const cameraVideo=byId('camera-preview-video');
   byId('app-version').textContent='v'+window.KMG_VERSION;
@@ -372,8 +373,9 @@
     const target=byId('event-target');
     if(target){for(const option of target.options)option.disabled=!config.panelEnabled[option.value];if(!config.panelEnabled[target.value])target.value=keys.find(key=>config.panelEnabled[key])||'';}
     byId('panel-hit-areas').innerHTML=keys.filter(key=>config.panelEnabled[key]).map(key=>{
-      const b=layout[key],label=`${names[key]} 설정`,accessibleName=window.KMGI18n?.localize(label)||label,visibleNumber=window.KMGI18n?.localize(names[key])||names[key];return `<button class="panel-hit" type="button" data-hit="${key}" aria-label="${accessibleName}" aria-pressed="${selected===key}" style="left:${b.x/1920*100}%;top:${b.y/1080*100}%;width:${b.width/1920*100}%;height:${b.height/1080*100}%"><span class="panel-number" aria-hidden="true">${visibleNumber}</span></button>`;
+      const b=layout[key],label=`${names[key]} 설정`,accessibleName=window.KMGI18n?.localize(label)||label,visibleNumber=window.KMGI18n?.localize(names[key])||names[key];return `<button class="panel-hit" type="button" data-hit="${key}" aria-label="${accessibleName}" aria-pressed="${selected===key}" style="left:${b.x/1920*100}%;top:${b.y/1080*100}%;width:${b.width/1920*100}%;height:${b.height/1080*100}%;border-radius:${16/b.width*100}% / ${16/b.height*100}%"><span class="panel-number" aria-hidden="true">${visibleNumber}</span></button>`;
     }).join('');
+    highlight();
   }
   function apply(message){
     try{
@@ -419,6 +421,10 @@
   });
   form.addEventListener('click',event=>{const cameraButton=event.target.closest('[data-camera-action]');if(cameraButton){event.preventDefault();if(cameraButton.dataset.cameraAction==='refresh')void cameraController?.refresh();else if(cameraButton.dataset.cameraAction==='connect')void cameraController?.connect(control('cameraDevice')?.value||'');else if(cameraButton.dataset.cameraAction==='disconnect')cameraController?.disconnect();return;}const button=event.target.closest('[data-gradient-edit]');if(button){event.preventDefault();openGradient(button.dataset.gradientEdit,button);}});
   form.addEventListener('submit',event=>event.preventDefault());
+  byId('panel-hit-areas').addEventListener('pointerover',event=>{hovered=event.target.closest('[data-hit]')?.dataset.hit||null;highlight();});
+  byId('panel-hit-areas').addEventListener('pointerleave',()=>{hovered=null;highlight();});
+  byId('panel-hit-areas').addEventListener('focusin',event=>{hovered=event.target.closest('[data-hit]')?.dataset.hit||null;highlight();});
+  byId('panel-hit-areas').addEventListener('focusout',()=>{hovered=null;highlight();});
   byId('panel-hit-areas').addEventListener('click',event=>{const button=event.target.closest('[data-hit]');if(button)selectPanel(button.dataset.hit);});
   byId('reset').onclick=reset;
   byId('send').onclick=()=>{const target=byId('event-target').value;if(!config.panelEnabled[target])return;send(frame,'receive',{target,nickname:byId('event-name').value,text:byId('event-text').value});status.textContent='샘플을 표시했습니다';};
@@ -499,6 +505,15 @@
       const data=current(),uploadSnapshot=Array.from(uploads,([key,entry])=>[key,{...entry}]),entries=OverlayPack.settingsEntries(data);
       for(const key of keys)entries.push(await alphaMask(data.layout[key],'assets/'+key+'-alpha-mask.png'));
       for(const [key,entry] of uploadSnapshot){const selectedPath=key==='whole'?data.backgroundImage:key==='sponsor'?data.sponsor:key.startsWith('region-')?data.regionBackgrounds[key.slice(7)]?.image:data.panelContent[key]?.url;if(selectedPath===entry.path)entries.push({name:entry.path,bytes:new Uint8Array(await entry.file.arrayBuffer())});}
+      // Reopened packages retain asset paths, but no File objects in uploads.
+      const assetPaths=new Set([data.backgroundImage,data.sponsor,data.logo,...Object.values(data.regionBackgrounds||{}).map(region=>region.image),...Object.values(data.panelContent||{}).filter(panel=>panel.type==='media').map(panel=>panel.url)]);
+      for(const path of assetPaths){
+        if(typeof path!=='string'||!/^assets\/[A-Za-z0-9_.-]+\.(png|jpe?g|webp|gif|mp4|webm|svg)$/i.test(path)||entries.some(entry=>entry.name===path))continue;
+        try{
+          const response=await fetch(path);if(!response.ok)throw new Error('asset unavailable');
+          entries.push({name:path,bytes:new Uint8Array(await response.arrayBuffer())});
+        }catch{throw new Error('Could not include saved media. Re-upload local files before saving ZIP.');}
+      }
       const blob=new Blob([OverlayPack.zip(entries)],{type:'application/zip'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='OBS-settings.zip';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);status.textContent='설정 ZIP을 오버레이 폴더에 풀고 OBS에서 자동 배치 적용을 누르세요';
     }catch(error){status.textContent=window.KMGI18n?.localize(error.message)||error.message;}
   };

@@ -4,6 +4,14 @@
   const canvas = document.querySelector('.overlay');
   const defaults = {...(document.body.classList.contains('preview-mode')?window.OVERLAY_PUBLIC_CONFIG:window.OVERLAY_CONFIG)};
   let config = {...defaults}, history = [], timer = null, queue = [];
+  let previewHighlight={keys:[],color:'#d4ff00'},strokeTiles=[];
+  function highlightStrokes(){
+    if(!document.body.classList.contains('preview-mode'))return;
+    for(const tile of strokeTiles){
+      tile.style.cssText=tile.baseStyle;tile.className=tile.baseClass;
+      if(previewHighlight.keys.includes(tile.panelKey)&&/^#[0-9a-f]{6}$/i.test(previewHighlight.color)){tile.className='preview-stroke-tile';tile.style.outlineWidth='8px';tile.style.outlineColor=previewHighlight.color;}
+    }
+  }
   const store = OverlayEvents.createEventStore(100);
   const labels = {chzzk:'CHZZK',twitch:'TWITCH',youtube:'YOUTUBE',soop:'SOOP',external:'LIVE'};
   const accessibilityLabels={
@@ -73,7 +81,7 @@
       :background.mode==='solid'&&/^#[0-9a-f]{6}$/i.test(background.color)?background.color:'#000000';
     window.Background?.applyConfig(config);
     const strokes=$('preview-strokes');
-    strokes.replaceChildren();
+    strokes.replaceChildren();strokeTiles=[];
     const opaqueStroke=part=>{
       if(!part||typeof part!=='object')return part;
       const result={...part,opacity:100};
@@ -100,7 +108,9 @@
         tile.style.setProperty('--stroke-width',width+'px');
         tile.style.setProperty('--stroke-gradient',window.KMGGradient.css(globalStroke));
       }
-      strokes.append(tile);
+      tile.panelKey=key;tile.strokeWidth=width;tile.baseStyle=tile.style.cssText;tile.baseClass=tile.className;
+      strokes.append(tile);strokeTiles.push(tile);
+      highlightStrokes();
     }
   }
   const panelKeys=['game','custom1','custom2','custom3','chat','translation','hand'];
@@ -237,7 +247,7 @@
   $('sponsor-video')?.addEventListener('error',()=>{$('sponsor-video').style.display='none';$('sponsor-video').removeAttribute('src');});
   for(const key of ['custom1','custom2','custom3']){const node=panel(key);if(!node)continue;for(const tag of ['img','video'])node.querySelector(tag)?.addEventListener('error',event=>{event.currentTarget.style.display='none';});}
   window.Overlay={receive,applyConfig,clear,getConfig:()=>({...config})};
-  addEventListener('message',event=>{if(event.source!==parent||event.data?.channel!=='kmg-preview')return;const {action,data}=event.data;if(action==='apply')applyConfig(data);else if(action==='receive')receive(data);else if(action==='clear')clear();});
+  addEventListener('message',event=>{if(event.source!==parent||event.data?.channel!=='kmg-preview')return;const {action,data}=event.data;if(action==='apply')applyConfig(data);else if(action==='receive')receive(data);else if(action==='clear')clear();else if(action==='highlight'&&Array.isArray(data?.keys)){previewHighlight=data;highlightStrokes();}});
   if(new URLSearchParams(location.search).has('preview'))document.body.classList.add('preview-mode');
   applyConfig();
 })();

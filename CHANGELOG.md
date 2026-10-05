@@ -1,5 +1,11 @@
 # 변경 기록
 
+## 0.4.2 — 2026-10-04 (development prerelease)
+
+- Put English first in the shared language menu while preserving saved Korean and Japanese selections.
+- Preserve local image and video bytes when a restored settings package is exported again; stop an incomplete export if a referenced local asset cannot be read.
+- Record the scoped macOS QA evidence and remaining checks in docs/QA.md.
+
 ## 0.4.1 — 2026-10-04
 
 - Restore exported local settings after replacing config.js in a GitHub source ZIP. Runtime pages load neutral defaults once, then optional local settings. Source and built ZIPs use the same order; the demo remains neutral.

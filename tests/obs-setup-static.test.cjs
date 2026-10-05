@@ -33,7 +33,7 @@ test('v4 creates OST names and migrates only exact old template items after succ
 test('v4 media panels use independent local browser sources in clipped groups',()=>{
  assert.match(generic,/panel\.kind=='media' and panel\.url~='' and name\.\.' Media'/);
  assert.match(generic,/panel\.kind=='media' and script_path\(\)\.\.'panel-media-'\.\.key\.\.'\.html'/);
- assert.match(generic,/clip\(scene,group,selected,[^\n]+panel\.kind=='media',retained_sources\)/);
+ assert.match(generic,/clip\(scene,group,selected,[^\n]+panel\.kind=='media',retained_sources,pending_removals\)/);
  assert.match(source,/browser\(nested,selected,url,url_file==true,unpack\(box\)\)/);
  assert.match(generic,/elseif media_index then[\s\S]*local_file_matches\(occupied,'panel-media-'\.\.key\.\.'\.html'\)[\s\S]*known_group\(media_index\)/);
  assert.match(generic,/if needs_media then[\s\S]*panel-media\.js/);
@@ -122,4 +122,15 @@ test('template groups and retained items are locked without changing shared OBS 
 test('new template groups start collapsed while existing group state is preserved',()=>{
  const clip=source.slice(source.indexOf('local function clip('),source.indexOf('local panel_keys='));
  assert.match(clip,/if existing==nil then[\s\S]*obs\.obs_sceneitem_get_private_settings\(group\)[\s\S]*obs\.obs_data_set_bool\(private,'collapsed',true\)[\s\S]*obs\.obs_data_release\(private\)/);
+});
+
+test('populated apply snapshots before mutation and restores on failure before releasing references',()=>{
+ const snapshot=generic.indexOf('local previous_layout=snapshot_layout(scene)');
+ const firstClip=generic.indexOf('if not clip(scene,group,selected');
+ const restore=generic.indexOf('restore_layout(previous_layout)');
+ const release=generic.indexOf('release_layout(previous_layout)');
+ assert.ok(snapshot>=0&&snapshot<firstClip);
+ assert.ok(restore>firstClip&&release>restore);
+ assert.match(generic.slice(restore-10,restore),/else\s*$/);
+ assert.doesNotMatch(generic,/for _,name in ipairs\(new_groups\)/);
 });

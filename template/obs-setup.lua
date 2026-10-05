@@ -129,7 +129,7 @@ local function browser(scene,name,url,file,x,y,w,h,css,bottom)
  obs.obs_data_release(data)
  return placed
 end
-local function clip(scene,name,selected,mask_path,box,url,internal_prefix,url_file,retained_sources)
+local function clip(scene,name,selected,mask_path,box,url,internal_prefix,url_file,retained_sources,pending_removals)
  internal_prefix=internal_prefix or 'OBS Template · '
  local existing=obs.obs_scene_get_group(scene,name)
  if selected=='' then
@@ -205,7 +205,7 @@ local function clip(scene,name,selected,mask_path,box,url,internal_prefix,url_fi
      obs.script_log(obs.LOG_WARNING,'Could not retain a user source; previous panel item was preserved.')
      return false
     end
-    obs.obs_sceneitem_remove(item)
+    if pending_removals~=nil then pending_removals[#pending_removals+1]=item else obs.obs_sceneitem_remove(item) end
    end
   end
   obs.sceneitem_list_release(items)
@@ -213,6 +213,106 @@ local function clip(scene,name,selected,mask_path,box,url,internal_prefix,url_fi
  return ok
 end
 local panel_keys={'game','custom1','custom2','custom3','chat','translation','hand'}
+-- Hold original sources while groups are edited; a failed apply must not expose
+-- a mixture of the previous layout and the partially applied next layout.
+local function copy_source_settings(source)
+ local original=obs.obs_source_get_settings(source)
+ local copy=obs.obs_data_create_from_json(obs.obs_data_get_json(original))
+ obs.obs_data_release(original)
+ return copy
+end
+local function snapshot_layout(scene)
+ local snapshot={sources={},scenes={}}
+ local function capture(current)
+  local state={scene=current,items={}}
+  snapshot.scenes[#snapshot.scenes+1]=state
+  local items=obs.obs_scene_enum_items(current)
+  if items~=nil then
+   for index,item in ipairs(items) do
+    local source=obs.obs_sceneitem_get_source(item)
+    local name=obs.obs_source_get_name(source)
+    if snapshot.sources[name]==nil then
+     local saved={source=obs.obs_source_get_ref(source),filters={}}
+     if template_owned(name) then
+      saved.settings=copy_source_settings(source)
+      local filters=obs.obs_source_enum_filters(source)
+      if filters~=nil then
+       for _,filter in ipairs(filters) do
+        saved.filters[#saved.filters+1]={source=obs.obs_source_get_ref(filter),name=obs.obs_source_get_name(filter),settings=copy_source_settings(filter),enabled=obs.obs_source_enabled(filter)}
+       end
+       obs.source_list_release(filters)
+      end
+     end
+     snapshot.sources[name]=saved
+    end
+    local info=obs.obs_transform_info()
+    local crop=obs.obs_sceneitem_crop()
+    obs.obs_sceneitem_get_info2(item,info);obs.obs_sceneitem_get_crop(item,crop)
+    obs.obs_sceneitem_addref(item)
+    local private=obs.obs_sceneitem_get_private_settings(item)
+    local collapsed=private~=nil and obs.obs_data_get_bool(private,'collapsed') or false
+    if private~=nil then obs.obs_data_release(private) end
+    state.items[#state.items+1]={item=item,source=source,name=name,info=info,crop=crop,visible=obs.obs_sceneitem_visible(item),locked=obs.obs_sceneitem_locked(item),collapsed=collapsed,index=index-1}
+    if obs.obs_sceneitem_is_group(item) then capture(obs.obs_sceneitem_group_get_scene(item)) end
+   end
+   obs.sceneitem_list_release(items)
+  end
+ end
+ capture(scene)
+ return snapshot
+end
+local function restore_layout(snapshot)
+ -- Restore children first so the original group transform is applied last.
+ for index=#snapshot.scenes,1,-1 do
+  local state=snapshot.scenes[index]
+  local originals={}
+  for _,saved in ipairs(state.items) do originals[obs.obs_sceneitem_get_id(saved.item)]=true end
+  local items=obs.obs_scene_enum_items(state.scene)
+  if items~=nil then
+   for _,item in ipairs(items) do
+    if not originals[obs.obs_sceneitem_get_id(item)] then obs.obs_sceneitem_remove(item) end
+   end
+   obs.sceneitem_list_release(items)
+  end
+  for _,saved in ipairs(state.items) do
+   local item=saved.item
+   if item~=nil then
+    obs.obs_sceneitem_set_info2(item,saved.info);obs.obs_sceneitem_set_crop(item,saved.crop)
+    obs.obs_sceneitem_set_visible(item,saved.visible);obs.obs_sceneitem_set_locked(item,saved.locked)
+    obs.obs_sceneitem_set_order_position(item,saved.index)
+    local private=obs.obs_sceneitem_get_private_settings(item)
+    if private~=nil then obs.obs_data_set_bool(private,'collapsed',saved.collapsed);obs.obs_data_release(private) end
+   end
+  end
+ end
+ for _,saved in pairs(snapshot.sources) do
+  if saved.settings~=nil then
+   obs.obs_source_reset_settings(saved.source,saved.settings)
+   local originals={}
+   for _,filter in ipairs(saved.filters) do originals[filter.name]=true end
+   local filters=obs.obs_source_enum_filters(saved.source)
+   if filters~=nil then
+    for _,filter in ipairs(filters) do if not originals[obs.obs_source_get_name(filter)] then obs.obs_source_filter_remove(saved.source,filter) end end
+    obs.source_list_release(filters)
+   end
+   for _,filter in ipairs(saved.filters) do
+    local current=obs.obs_source_get_filter_by_name(saved.source,filter.name)
+    if current==nil then obs.obs_source_filter_add(saved.source,filter.source) else obs.obs_source_release(current) end
+    obs.obs_source_reset_settings(filter.source,filter.settings);obs.obs_source_set_enabled(filter.source,filter.enabled)
+   end
+  end
+ end
+end
+local function release_layout(snapshot)
+ for _,state in ipairs(snapshot.scenes) do
+  for _,saved in ipairs(state.items) do obs.obs_sceneitem_release(saved.item) end
+ end
+ for _,saved in pairs(snapshot.sources) do
+  if saved.settings~=nil then obs.obs_data_release(saved.settings) end
+  for _,filter in ipairs(saved.filters) do obs.obs_data_release(filter.settings);obs.obs_source_release(filter.source) end
+  obs.obs_source_release(saved.source)
+ end
+end
 local function apply_generic(settings)
  local function fail(message)
   obs.script_log(obs.LOG_WARNING,message)
@@ -414,10 +514,11 @@ local function apply_generic(settings)
  local fill_visible=existing_fill==nil or obs.obs_sceneitem_visible(existing_fill)
  local existing_background=obs.obs_scene_find_source(scene,'OST · Background') or obs.obs_scene_find_source(scene,'OBS Template · Background')
  local background_visible=existing_background==nil or obs.obs_sceneitem_visible(existing_background)
+ local previous_layout=snapshot_layout(scene)
  local result=true
- local new_groups={}
  local unused_groups={}
  local retained_sources={}
+ local pending_removals={}
  for _,key in ipairs(panel_keys) do
   local panel=panels[key]
   local name='OST · Panel '..panel.index
@@ -427,8 +528,7 @@ local function apply_generic(settings)
   if not panel.active then selected='' end
   if selected=='' then unused_groups[#unused_groups+1]=group
   else
-   if obs.obs_scene_get_group(scene,group)==nil then new_groups[#new_groups+1]=group end
-   if not clip(scene,group,selected,script_path()..'assets/'..key..'-alpha-mask.png',panel.box,url,'OST · ',panel.kind=='media',retained_sources) then
+   if not clip(scene,group,selected,script_path()..'assets/'..key..'-alpha-mask.png',panel.box,url,'OST · ',panel.kind=='media',retained_sources,pending_removals) then
     obs.script_log(obs.LOG_WARNING,'Could not mask panel '..panel.index..'. Check Browser Source and mask files.')
     result=false;break
    end
@@ -442,6 +542,8 @@ local function apply_generic(settings)
   if not result then obs.script_log(obs.LOG_WARNING,'Could not create a required template browser source.') end
  end
  if result then
+  -- Commit removals only once all panel and layer updates have succeeded.
+  for _,item in ipairs(pending_removals) do obs.obs_sceneitem_remove(item) end
   -- Retain user sources that only existed inside an old panel group.
   local current_sources={}
   for _,panel in pairs(panels) do
@@ -472,8 +574,10 @@ local function apply_generic(settings)
   obs.obs_frontend_set_current_scene(source)
   obs.script_log(obs.LOG_INFO,'OBS Streaming Template applied: seven independent panels. No links are logged.')
  else
-  for _,name in ipairs(new_groups) do remove(scene,name) end
+  restore_layout(previous_layout)
+  obs.script_log(obs.LOG_WARNING,'Apply failed; the previous scene layout was restored.')
  end
+ release_layout(previous_layout)
  if created then obs.obs_scene_release(scene) else obs.obs_source_release(source) end
  obs.obs_data_release(settings)
  return result

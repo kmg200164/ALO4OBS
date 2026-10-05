@@ -171,3 +171,12 @@ test('full-screen preview keeps an exit control visible and translated',()=>{
  for(const value of [null,'','unsupported']){const app=boot('/preview.html',value);assert.equal(app.document.documentElement.lang,'en');assert.equal(app.guide.href,'guide-en.html');assert.equal(app.nodes[0].nodeValue,'Solid');}
  for(const value of ['ko','ja']){const app=boot('/preview.html',value);assert.equal(app.document.documentElement.lang,value);}
 });
+
+
+test('shared header lists English, Korean, Japanese in that order',()=>{
+ let markup='';
+ const source=fs.readFileSync(path.join(__dirname,'../template/header.js'),'utf8').split(/\r?\n\r?\n/)[0];
+ vm.runInNewContext(source,{document:{currentScript:{insertAdjacentHTML:(_position,html)=>{markup=html;}}}});
+ const select=markup.match(/<select id="ui-language"[^>]*>([\s\S]*?)<\/select>/)[1];
+ assert.deepEqual([...select.matchAll(/<option value="([^"]+)">([^<]+)<\/option>/g)].map(m=>[m[1],m[2]]),[['en','English'],['ko','한국어'],['ja','日本語']]);
+});
