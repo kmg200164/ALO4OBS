@@ -17,7 +17,7 @@ Seven panels automatically arrange your game, camera, chat, and captions without
 
 **[Download the template ZIP](https://github.com/kmg200164/OBS-streaming-template/raw/refs/heads/main/downloads/OBS-Streaming-Template.zip)**
 
-![Setup: download, extract, open guide-en.html, configure panels, unpack saved settings, add the OBS script.](docs/images/setup-workflow.png)
+![Setup: download, extract, open settings.html, configure panels, unpack saved settings, add the OBS script.](docs/images/setup-workflow.png)
 
 1. Click the download link above. Find the ZIP in **Downloads**.
 2. Use the download link above; GitHub’s **Code → Download ZIP** is for developers. Extract it: Windows **right-click → Extract All → Extract**; macOS **double-click**. Open the extracted folder. Do not open pages inside the ZIP.
