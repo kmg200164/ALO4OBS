@@ -19,7 +19,7 @@ function harness(options={}){
   byId:id=>id==='bundle'?bundle:null,current:()=>structuredClone(data),
   alphaMask:async(_,name)=>{await maskGate;return {name,bytes:new Uint8Array([1])};},
   OverlayPack:{settingsEntries:input=>[{name:'obs-settings.json',bytes:new TextEncoder().encode(JSON.stringify(input))}],zip:entries=>{captured=entries;return new Uint8Array([0]);}},
-  document:{createElement:()=>({click(){}})},window:{}
+  document:{createElement:()=>({click(){}})},window:{OBS_EXPORT_RUNTIME:{}}
  };
  vm.runInNewContext(source.slice(start,end),context);
  return {uploads,bundle,status,releaseMasks,get captured(){return captured;}};

@@ -378,7 +378,7 @@ local function apply_generic(settings)
  if error_message~=nil then return fail(error_message) end
  for _,name in ipairs({'overlay.html','background.html','frame.html','wallpaper.html'}) do
   local file=io.open(script_path()..name,'r')
-  if file==nil then return fail('Keep '..name..' beside obs-setup.lua.') end
+  if file==nil then return fail('Keep '..name..' beside OBS-script.lua.') end
   file:close()
  end
  local needs_media=false
@@ -387,7 +387,7 @@ local function apply_generic(settings)
   if panel.active and panel.kind=='media' and panel.url~='' then
    needs_media=true
    local entry=io.open(script_path()..'panel-media-'..key..'.html','r')
-   if entry==nil then return fail('Keep panel-media-'..key..'.html beside obs-setup.lua.') end
+   if entry==nil then return fail('Keep panel-media-'..key..'.html beside OBS-script.lua.') end
    entry:close()
    if panel.url:match('^assets/') then
     local asset=io.open(script_path()..panel.url,'rb')

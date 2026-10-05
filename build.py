@@ -18,7 +18,7 @@ if re.search(rb'https?://|chrome-extension://', public_config, re.I):
     raise ValueError('Public defaults must not contain personal URLs.')
 gift_files = {
     'background.html', 'background.js', 'camera-preview.js', 'config.public.js', 'demo.html', 'demo.js', 'events.js',
-    'CHANGELOG.md', 'LICENSE', 'frame.html', 'gradient.css', 'gradient.js', 'guide-en.html', 'guide-ja.html', 'guide-layout.css', 'guide-layout.js', 'guide.html', 'header.css', 'header.js', 'i18n.js', 'obs-setup.lua',
+    'CHANGELOG.md', 'LICENSE', 'frame.html', 'gradient.css', 'gradient.js', 'guide-en.html', 'guide-ja.html', 'guide-layout.css', 'guide-layout.js', 'guide.html', 'header.css', 'header.js', 'i18n.js', 'OBS-script.lua',
     'overlay.css', 'overlay.html', 'overlay.js', 'pack.js', 'panel-media.js',
     'panel-media-game.html', 'panel-media-custom1.html', 'panel-media-custom2.html',
     'panel-media-custom3.html', 'panel-media-chat.html', 'panel-media-translation.html',
@@ -47,6 +47,24 @@ for path in sorted(files):
         if path.suffix == '.css':
             data = data.replace(b'url("assets/', b'url("../assets/')
     entries[relative] = data
+# A saved settings ZIP carries its own OBS runtime. JavaScript is installed
+# locally by the explicitly loaded Lua script, rather than downloaded as .js.
+import base64
+import json
+runtime_names = [name for name in entries if name not in {'config.js', 'VERSION', 'OBS-script.lua'} and not name.startswith(('guide', 'settings', 'README', 'CHANGELOG')) and not name.startswith('internal/preview')]
+js_names = [name for name in runtime_names if name.endswith('.js')]
+lua = entries['OBS-script.lua'].decode('utf-8')
+install = ['-- Install bundled browser runtime when this OBS script is loaded.']
+for name in js_names:
+    content = entries[name].decode('utf-8')
+    delimiter = '='
+    while ']' + delimiter + ']' in content: delimiter += '='
+    install.append("do local f=assert(io.open(script_path().." + repr(name) + ", 'wb'));assert(f:write([" + delimiter + '[' + content + ']' + delimiter + ']));assert(f:close()) end')
+saved_runtime = {name: base64.b64encode(entries[name]).decode('ascii') for name in runtime_names if name not in js_names}
+saved_runtime['OBS-script.lua'] = base64.b64encode(('\n'.join(install) + '\n' + lua).encode()).decode('ascii')
+entries['internal/export-runtime.js'] = ('window.OBS_EXPORT_RUNTIME = ' + json.dumps(saved_runtime) + ';\n').encode()
+entries['settings.html'] = entries['settings.html'].replace(b'<script src="internal/pack.js">', b'<script src="internal/export-runtime.js"></script><script src="internal/pack.js">')
+
 def verify_entries(package):
     """Check references before replacing any existing delivery ZIP."""
     if 'obs-settings.json' in package:

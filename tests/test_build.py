@@ -25,6 +25,17 @@ def temporary_destination():
 
 
 class BuildTests(unittest.TestCase):
+    def test_saved_package_contains_independent_lua_runtime(self):
+        import base64, json
+        script = builder.entries['internal/export-runtime.js'].decode()
+        runtime = json.loads(script.removeprefix('window.OBS_EXPORT_RUNTIME = ').strip().removesuffix(';'))
+        self.assertIn('OBS-script.lua', runtime)
+        self.assertIn('overlay.html', runtime)
+        self.assertFalse(any(name.endswith('.js') for name in runtime))
+        lua = base64.b64decode(runtime['OBS-script.lua']).decode()
+        self.assertIn("internal/panel-media.js", lua)
+        self.assertIn('window.OVERLAY_CONFIG', lua)
+
     def test_delivery_filename_contract(self):
         self.assertEqual(builder.output.name, 'OBS-Streaming-Template.zip')
 
@@ -37,7 +48,7 @@ class BuildTests(unittest.TestCase):
                 self.assertNotIn('files/obs-settings.json', archive.namelist())
                 self.assertIn('files/assets/THIRD-PARTY-NOTICES.md', archive.namelist())
                 self.assertIn('files/internal/panel-media.js', archive.namelist())
-                self.assertIn("script_path()..'internal/panel-media.js'", archive.read('files/obs-setup.lua').decode('utf-8'))
+                self.assertIn("script_path()..'internal/panel-media.js'", archive.read('files/OBS-script.lua').decode('utf-8'))
                 self.assertNotIn('files/assets/asset-sources.md', archive.namelist())
                 self.assertNotIn('files/assets/platform-sources.md', archive.namelist())
                 self.assertIn('files/LICENSE', archive.namelist())
