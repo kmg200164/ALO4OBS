@@ -131,3 +131,7 @@ Report problems through GitHub Issues with the version, platform, reproduction s
 Use `MAJOR.MINOR.PATCH`, without development suffixes. The UI and tags add `v`; `dev` names the branch.
 
 `template/version.js` supplies the UI and package version. During `0.x`, fixes increment PATCH and features increment MINOR. Released versions are never replaced; changes receive a new number.
+
+## Support
+
+This template is free. If it helps you, you can [support this project](https://buymeacoffee.com/kmg200164). Support is optional and helps fund continued improvements.
