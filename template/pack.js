@@ -104,7 +104,7 @@
    if(config.cameraMode==='reactive'&&!config.reactiveUrl)throw new Error('Discord Reactive OBS URL required');
   }
   const json=JSON.stringify(config,null,2),bytes=value=>new TextEncoder().encode(value);
-  return [{name:'config.js',bytes:bytes('window.OVERLAY_CONFIG = '+json+';\n')},{name:'obs-settings.json',bytes:bytes(json)}];
+  return [{name:'config.json',bytes:bytes(json)},{name:'obs-settings.json',bytes:bytes(json)}];
  }
  const api={zip,settingsEntries};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.OverlayPack=api;
 })(typeof window!=='undefined'?window:globalThis);

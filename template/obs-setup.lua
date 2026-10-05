@@ -588,7 +588,27 @@ local function apply(props,property)
  local json=file:read('*a');file:close()
  local settings=obs.obs_data_create_from_json(json)
  if settings==nil then obs.script_log(obs.LOG_WARNING,'Invalid obs-settings.json. Export settings again.');return false end
- if obs.obs_data_get_int(settings,'layoutVersion')==4 then return apply_generic(settings) end
+ if obs.obs_data_get_int(settings,'layoutVersion')==4 then
+  -- Downloaded settings contain data only; generate browser configuration locally.
+  local config_path=script_path()..'config.js'
+  local old_file=io.open(config_path,'rb')
+  local previous=old_file and old_file:read('*a') or nil
+  if old_file then old_file:close() end
+  local output=io.open(config_path,'wb')
+  if not output then obs.obs_data_release(settings);obs.script_log(obs.LOG_WARNING,'Cannot write config.js in the installation folder.');return false end
+  local canonical=obs.obs_data_get_json(settings)
+  local written=output:write('window.OVERLAY_CONFIG = '..canonical..';\n')
+  local closed=output:close()
+  if not written or not closed then
+   if previous then local restore=io.open(config_path,'wb');if restore then restore:write(previous);restore:close() end else os.remove(config_path) end
+   obs.obs_data_release(settings);obs.script_log(obs.LOG_WARNING,'Cannot save browser configuration.');return false
+  end
+  local result=apply_generic(settings)
+  if not result then
+   if previous then local restore=io.open(config_path,'wb');if restore then restore:write(previous);restore:close() end else os.remove(config_path) end
+  end
+  return result
+ end
  -- Copy visibility before checking live dependencies. Release the OBS data
  -- reference here so every later validation return has only settings to release.
  local panel_flags={}

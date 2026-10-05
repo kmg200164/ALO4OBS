@@ -236,3 +236,5 @@ test('promotion media follows its active slot and stops across disabled or repla
  context.window.Overlay.applyConfig({...input,sponsorType:'embed',sponsor:'https://example.org/widget',showSponsor:false});assert.equal(embed.src,undefined);
  context.window.Overlay.applyConfig({...input,slotContent:{custom1:'none',custom2:'none',custom3:'none'}});assert.equal(video.src,undefined);assert.equal(embed.src,undefined);
 });
+
+test('settings ZIP contains data rather than executable JavaScript',()=>{const entries=api.settingsEntries({});assert.equal(entries.some(entry=>/\.(js|html|exe|ps1|bat)$/i.test(entry.name)),false);assert.deepEqual(JSON.parse(new TextDecoder().decode(entries[0].bytes)),JSON.parse(new TextDecoder().decode(entries[1].bytes)));});
