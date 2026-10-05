@@ -51,3 +51,5 @@ html[lang=ko] button,html[lang=ko] .action-button,html[lang=ko] .mini-action{fon
 .fullscreen-toolbar button:hover{filter:brightness(.92)}
 .fullscreen-toolbar button:focus-visible{outline:3px solid #fff;outline-offset:2px}
 @media(max-width:620px){.fullscreen-toolbar{justify-content:center;gap:8px;padding:8px;font-size:12px}.fullscreen-toolbar button{min-height:36px;padding:6px 10px;font-size:12px}}
+
+.editor-title .panel-number{margin:0}

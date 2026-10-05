@@ -267,7 +267,7 @@
       ${fieldHtml('이미지 경로 또는 URL','regionImage','text','placeholder="assets/image.png 또는 https://…"',true)}
       ${editorFile('이미지 파일','region','image/png,image/jpeg,image/webp,image/gif')}
       </div>`);
-    byId('panel-editor').innerHTML=`<h4 class="editor-title">${names[key]}</h4>${content}<div class="divider"></div>${regionInputs}`;
+    byId('panel-editor').innerHTML=`<h4 class="editor-title"><span class="panel-number">${names[key]}</span></h4>${content}<div class="divider"></div>${regionInputs}`;
     for(const [name,value] of Object.entries({regionColor:fill.color||region.color||'#ffffff',regionOpacity:nearestPreset(fill.opacity??region.opacity,opacityPresets,20),regionBlur:nearestPreset(fill.blur??region.blur,blurPresets,16),regionBorderColor:stroke.color||region.borderColor||'#ffffff',regionStrokeWidth:nearestPreset(stroke.width,strokeWidthPresets,4),regionImage:region.image||''})){const input=control(name);if(input)input.value=value;}
     renderContentExtra();
     paintGradientControls();
