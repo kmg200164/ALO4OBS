@@ -1,4 +1,4 @@
-## 0.4.8
+## 0.5.0
 
 - Save a complete OBS package with OBS-script.lua; extract and select that script in the same folder.
 
