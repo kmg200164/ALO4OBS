@@ -85,11 +85,11 @@ def build(destination=output):
         with ZipFile(temporary, 'w', ZIP_DEFLATED) as archive:
             for name, data in entries.items():
                 archive.writestr('files/' + name, data)
-            archive.writestr('Start.html', '<!doctype html><html lang="en"><meta charset="utf-8"><title>OBS Streaming Template</title><meta http-equiv="refresh" content="0;url=files/guide-en.html"><body><a href="files/guide-en.html">Open OBS Streaming Template</a></body></html>')
+            archive.writestr('Setting.html', '<!doctype html><html lang="en"><meta charset="utf-8"><title>OBS Streaming Template</title><meta http-equiv="refresh" content="0;url=files/guide-en.html"><body><a href="files/guide-en.html">Open OBS Streaming Template</a></body></html>')
         with ZipFile(temporary) as archive:
             if archive.testzip() is not None:
                 raise ValueError('Bundle ZIP CRC verification failed.')
-            expected = {'files/' + name for name in entries} | {'Start.html'}
+            expected = {'files/' + name for name in entries} | {'Setting.html'}
             if set(archive.namelist()) != expected:
                 raise ValueError('Bundle ZIP inventory does not match the allowlist.')
             if any(archive.read('files/' + name) != data for name, data in entries.items()):
