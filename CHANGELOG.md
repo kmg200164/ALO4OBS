@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.2 — 2026-10-05 11:52:06 +09:00
+
+- Remove manual resizing from the sample message field; scroll vertically when content exceeds its height.
+
 ## 0.5.1 — 2026-10-05 11:50:43 +09:00
 
 - Save settings through the browser native file picker when available; retain download fallback for other browsers.
