@@ -95,3 +95,8 @@ The built settings page embeds a neutral runtime manifest, so local-file export 
 ### 0.5.1: Windows extraction warning
 
 User screenshot identifies LICENSE as the blocked file. The user-generated ZIP has ZoneId=4 (restricted zone) and a file-origin HostUrl. This does not establish a malware detection. Rename the packaged license to LICENSE.txt and use the browser native save picker when available. Verify write/close and cancellation in automated checks. Actual Windows extraction of the new export remains unverified; do not claim this warning is resolved yet.
+
+
+### User-reported live Windows broadcast — 2026-10-05
+
+The user reports successful operation after the latest installation changes and provided an OBS screenshot showing an active broadcast, game capture, translation text, web widget content, rounded masks, and panel borders. The screenshot reports zero dropped frames at capture time. This is user-supplied evidence, not an independent audio, macOS, repeated-apply, or recovery verification. README describes the successful Windows broadcast without labeling the entire product a test version.

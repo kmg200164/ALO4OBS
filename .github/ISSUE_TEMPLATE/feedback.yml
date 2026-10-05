@@ -1,0 +1,21 @@
+name: Problem or suggestion
+description: Tell us what happened or what could be easier. Any language is welcome.
+title: ""
+body:
+  - type: textarea
+    id: feedback
+    attributes:
+      label: What happened, or what would you like to improve?
+      description: Your own words are enough. You can paste a screenshot here. Hide private widget links and stream keys.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Template version (optional)
+      placeholder: e.g. 0.5.2 — shown at the top of settings
+  - type: input
+    id: environment
+    attributes:
+      label: Computer and browser (optional)
+      placeholder: e.g. Windows 11, Chrome, OBS 32

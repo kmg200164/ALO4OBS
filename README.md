@@ -40,7 +40,9 @@ Select the required sources, then click **Apply saved settings / Auto layout** o
 
 Keep the installation folder in place; OBS uses its files. English is the default language, with Korean and Japanese available.
 
-**0.5.2 — test version.** Installation checks remain incomplete; see [QA results](docs/QA.md).
+**Current version: 0.5.2.** Used successfully in a live Windows OBS broadcast.
+
+**[Report a problem or suggest an improvement](https://github.com/kmg200164/OBS-streaming-template/issues/new?template=feedback.yml)** — describe what happened in your own words. A screenshot helps; Korean, English, and Japanese are welcome. GitHub sign-in is required.
 
 To update your layout, repeat steps 4–6. Each source can serve only one panel; scenes and groups cannot be selected. Seven camera panels require seven distinct sources. For Korean script controls, enable **English UI (reload after changing)** and reload.
 
@@ -124,7 +126,7 @@ KMG directs the product, design, and requirements, and evaluates real use. Code 
 
 Code: [MIT](LICENSE), copyright 2026 KMG. Figma Simple Design System icons (CC BY 4.0), Lucide (ISC), and Inter (OFL) retain their own terms; see [third-party notices](template/assets/THIRD-PARTY-NOTICES.md).
 
-Report problems through GitHub Issues with the version, platform, reproduction steps, and result. Remove private URLs and tokens from attachments. Updates appear in [CHANGELOG.md](CHANGELOG.md).
+Before sharing screenshots, hide personal widget links and stream keys. Updates appear in [CHANGELOG.md](CHANGELOG.md); detailed verification records are in [QA results](docs/QA.md).
 
 ## Versions
 
