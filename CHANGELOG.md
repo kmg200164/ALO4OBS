@@ -1,3 +1,7 @@
+## 0.4.7
+
+- Explain both ZIP files, copying settings into files, and where to select the OBS script.
+
 ## 0.4.6
 
 - Rename the configuration page to settings.html and update navigation and package links.
