@@ -87,9 +87,7 @@ test('English guide retains product spelling and valid upstream link paths',()=>
  const guide=fs.readFileSync(path.join(__dirname,'../template/guide-en.html'),'utf8');
  assert.ok(guide.includes('<h1>Configure and connect OBS</h1>'));
  assert.ok(guide.includes('Click <strong>Apply saved settings / Auto layout</strong>'));
- assert.ok(guide.includes('>WEFLAB chat guide</a>'));
- assert.ok(guide.includes('>Speech Translator guide</a>'));
- assert.ok(guide.includes('optional examples, not required services'));
+ assert.doesNotMatch(guide,/WEFLAB|Speech Translator|optional examples/);
  assert.doesNotMatch(guide,/honfigure|hlick|WEFLpB|hSS|hHpNGELOG/);
 });
 
