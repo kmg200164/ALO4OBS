@@ -40,7 +40,7 @@ Select the required sources, then click **Apply saved settings / Auto layout** o
 
 Keep the installation folder in place; OBS uses its files. English is the default language, with Korean and Japanese available.
 
-**0.4.8 — test version.** Installation checks remain incomplete; see [QA results](docs/QA.md).
+**0.5.0 — test version.** Installation checks remain incomplete; see [QA results](docs/QA.md).
 
 To update your layout, repeat steps 4–6. Each source can serve only one panel; scenes and groups cannot be selected. Seven camera panels require seven distinct sources. For Korean script controls, enable **English UI (reload after changing)** and reload.
 
