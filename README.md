@@ -135,3 +135,9 @@ Use `MAJOR.MINOR.PATCH`, without development suffixes. The UI and tags add `v`; 
 ## Support
 
 This template is free. If it helps you, you can [support this project](https://buymeacoffee.com/kmg200164). Support is optional and helps fund continued improvements.
+
+<p align="center">
+  <a href="https://buymeacoffee.com/kmg200164">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy me a coffee — support KMG" width="360">
+  </a>
+</p>
