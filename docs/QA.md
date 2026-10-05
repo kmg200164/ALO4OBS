@@ -82,3 +82,7 @@ Remaining separate proof: direct-file browser startup/upload/export, the complet
 ## Download package correction (2026-10-05)
 
 The user reproduced stale 0.4.1 UI in the public download. The 0.4.3 package now includes English-first language ordering and preview highlighting that recolors the actual stroke tiles, using the maximum UI width (8) without saving highlight styles. The archive exposes settings.html plus a files folder. Automated checks pass; rendered direct-file highlighting and complete local-upload-to-OBS validation remain pending. This is a test package, not a production release.
+
+## Data-only settings export (0.4.4)
+
+Windows extraction of a browser-generated settings ZIP was blocked at config.js; its Zone.Identifier was ZoneId=4. Exports now contain JSON and media/masks, with no executable JavaScript. The OBS v4 apply path generates browser config locally from parsed JSON and restores the previous file on guarded apply failure. Automated packaging checks pass; native Windows extraction and live OBS application of this new export remain unverified.

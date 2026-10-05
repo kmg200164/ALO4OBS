@@ -32,7 +32,7 @@ test('malformed saved and exported geometry falls back to neutral defaults',()=>
  assert.equal(restore({...exported,layout:{}},{...draft,layout:{}},null),defaults);
 });
 
-test('extracted settings restore uploaded asset paths and gradient through config.js',()=>{
+test('JSON settings preserve uploaded asset paths and gradient in locally generated configuration',()=>{
  const pack=require('../template/pack.js');
  const input={...exported,
   slotContent:{custom1:'image',custom2:'none',custom3:'none'},
@@ -40,8 +40,8 @@ test('extracted settings restore uploaded asset paths and gradient through confi
   globalStyle:{...exported.globalStyle,background:{...exported.globalStyle.background,mode:'file',url:'assets/background-whole.png'}},
   regionBackgrounds:{game:{color:'#FFFFFF',image:'assets/background-game.png',opacity:20,blur:16,borderColor:'#FFFFFF'}}
  };
- const entry=pack.settingsEntries(input).find(item=>item.name==='config.js');
- const fileContext={window:{}};vm.runInNewContext(new TextDecoder().decode(entry.bytes),fileContext);
+ const entry=pack.settingsEntries(input).find(item=>item.name==='config.json');
+ const fileContext={window:{}};vm.runInNewContext('window.OVERLAY_CONFIG = '+new TextDecoder().decode(entry.bytes)+';',fileContext);
  const fromFile=JSON.parse(JSON.stringify(fileContext.window.OVERLAY_CONFIG));
  const restored=restore(fromFile,draft,'previous-file');
  assert.equal(restored.customSlotMedia.custom1.url,'assets/custom1.png');
