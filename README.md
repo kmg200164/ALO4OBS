@@ -28,7 +28,7 @@ Seven panels automatically arrange your game, camera, chat, and captions without
 
 ### OBS buttons
 
-**Tools → Scripts**. Captured on macOS; English Windows menus use the same names.
+**Tools → Scripts**. The menu names are the same on Windows and macOS.
 
 ![English OBS Tools menu with Scripts selected.](docs/images/obs-tools-scripts.png)
 
@@ -68,7 +68,7 @@ Default coordinates adjust with configuration. Background, fill, content, and ou
 
 Choose OBS sources in the script. For web content, use a provider's HTTP(S) display/widget URL. Management and video watch pages do not become widgets or playable media automatically.
 
-Any panel supports compatible chat, translation, alerts, donations, or reactive images. WEFLAB and Speech Translator are optional examples. Providers control their widgets' typography, timestamps, names, audio, and connections. Keep required services running; alerts from different providers remain separate.
+Any panel supports compatible chat, translation, alerts, donations, or reactive images. Providers control their widgets' typography, timestamps, names, audio, and connections. Keep required services running;
 
 Upload images, GIF, MP4, or WebM, or use direct media URLs. Uploads are processed locally. Media loops muted; widget audio follows provider settings. Use assets you have permission to share.
 
