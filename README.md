@@ -21,7 +21,7 @@ Seven panels automatically arrange your game, camera, chat, and captions without
 
 1. Click the download link above. Find the ZIP in **Downloads**.
 2. Use the download link above; GitHub’s **Code → Download ZIP** is for developers. Extract it: Windows **right-click → Extract All → Extract**; macOS **double-click**. Open the extracted folder. Do not open pages inside the ZIP.
-3. Double-click **Start.html**, then its gear icon to open settings.
+3. Double-click **Setting.html**, then its gear icon to open settings.
 4. Configure Panels 1–7, then click **Save as ZIP** to download `OBS-settings.zip`.
 5. Extract those settings **into the same template folder**, beside `obs-setup.lua` and `overlay.html`. Replace older generated files if asked. Do not create an extra subfolder.
 6. In [OBS Studio](https://obsproject.com/) **30.1 or newer**, set the base canvas to **1920 × 1080**. Open **Tools → Scripts → +** and select `obs-setup.lua`. Assign a distinct existing source to each panel using **OBS source**, then click **Apply saved settings / Auto layout**.
