@@ -23,8 +23,8 @@ Seven panels automatically arrange your game, camera, chat, and captions without
 2. Use the download link above; GitHub’s **Code → Download ZIP** is for developers. Extract it: Windows **right-click → Extract All → Extract**; macOS **double-click**. Open the extracted folder. Do not open pages inside the ZIP.
 3. Double-click **settings.html**, then its gear icon to open settings.
 4. Configure Panels 1–7, then click **Save as ZIP** to download `OBS-settings.zip`.
-5. Extract those settings **into the same template folder**, beside `obs-setup.lua` and `overlay.html`. Replace older generated files if asked. Do not create an extra subfolder.
-6. In [OBS Studio](https://obsproject.com/) **30.1 or newer**, set the base canvas to **1920 × 1080**. Open **Tools → Scripts → +** and select `obs-setup.lua`. Assign a distinct existing source to each panel using **OBS source**, then click **Apply saved settings / Auto layout**.
+5. Extract **OBS-settings.zip** and open **OBS-settings**. Copy everything inside it. Open the original **OBS-Streaming-Template** folder, then **files**, and paste there. Replace matching files. Copy the contents, not the OBS-settings folder itself.
+6. In [OBS Studio](https://obsproject.com/) **30.1 or newer**, set the base canvas to **1920 × 1080**. Open **Tools → Scripts → +** and select `obs-setup.lua` from the template’s **files** folder. The **OBS-settings** folder contains no script. Assign a distinct existing source to each panel using **OBS source**, then click **Apply saved settings / Auto layout**.
 
 ### OBS buttons
 
@@ -40,7 +40,7 @@ Select the required sources, then click **Apply saved settings / Auto layout** o
 
 Keep the installation folder in place; OBS uses its files. English is the default language, with Korean and Japanese available.
 
-**0.4.6 — test version.** Installation checks remain incomplete; see [QA results](docs/QA.md).
+**0.4.7 — test version.** Installation checks remain incomplete; see [QA results](docs/QA.md).
 
 To update your layout, repeat steps 4–6. Each source can serve only one panel; scenes and groups cannot be selected. Seven camera panels require seven distinct sources. For Korean script controls, enable **English UI (reload after changing)** and reload.
 
