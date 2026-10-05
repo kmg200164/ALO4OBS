@@ -2,7 +2,9 @@ OBS Streaming Template
 
 Open settings.html in the extracted template folder.
 Select Panels 1-7 and choose their content, placement, and style.
-Choose Auto or Manual for width and height; use the number or slider.
+Choose Auto or Manual for every panel height and the width of Panels 2-4.
+Panels 1, 5, 6 and 7 use automatic width; their width controls are hidden.
+Use the number input or slider for manual sizing.
 Limits follow active panels, gaps, and fixed sizes. Out-of-range values are adjusted.
 Uploaded images/videos are retained in this browser for the same settings page.
 Save a settings ZIP for a portable backup before clearing browser data or moving files.
