@@ -6,16 +6,9 @@ An OBS overlay that auto-arranges your panels so they never overlap.
 
 ## Download
 
-**[Download ALO4OBS 0.8.0](https://github.com/kmg200164/ALO4OBS/raw/c069dccb08f07fdf7510e947a52092d3213ca4a0/downloads/OBS-Streaming-Template.zip)**
+**[Download ALO4OBS 0.8.0](https://github.com/kmg200164/ALO4OBS/raw/refs/heads/main/downloads/OBS-Streaming-Template.zip)**
 
 The current downloadable package is **0.8.0**. See the latest patch notes below and the full [change log](CHANGELOG.md).
-
-## What changed in the downloadable 0.7.1
-
-- Main has Auto, 16:9, 21:9, and 32:9 aspect choices.
-- Sub panels keep their width controls and a 206 px default minimum.
-- Manual size limits follow active panels, gaps, and fixed siblings.
-- Reopened browser drafts restore uploaded image and video bytes when storage is available.
 
 ## Latest update — 0.8.0
 
