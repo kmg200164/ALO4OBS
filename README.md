@@ -6,9 +6,9 @@ An OBS overlay that auto-arranges your panels so they never overlap.
 
 ## Download
 
-**[Download ALO4OBS 0.7.1](https://github.com/kmg200164/ALO4OBS/raw/fc7f32446edfb87549596bf4a3f8f186cf8120e5/downloads/OBS-Streaming-Template.zip)**
+**[Download ALO4OBS 0.8.0](https://github.com/kmg200164/ALO4OBS/raw/c069dccb08f07fdf7510e947a52092d3213ca4a0/downloads/OBS-Streaming-Template.zip)**
 
-The current downloadable package is **0.7.1**. The 0.8.0 notes below are an unreleased draft, not a download or release claim.
+The current downloadable package is **0.8.0**. See the latest patch notes below and the full [change log](CHANGELOG.md).
 
 ## What changed in the downloadable 0.7.1
 
@@ -17,7 +17,7 @@ The current downloadable package is **0.7.1**. The 0.8.0 notes below are an unre
 - Manual size limits follow active panels, gaps, and fixed siblings.
 - Reopened browser drafts restore uploaded image and video bytes when storage is available.
 
-## Upcoming 0.8.0 draft
+## Latest update — 0.8.0
 
 - ALO4OBS replaces the previous product name in the current interface.
 - Main, Sub 1–3, and Side 1–3 make panel roles easier to read.
@@ -25,7 +25,8 @@ The current downloadable package is **0.7.1**. The 0.8.0 notes below are an unre
 - Gap, fill opacity, blur, and stroke width use five-step sliders.
 - Choosing an 8 px gap with global stroke enabled asks before turning that global stroke off; cancel keeps it, and regional overrides stay unchanged.
 
-- The header separates links, centered product/version, and tools; narrow screens use menus.
+- The header separates links, centered product/version, and tools; narrow screens use menus. Wide headers show Auto Layout Overlay for OBS; narrower headers show ALO4OBS.
+- All UI icons use the official Lucide set. Slider values update immediately, increase left to right, and display beside their labels.
 
 ## Features
 

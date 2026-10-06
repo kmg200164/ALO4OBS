@@ -30,7 +30,7 @@ test('header script derives the bug-report link from the repository URL and hide
 
 test('build.py only allows the repository and donation URLs in the shipped public config',()=>{
  const buildPy=fs.readFileSync(path.join(__dirname,'../build.py'),'utf8');
- assert.match(buildPy,/https:\/\/github\.com\/kmg200164\/OBS-streaming-template/);
+ assert.match(buildPy,/https:\/\/github\.com\/kmg200164\/ALO4OBS/);
  assert.match(buildPy,/https:\/\/buymeacoffee\.com\/kmg200164/);
  assert.match(buildPy,/def check_public_config_urls/);
 });
