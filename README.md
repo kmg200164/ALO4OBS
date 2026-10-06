@@ -1,5 +1,11 @@
 # ALO4OBS
 
+Auto Layout Overlay for OBS
+
+**[Download ALO4OBS 0.8.0](https://github.com/kmg200164/ALO4OBS/raw/refs/heads/main/downloads/OBS-Streaming-Template.zip)**
+
+The current downloadable package is **0.8.0**. For patch notes, see [CHANGELOG.md](CHANGELOG.md).
+
 An OBS overlay that auto-arranges your panels so they never overlap.
 
 ## Support and feedback
@@ -20,14 +26,6 @@ ALO4OBS is free, and support is entirely optional. For bug reports, include what
 </details>
 
 ![Setup: download, extract, open settings.html, configure panels, unpack saved settings, add the OBS script.](docs/images/setup-workflow.png)
-
-## Download
-
-**[Download ALO4OBS 0.8.0](https://github.com/kmg200164/ALO4OBS/raw/refs/heads/main/downloads/OBS-Streaming-Template.zip)**
-
-The current downloadable package is **0.8.0**. For patch notes, see [CHANGELOG.md](CHANGELOG.md).
-
-
 
 ## Features
 
