@@ -7,15 +7,30 @@ import tempfile
 
 repository = Path(__file__).resolve().parent
 source = repository / 'template'
-output = repository / 'dist' / 'OBS-Streaming-Template.zip'
 public_config = (source / 'config.public.js').read_bytes()
 version_source = (source / 'version.js').read_text(encoding='utf-8')
 match = re.fullmatch(r"window\.KMG_VERSION = '((?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*))';\s*", version_source)
 if not match:
     raise ValueError('Invalid version.js')
 version = match.group(1)
-if re.search(rb'https?://|chrome-extension://', public_config, re.I):
-    raise ValueError('Public defaults must not contain personal URLs.')
+output = repository / 'dist' / f'ALO4OBS-v{version}.zip'
+# Only these two public links (repository, donation) may appear in the shipped
+# public config; anything else (chrome-extension:// included) is personal data.
+PUBLIC_URL_ALLOWLIST = {
+    'https://github.com/kmg200164/OBS-streaming-template',
+    'https://buymeacoffee.com/kmg200164',
+}
+
+
+def check_public_config_urls(data):
+    if re.search(rb'chrome-extension://', data, re.I):
+        raise ValueError('Public defaults must not contain personal URLs.')
+    for match in re.findall(rb'https?://[^\s"\'<>]+', data):
+        if match.decode() not in PUBLIC_URL_ALLOWLIST:
+            raise ValueError('Public defaults must not contain personal URLs.')
+
+
+check_public_config_urls(public_config)
 gift_files = {
     'background.html', 'background.js', 'camera-preview.js', 'config.public.js', 'demo.html', 'demo.js', 'events.js',
     'CHANGELOG.md', 'LICENSE', 'frame.html', 'gradient.css', 'gradient.js', 'guide-en.html', 'guide-ja.html', 'guide-layout.css', 'guide-layout.js', 'guide.html', 'header.css', 'header.js', 'i18n.js', 'OBS-script.lua',
@@ -40,8 +55,8 @@ for path in sorted(files):
     if path.name == 'THIRD-PARTY-NOTICES.md':
         data = data.replace(b'(../../LICENSE)', b'(../LICENSE.txt)')
     if path.suffix == '.html':
-        data = re.sub(r'((?:src|href)=")([^"/]+\.(?:js|css))(\")',
-                      lambda m: m[1] + ('' if m[2] == 'config.js' else 'internal/') + m[2] + m[3],
+        data = re.sub(r'((?:src|href)=")([^"/]+\.(?:js|css))(\?[^\"]*)?(\")',
+                      lambda m: m[1] + ('' if m[2] == 'config.js' else 'internal/') + m[2] + (m[3] or '') + m[4],
                       data.decode()).encode()
     if path.suffix in {'.js', '.css'} and path.name != 'config.js':
         relative = 'internal/' + relative
@@ -104,7 +119,7 @@ def build(destination=output):
         with ZipFile(temporary, 'w', ZIP_DEFLATED) as archive:
             for name, data in entries.items():
                 archive.writestr('files/' + name, data)
-            archive.writestr('settings.html', '<!doctype html><html lang="en"><meta charset="utf-8"><title>OBS Streaming Template</title><meta http-equiv="refresh" content="0;url=files/guide-en.html"><body><a href="files/guide-en.html">Open OBS Streaming Template</a></body></html>')
+            archive.writestr('settings.html', '<!doctype html><html lang="en"><meta charset="utf-8"><title>ALO4OBS</title><meta http-equiv="refresh" content="0;url=files/guide-en.html"><body><a href="files/guide-en.html">Open ALO4OBS</a></body></html>')
         with ZipFile(temporary) as archive:
             if archive.testzip() is not None:
                 raise ValueError('Bundle ZIP CRC verification failed.')

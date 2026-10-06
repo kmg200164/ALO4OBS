@@ -1,4 +1,9 @@
 // Neutral defaults packaged as config.js. Keep personal settings in the local config.js only.
+// Separate from OVERLAY_CONFIG so these links never end up in an exported settings JSON.
+window.OVERLAY_PUBLIC_LINKS = {
+  repository: "https://github.com/kmg200164/OBS-streaming-template",
+  donation: "https://buymeacoffee.com/kmg200164"
+};
 window.OVERLAY_PUBLIC_CONFIG = window.OVERLAY_CONFIG = {
   layoutVersion: 4,
   name: "", accent: "#ad92ff", panel: "#1a1a1a", text: "#ffffff",

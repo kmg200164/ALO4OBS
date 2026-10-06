@@ -38,7 +38,9 @@
   if(config.layoutVersion===3||generic){
    if(config.panelPlacement!==undefined)config.panelPlacement=events.normalizePlacement(config.panelPlacement);
    config.panelSizing=events.normalizeSizing(config.panelSizing);
-   config.layout=events.autoLayout({order:config.layoutOrder,placement:config.panelPlacement,enabled:config.panelEnabled,sizing:config.panelSizing});
+   if(config.panelGap===undefined)config.panelGap=32;
+   else if(!events.panelGaps.includes(config.panelGap))throw new Error('Invalid panel gap');
+   config.layout=events.autoLayout({order:config.layoutOrder,placement:config.panelPlacement,enabled:config.panelEnabled,sizing:config.panelSizing,gap:config.panelGap});
    events.validateLayout(config.layout);
   }else config.layout=events.resolveLayout(config.layoutVersion===2?config.layout:undefined);
   config.layoutVersion=generic?4:config.layoutVersion===3?3:2;

@@ -23,7 +23,7 @@
     const locale=Object.hasOwn(accessibilityLabels,language)?language:'en',text=accessibilityLabels[locale];
     if(document.documentElement)document.documentElement.lang=locale;canvas?.setAttribute?.('aria-label',text.overlay);
     for(const key of ['game','sponsor','translation','alerts','chat','hand','custom1','custom2','custom3'])panel(key)?.setAttribute?.('aria-label',text[key]);
-    if(config.layoutVersion>=4)panelKeys.forEach((key,index)=>panel(key)?.setAttribute?.('aria-label',locale==='ko'?`패널 ${index+1}`:locale==='ja'?`パネル${index+1}`:`Panel ${index+1}`));
+    if(config.layoutVersion>=4)panelKeys.forEach(key=>panel(key)?.setAttribute?.('aria-label',OverlayEvents.panelLabels[key]));
     const sponsorImage=$('sponsor-image'),sponsorEmbed=$('sponsor-embed');if(sponsorImage)sponsorImage.alt=text.sponsor;if(sponsorEmbed)sponsorEmbed.title=text.sponsorWidget;
     for(const key of ['custom1','custom2','custom3'])panel(key)?.querySelector('iframe')?.setAttribute?.('title',text.webWidget);
   }
@@ -165,6 +165,8 @@
     const positions=source.layoutVersion>=3?OverlayEvents.validateLayout(source.layout):OverlayEvents.resolveLayout(source.layoutVersion===2?source.layout:undefined);
     config = {...defaults,...update};
     applyAccessibilityLanguage(config.uiLanguage);
+    // Boxes already include the gap; the token keeps any gap-based CSS in sync.
+    canvas.style?.setProperty?.('--gap',(OverlayEvents.normalizeGap?.(source.panelGap)??32)+'px');
     if(source.layoutVersion>=4){
       canvas.classList?.add?.('generic-layout');
       previewLayers(positions);

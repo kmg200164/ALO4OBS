@@ -36,10 +36,12 @@ test('version-3 URLs and media migrate to their existing panel geometry keys',()
 });
 
 test('settings preview numbers all seven panels without adding numbers to the OBS overlay',()=>{
-  for(let index=1;index<=7;index++)assert.match(html,new RegExp(`<option value="[^"]+">패널 ${index}<\\/option>`));
-  assert.match(preview,/class="panel-number"/);
+  const roles=['Main','Sub 1','Sub 2','Sub 3','Side 1','Side 2','Side 3'];
+  keys.forEach((key,index)=>assert.match(html,new RegExp(`<option value="${key}">${roles[index]}<\\/option>`)));
+  assert.doesNotMatch(html,/패널 [1-7]/);
+  assert.match(html,/id="selected-panel-tag" class="panel-number"/);
   assert.match(css,/\.panel-number\{/);
-  assert.doesNotMatch(fs.readFileSync(path.join(root,'overlay.html'),'utf8'),/패널 [1-7]/);
+  assert.doesNotMatch(fs.readFileSync(path.join(root,'overlay.html'),'utf8'),/패널 [1-7]|Panel [1-7]|\b(?:Main|Sub [1-3]|Side [1-3])\b/);
   assert.match(overlay,/document\.body\.classList\.contains\('preview-mode'\)/);
   assert.match(background,/config\.layoutVersion>=3\?OverlayEvents\.validateLayout/);
 });

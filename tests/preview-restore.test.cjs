@@ -106,7 +106,7 @@ test('source runtime loads neutral defaults once before optional local settings'
   const scripts=[...html.matchAll(/<script[^>]*src="([^"]+)"[^>]*>/g)].map(match=>match[1]);
   if(!scripts.includes('config.public.js'))continue;
   assert.equal(scripts.filter(name=>name==='config.public.js').length,1,filename);
-  if(filename==='demo.html'){assert.ok(!scripts.includes('config.js'));continue;}
+  if(filename==='demo.html'||filename.startsWith('guide')){assert.ok(!scripts.includes('config.js'));continue;}
   assert.equal(scripts.filter(name=>name==='config.js').length,1,filename);
   assert.ok(scripts.indexOf('config.public.js')<scripts.indexOf('config.js'),filename);
   const neutral=fs.readFileSync(path.join(folder,'config.public.js'),'utf8');

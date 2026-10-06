@@ -140,15 +140,16 @@ test('auto layout export gives OBS the same resized boxes as the preview',()=>{
  assert.equal(saved.layout.custom1.width,676);
  assert.equal(saved.panelEnabled.custom2,false);
 });
-test('hierarchical frame levels survive export as the same OBS boxes',()=>{
+test('legacy right-frame Sub placement exports the fixed Sub row as OBS boxes',()=>{
  const events=require('../template/events.js'),placement=events.defaultPlacement();
  placement.custom2.level1='right';placement.custom2.level2='bottom';
  const enabled={custom3:false};
  const saved=JSON.parse(new TextDecoder().decode(api.settingsEntries({layoutVersion:3,panelPlacement:placement,panelEnabled:enabled})[1].bytes));
  assert.deepEqual(saved.layout,events.autoLayout({placement,enabled}));
- assert.equal(saved.layout.custom1.width,1384);
- assert.equal(saved.layout.custom2.x,1448);
- assert.equal(saved.panelPlacement.custom2.level1,'right');
+ assert.equal(saved.layout.custom1.width,676);
+ assert.equal(saved.layout.custom2.x,740);
+ assert.equal(saved.panelPlacement.custom2.level1,'left');
+ assert.equal(saved.panelPlacement.chat,undefined);
 });
 test('opposite game and custom rows export the canonical geometry for OBS',()=>{
  const events=require('../template/events.js'),placement=events.defaultPlacement();

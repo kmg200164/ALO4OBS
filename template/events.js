@@ -21,55 +21,37 @@
   }
   function handcamLayout() {return {handHeight:318,chatHeight:317,handY:730};}
   const panelKeys=['game','custom1','custom2','custom3','chat','translation','hand'];
+  // Role names are product terms shared by the editor, overlay and OBS script.
+  const panelLabels={game:'Main',custom1:'Sub 1',custom2:'Sub 2',custom3:'Sub 3',chat:'Side 1',translation:'Side 2',hand:'Side 3'};
   function baseLayout() {
     return {game:{x:32,y:32,width:1384,height:778},custom1:{x:32,y:842,width:440,height:206},custom2:{x:504,y:842,width:440,height:206},custom3:{x:976,y:842,width:440,height:206},chat:{x:1448,y:32,width:440,height:317},translation:{x:1448,y:381,width:440,height:317},hand:{x:1448,y:730,width:440,height:318}};
   }
+  // One spacing value is both the outer margin and the gap between panels.
+  // The right frame keeps its width; the left frame takes what remains.
+  const panelGaps=[8,16,24,32,48],sideWidth=440;
+  function normalizeGap(value){return panelGaps.includes(value)?value:32;}
+  function frameSize(gap){return {left:1920-3*gap-sideWidth,height:1080-2*gap,sideX:1920-gap-sideWidth};}
   function defaultPlacement() {
     return {game:{level1:'left',level2:'top',level3:'left'},
       custom1:{level1:'left',level2:'bottom',level3:'left'},
       custom2:{level1:'left',level2:'bottom',level3:'center'},
-      custom3:{level1:'left',level2:'bottom',level3:'right'},
-      chat:{level1:'right',level2:'top',level3:'left'},
-      translation:{level1:'right',level2:'center',level3:'left'},
-      hand:{level1:'right',level2:'bottom',level3:'left'}};
+      custom3:{level1:'left',level2:'bottom',level3:'right'}};
   }
+  // Only Main and the Sub band swap rows. Side panels always fill the right
+  // frame top to bottom, so legacy Side or left/right values are ignored.
   function normalizePlacement(input,changedKey) {
     if(input!==undefined&&(!input||typeof input!=='object'||Array.isArray(input)))throw new Error('Invalid panel placement');
-    const defaults=defaultPlacement(),placement={};
-    for(const key of panelKeys){
+    const placement=defaultPlacement(),rows={};
+    for(const key of Object.keys(placement)){
       const supplied=input?.[key];
       if(supplied!==undefined&&(!supplied||typeof supplied!=='object'||Array.isArray(supplied)))throw new Error(key+': invalid frame level');
-      const path=placement[key]={...defaults[key],...(supplied||{})};
-      if(!['left','right'].includes(path.level1)||!['top','center','bottom'].includes(path.level2)||!['left','center','right'].includes(path.level3))throw new Error(key+': invalid frame level');
+      if(supplied?.level2!==undefined&&!['top','center','bottom'].includes(supplied.level2))throw new Error(key+': invalid frame level');
+      rows[key]=supplied?.level1!=='right'&&['top','bottom'].includes(supplied?.level2)?supplied.level2:null;
     }
-    // Keep level3 in the saved schema for compatibility, but custom panel
-    // identity defines the band order regardless of legacy stored values.
-    placement.custom1.level3='left';
-    placement.custom2.level3='center';
-    placement.custom3.level3='right';
-    const vertical=value=>value==='top'||value==='bottom'?value:null;
-    // Left-side rows only have top and bottom. Center resolves to the panel's
-    // normal row so imported and partially edited settings remain deterministic.
-    for(const key of panelKeys)if(placement[key].level1==='left'&&!vertical(placement[key].level2))
-      placement[key].level2=defaults[key].level2==='top'?'top':'bottom';
-    const game=placement.game;
-    const customs=['custom1','custom2','custom3'].filter(key=>placement[key].level1==='left');
-    if(game.level1==='left'){
-      const changedCustom=customs.includes(changedKey)?changedKey:null;
-      const gameRow=vertical(game.level2)||defaults.game.level2;
-      if(changedCustom){
-        const row=vertical(placement[changedCustom].level2)||'bottom';
-        for(const key of customs)placement[key].level2=row;
-        game.level2=row==='top'?'bottom':'top';
-      }else{
-        for(const key of customs)placement[key].level2=gameRow==='top'?'bottom':'top';
-        game.level2=gameRow;
-      }
-    }else if(customs.length){
-      const sourceKey=customs.includes(changedKey)?changedKey:customs[0];
-      const row=vertical(placement[sourceKey].level2)||'bottom';
-      for(const key of customs)placement[key].level2=row;
-    }
+    const changed=['custom1','custom2','custom3'].includes(changedKey)&&rows[changedKey];
+    const gameRow=changed?(changed==='top'?'bottom':'top'):rows.game||'top';
+    placement.game.level2=gameRow;
+    for(const key of ['custom1','custom2','custom3'])placement[key].level2=gameRow==='top'?'bottom':'top';
     return placement;
   }
   function canResizeWidth(key){return ['custom1','custom2','custom3'].includes(key);}
@@ -98,11 +80,19 @@
   }
   // Each frame reserves fixed sizes first; automatic peers divide the remainder.
   // Minimums include descendant fixed sizes, so an automatic frame never clips them.
-  function allocateSizes(entries,extent,axis) {
-    const available=extent-32*(entries.length-1),sizes=entries.map(entry=>entry.fixed??null);
+  function allocateSizes(entries,extent,axis,gap,fit=false) {
+    const available=extent-gap*(entries.length-1);
+    // Rendering never fails on an overfull Sub row: fixed widths are clamped to
+    // their range and, if they still overflow, shrink in proportion. Stored sizes
+    // stay untouched, so the editor warns instead of rewriting them.
+    if(fit){
+      entries=entries.map(entry=>entry.fixed===undefined?entry:{...entry,fixed:Math.min(entry.maximum??extent,Math.max(entry.minimum??1,entry.fixed))});
+      if(entries.reduce((sum,entry)=>sum+(entry.fixed??entry.minimum??1),0)>available)entries=entries.map(entry=>entry.fixed===undefined?entry:{...entry,fixed:undefined,weight:entry.fixed});
+    }
+    const sizes=entries.map(entry=>entry.fixed??null);
     const required=entries.reduce((sum,entry)=>sum+(entry.fixed??entry.minimum??1),0);
     if(entries.some(entry=>entry.fixed!==undefined&&(entry.fixed<(entry.minimum??1)||entry.fixed>(entry.maximum??extent))))throw new Error('Fixed panel sizes exceed available '+axis+': keep each panel within its usable range');
-    if(required>available)throw new Error('Fixed panel sizes exceed available '+axis+': sizes and 32-pixel gaps must fit');
+    if(required>available)throw new Error('Fixed panel sizes exceed available '+axis+': sizes and gaps must fit');
     let remaining=available-sizes.reduce((sum,size)=>sum+(size??0),0);
     let automatic=entries.map((entry,index)=>index).filter(index=>sizes[index]===null);
     while(automatic.length){
@@ -127,62 +117,57 @@
     if(axis==='width'&&canResizeWidth(key))return Math.min(reference[key].height,reference[key].width);
     return Math.ceil(reference[key][axis]/2);
   }
-  function sizedLayout(leftRows,right,sizing,constrained=true) {
-    const layout=baseLayout();
-    const reference=constrained?sizedLayout(leftRows,right,normalizeSizing(),false):null;
-    const limits=(key,axis)=>key==='game'&&axis==='height'&&sizing[key].aspect&&sizing[key].aspect!=='auto'?{minimum:1,maximum:1016}:reference?{minimum:sizingMinimum(reference,key,axis),maximum:Math.floor(reference[key][axis]*1.5)}:{minimum:1};
+  function sizedLayout(leftRows,right,sizing,gap,strict,constrained=true) {
+    const layout=baseLayout(),frame=frameSize(gap);
+    const reference=constrained?sizedLayout(leftRows,right,normalizeSizing(),gap,strict,false):null;
+    const limits=(key,axis)=>key==='game'&&axis==='height'&&sizing[key].aspect&&sizing[key].aspect!=='auto'?{minimum:1,maximum:frame.height}:reference?{minimum:sizingMinimum(reference,key,axis),maximum:Math.floor(reference[key][axis]*1.5)}:{minimum:1};
+    const rowWidths=row=>allocateSizes(row.items.map(key=>({fixed:fixed(key,'width'),...limits(key,'width')})),frame.left,'width',gap,!strict);
     const fixed=(key,axis)=>{
       if(constrained&&key==='game'&&axis==='height'&&sizing[key].aspect&&sizing[key].aspect!=='auto'){
         const row=leftRows.find(row=>row.items.includes(key));
-        const width=row?allocateSizes(row.items.map(panel=>({fixed:fixed(panel,'width'),...limits(panel,'width')})),1384,'width')[row.items.indexOf(key)]:440;
+        const width=row?rowWidths(row)[row.items.indexOf(key)]:sideWidth;
         return Math.floor(width*9/Number(sizing[key].aspect.split(':')[0]));
       }
       return sizing[key][axis+'Mode']==='fixed'?sizing[key][axis]:undefined;
     };
-    // Four equal tracks, with 32 px outer margins and gaps: left spans three.
-    // Empty frames stay reserved; fixed children never resize these parents.
+    // Outer margins and gaps all use the chosen gap; empty frames stay
+    // reserved and fixed children never resize these parents.
     if(leftRows.length){
       const heights=allocateSizes(leftRows.map(row=>{
         const values=row.items.map(key=>fixed(key,'height')).filter(value=>value!==undefined);
-        for(const key of row.items){const value=fixed(key,'height'),range=limits(key,'height');if(value!==undefined&&(value<range.minimum||value>(range.maximum??1016)))throw new Error('Fixed panel sizes exceed available height: keep each panel within its usable range');}
+        for(const key of row.items){const value=fixed(key,'height'),range=limits(key,'height');if(value!==undefined&&(value<range.minimum||value>(range.maximum??frame.height)))throw new Error('Fixed panel sizes exceed available height: keep each panel within its usable range');}
         const minimum=Math.max(...row.items.map(key=>limits(key,'height').minimum));
         const reservePeerSpace=row.items.includes('game')&&sizing.game.aspect&&sizing.game.aspect!=='auto';
         return {fixed:values.length?Math.max(...values,reservePeerSpace?minimum:0):undefined,minimum,weight:row.weight};
-      }),1016,'height');
-      let y=32;
+      }),frame.height,'height',gap);
+      let y=gap;
       leftRows.forEach((row,rowIndex)=>{
-        const height=heights[rowIndex];
-        const widths=allocateSizes(row.items.map(key=>({fixed:fixed(key,'width'),...limits(key,'width')})),1384,'width');
-        let x=32;
+        const height=heights[rowIndex],widths=rowWidths(row);
+        let x=gap;
         row.items.forEach((key,index)=>{
-          let width=widths[index],panelHeight=fixed(key,'height')??height;
-          layout[key]={x,y,width,height:panelHeight};x+=widths[index]+32;
+          layout[key]={x,y,width:widths[index],height:fixed(key,'height')??height};x+=widths[index]+gap;
         });
-        y+=height+32;
+        y+=height+gap;
       });
     }
     if(right.length){
-      const heights=allocateSizes(right.map(key=>({fixed:fixed(key,'height'),...limits(key,'height')})),1016,'height');
-      let y=32;
+      const heights=allocateSizes(right.map(key=>({fixed:fixed(key,'height'),...limits(key,'height')})),frame.height,'height',gap);
+      let y=gap;
       right.forEach((key,index)=>{
-        const width=fixed(key,'width')??440,range=limits(key,'width');
-        if(width<range.minimum||width>Math.min(440,range.maximum??440))throw new Error('Fixed panel sizes exceed available width: right frame stays one column wide');
-        layout[key]={x:1448,y,width,height:heights[index]};y+=heights[index]+32;
+        const width=fixed(key,'width')??sideWidth,range=limits(key,'width');
+        if(width<range.minimum||width>Math.min(sideWidth,range.maximum??sideWidth))throw new Error('Fixed panel sizes exceed available width: right frame stays one column wide');
+        layout[key]={x:frame.sideX,y,width,height:heights[index]};y+=heights[index]+gap;
       });
     }
     return layout;
   }
-  function hierarchicalLayout(placement,enabled,sizing) {
+  function hierarchicalLayout(placement,enabled,sizing,gap,strict) {
     placement=normalizePlacement(placement);
     const active=panelKeys.filter(key=>enabled[key]!==false);
-    const left=active.filter(key=>placement[key].level1==='left');
-    const right=active.filter(key=>placement[key].level1==='right').sort((a,b)=>
-      ['top','center','bottom'].indexOf(placement[a].level2)-['top','center','bottom'].indexOf(placement[b].level2)
-      ||['left','center','right'].indexOf(placement[a].level3)-['left','center','right'].indexOf(placement[b].level3));
-    const rows=['top','bottom'].map(level=>({items:left.filter(key=>placement[key].level2===level)
-      .sort((a,b)=>['left','center','right'].indexOf(placement[a].level3)-['left','center','right'].indexOf(placement[b].level3)),weight:1})).filter(row=>row.items.length);
-    if(rows.length===2&&left.includes('game'))for(const row of rows)row.weight=row.items.includes('game')?778:206;
-    return sizedLayout(rows,right,sizing);
+    const left=active.filter(key=>placement[key]),right=active.filter(key=>!placement[key]);
+    const rows=['top','bottom'].map(level=>({items:left.filter(key=>placement[key].level2===level),weight:1})).filter(row=>row.items.length);
+    if(rows.length===2)for(const row of rows)row.weight=row.items.includes('game')?778:206;
+    return sizedLayout(rows,right,sizing,gap,strict);
   }
   function resolveLayout(positions = {}) {
     const layout=baseLayout();
@@ -196,37 +181,48 @@
     }
     return layout;
   }
-  function autoLayout({order=panelKeys,placement,enabled={},sizing}={}) {
+  // strict rejects an overfull Sub row (used to find limits); rendering fits it.
+  function autoLayout({order=panelKeys,placement,enabled={},sizing,gap,strict=false}={}) {
     if(!Array.isArray(order)||!enabled||typeof enabled!=='object'||Array.isArray(enabled))throw new Error('Invalid auto layout');
-    sizing=normalizeSizing(sizing);
-    if(placement!==undefined)return hierarchicalLayout(placement,enabled,sizing);
+    sizing=normalizeSizing(sizing);gap=normalizeGap(gap);
+    if(placement!==undefined)return hierarchicalLayout(placement,enabled,sizing,gap,strict);
     const seen=new Set();
     for(const key of order){if(!panelKeys.includes(key)||seen.has(key))throw new Error('Invalid panel order');seen.add(key);}
     const ordered=[...order,...panelKeys.filter(key=>!seen.has(key))],active=ordered.filter(key=>enabled[key]!==false);
     if(!active.length)return baseLayout();
     const lead=active[0],bottom=ordered.slice(1,4).filter(key=>key!==lead&&enabled[key]!==false),right=ordered.slice(4).filter(key=>key!==lead&&enabled[key]!==false);
     const rows=[{items:[lead],weight:778}];if(bottom.length)rows.push({items:bottom,weight:206});
-    return sizedLayout(rows,right,sizing);
+    return sizedLayout(rows,right,sizing,gap,strict);
   }
   function sizingBounds(options={},key,axis) {
     if(!panelKeys.includes(key)||!['width','height'].includes(axis))throw new Error('Invalid panel size: unknown panel or axis');
     const enabled={...options.enabled,[key]:true},reference=autoLayout({...options,enabled,sizing:undefined});
-    const sizing=normalizeSizing(options.sizing),otherAxis=axis==='width'?'height':'width';
+    const sizing=normalizeSizing(options.sizing),otherAxis=axis==='width'?'height':'width',frame=frameSize(normalizeGap(options.gap));
+    // Stored heights are capped at 1016 px by normalizeSizing.
+    const cap=panel=>axis==='width'?(reference[panel].x>=frame.sideX?sideWidth:frame.left):Math.min(frame.height,1016);
     // Reference the all-automatic layout, so dragging never moves its own limits.
     for(const panel of panelKeys){
       sizing[panel][otherAxis+'Mode']='auto';
-      sizing[panel][axis]=Math.min(Math.min(Math.floor(reference[panel][axis]*1.5),axis==='width'?reference[panel].x>=1448?440:1384:1016),Math.max(sizingMinimum(reference,panel,axis),sizing[panel][axis]));
+      sizing[panel][axis]=Math.min(Math.min(Math.floor(reference[panel][axis]*1.5),cap(panel)),Math.max(sizingMinimum(reference,panel,axis),sizing[panel][axis]));
     }
     sizing[key][axis+'Mode']='fixed';
     function fits(value){
       sizing[key][axis]=value;
-      try{autoLayout({...options,enabled,sizing});return true;}
+      try{autoLayout({...options,enabled,sizing,strict:true});return true;}
       catch(error){if(error.message.startsWith('Fixed panel sizes exceed available'))return false;throw error;}
     }
     const minimum=sizingMinimum(reference,key,axis);
-    let low=minimum,high=Math.min(Math.floor(reference[key][axis]*1.5),axis==='width'?(reference[key].x>=1448?440:1384):1016);
+    let low=minimum,high=Math.min(Math.floor(reference[key][axis]*1.5),cap(key));
     while(low<high){const middle=Math.ceil((low+high)/2);if(fits(middle))low=middle;else high=middle-1;}
     return {min:minimum,max:low};
+  }
+  // When every enabled Sub is manual, report a row that is narrower ('gap') or
+  // wider ('overflow') than the left frame. Nothing is resized automatically.
+  function subWidthWarning({panelEnabled={},panelSizing,panelGap}={}) {
+    const sizing=normalizeSizing(panelSizing),subs=['custom1','custom2','custom3'].filter(key=>panelEnabled?.[key]!==false);
+    if(!subs.length||subs.some(key=>sizing[key].widthMode!=='fixed'))return null;
+    const gap=normalizeGap(panelGap),total=subs.reduce((sum,key)=>sum+sizing[key].width,gap*(subs.length-1)),frame=frameSize(gap).left;
+    return total<frame?'gap':total>frame?'overflow':null;
   }
   function aspectStops(box,axis,bounds) {
     const other=axis==='width'?box.height:box.width;
@@ -261,7 +257,7 @@
     if(mode==='user'){let hash=0;for(const c of platform+':'+nickname)hash=(Math.imul(hash,31)+c.codePointAt(0))|0;return `hsl(${(hash>>>0)%360} 72% 75%)`;}
     return {chzzk:'#00ffa3',twitch:'#bf94ff',youtube:'#ff6464',soop:'#55cfff'}[platform]||'#dddddd';
   }
-  const api = {normalizeEvent,createEventStore,handcamLayout,resolveLayout,defaultPlacement,normalizePlacement,normalizeSizing,canResizeWidth,canResizeHeight,sizingBounds,aspectStops,autoLayout,validateLayout,resolveSlots,nicknameColor};
+  const api = {panelLabels,panelGaps,normalizeGap,subWidthWarning,normalizeEvent,createEventStore,handcamLayout,resolveLayout,defaultPlacement,normalizePlacement,normalizeSizing,canResizeWidth,canResizeHeight,sizingBounds,aspectStops,autoLayout,validateLayout,resolveSlots,nicknameColor};
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.OverlayEvents = api;
 })(typeof window !== 'undefined' ? window : globalThis);

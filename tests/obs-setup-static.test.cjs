@@ -21,14 +21,18 @@ test('generic panels use independent OBS selectors and reject duplicate sources 
  assert.ok(generic.indexOf('if used[selected]')<generic.indexOf('local source=obs.obs_get_source_by_name(scene_name)'));
  assert.match(generic,/assets\/.*alpha-mask\.png/);
 });
-test('v4 creates OST names and migrates only exact old template items after successful replacement',()=>{
- assert.match(generic,/local name='OST · Panel '\.\.panel\.index/);
- assert.match(generic,/browser\(scene,'OST · Background'/);
+test('v4 creates ALO names and migrates only exact old template items after successful replacement',()=>{
+ assert.match(generic,/local name='ALO · '\.\.panel\.name/);
+ assert.match(source,/local scene_name='ALO4OBS'/);
+ assert.match(source,/local panel_names=\{'Main','Sub 1','Sub 2','Sub 3','Side 1','Side 2','Side 3'\}/);
+ assert.doesNotMatch(generic,/'ALO · Panel '\.\.|ALO · Panel \(%d/);
+ assert.match(generic,/local group_index=panel_indexes\[name:match\('\^ALO · \(\.\+\) Group\$'\) or ''\]/);
+ assert.match(generic,/browser\(scene,'ALO · Background'/);
  assert.match(generic,/preserve_and_remove_old_group\(scene,'OBS Template · Panel '\.\.index\.\.' Group',current_sources\)/);
  assert.match(generic,/preserve_and_remove_old_group\(scene,'OBS Template · Custom '\.\.index\.\.' Group',current_sources\)/);
- assert.ok(generic.indexOf('-- Retain user sources')>generic.indexOf("browser(scene,'OST · Panel Fill'"));
+ assert.ok(generic.indexOf('-- Retain user sources')>generic.indexOf("browser(scene,'ALO · Panel Fill'"));
  assert.doesNotMatch(generic,/local name='OBS Template · Panel '\.\.panel\.index/);
- assert.match(source,/name:match\('\^OST · '\)/);
+ assert.match(source,/name:match\('\^ALO · '\)/);
 });
 test('v4 media panels use independent local browser sources in clipped groups',()=>{
  assert.match(generic,/panel\.kind=='media' and panel\.url~='' and name\.\.' Media'/);
@@ -45,7 +49,7 @@ test('existing local template sources can be migrated from another extracted fol
 });
 test('v4 refuses a new name already used outside the template scene',()=>{
  assert.match(generic,/local occupied=obs\.obs_get_source_by_name\(name\)/);
- assert.match(generic,/if placed==nil or not expected_type then[\s\S]*return fail\('An OST source name is occupied by another source:/);
+ assert.match(generic,/if placed==nil or not expected_type then[\s\S]*return fail\('An ALO source name is occupied by another source:/);
  assert.match(source,/if not template_owned\(source_name\) and not current_sources\[source_name\]/);
 });
 test('v4 verifies generated source types before existing sources can be updated',()=>{
@@ -60,15 +64,15 @@ test('v4 verifies generated source types before existing sources can be updated'
 });
 test('v4 checks all seven group names before removing unused groups',()=>{
  const collision=generic.slice(generic.indexOf('local new_names='));
- assert.match(collision,/new_names\[#new_names\+1\]='OST · Panel '\.\.panel\.index\.\.' Group'/);
- assert.ok(collision.indexOf("new_names[#new_names+1]='OST · Panel '..panel.index..' Group'")<collision.indexOf('if panel.active and'));
+ assert.match(collision,/new_names\[#new_names\+1\]='ALO · '\.\.panel\.name\.\.' Group'/);
+ assert.ok(collision.indexOf("new_names[#new_names+1]='ALO · '..panel.name..' Group'")<collision.indexOf('if panel.active and'));
  assert.match(collision,/local function known_group\(index\)[\s\S]*obs\.obs_source_get_id\(canvas_source\)/);
 });
 test('v4 excludes groups from OBS source selection and probes prerequisites before scene mutation',()=>{
  assert.match(generic,/obs\.obs_source_is_group\(chosen\)/);
  assert.match(source,/obs\.obs_source_is_group\(s\) and math\.floor\(obs\.obs_source_get_output_flags\(s\)/);
  const scene=generic.indexOf('local source=obs.obs_get_source_by_name(scene_name)');
- for(const probe of ["obs.obs_source_create('browser_source','OST · Browser Probe'", "obs.obs_source_create('mask_filter','OST · Mask Probe'", "obs.obs_source_create('color_source_v3','OST · Canvas Probe'"]){
+ for(const probe of ["obs.obs_source_create('browser_source','ALO · Browser Probe'", "obs.obs_source_create('mask_filter','ALO · Mask Probe'", "obs.obs_source_create('color_source_v3','ALO · Canvas Probe'"]){
   const at=generic.indexOf(probe);
   assert.ok(at>=0&&at<scene,`${probe} must precede scene mutation`);
  }
@@ -78,7 +82,7 @@ test('v4 retains existing groups on clip failure and delays removal of unused gr
  assert.match(clip,/local function fail_group\(\)[\s\S]*if existing==nil then obs\.obs_sceneitem_remove\(group\) end/);
  assert.doesNotMatch(clip,/obs\.obs_sceneitem_remove\(group\);return false/);
  assert.ok(clip.indexOf('local items=obs.obs_scene_enum_items(nested)')>clip.indexOf('if not ok then return fail_group() end'));
- const browser=generic.indexOf("result=browser(scene,'OST · Panel Fill'");
+ const browser=generic.indexOf("result=browser(scene,'ALO · Panel Fill'");
  const unused=generic.indexOf('for _,name in ipairs(unused_groups) do preserve_and_remove_old_group(scene,name,current_sources) end');
  assert.ok(browser>=0&&unused>browser);
 });
@@ -86,7 +90,7 @@ test('panel outline visibility does not control panel fill visibility',()=>{
  const signal=source.slice(source.indexOf('local function sync_panel_fill(calldata)'),source.indexOf('local function connect_panel_signal()'));
  assert.match(signal,/panel_backdrop\(obs\.obs_sceneitem_visible\(item\),prefix\)/);
  assert.doesNotMatch(signal,/Panel Stroke|obs_sceneitem_set_visible\(fill/);
- assert.match(generic,/obs\.obs_sceneitem_set_visible\(obs\.obs_scene_find_source\(scene,'OST · Panel Fill'\),fill_visible\)/);
+ assert.match(generic,/obs\.obs_sceneitem_set_visible\(obs\.obs_scene_find_source\(scene,'ALO · Panel Fill'\),fill_visible\)/);
  assert.match(legacy,/obs\.obs_sceneitem_set_visible\(obs\.obs_scene_find_source\(scene,'OBS Template · Panel Fill'\),fill_visible\)/);
 });
 test('static guard: inactive captures, custom sources, and masks have no live dependency',()=>{

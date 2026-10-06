@@ -10,13 +10,14 @@ function attributeNode(values){
  const attributes={...values};
  return {getAttribute:name=>Object.hasOwn(attributes,name)?attributes[name]:null,setAttribute:(name,value)=>{attributes[name]=value;},attributes};
 }
-function boot(pathname='/settings.html',savedLanguage='ko'){
+function boot(pathname='/settings.html',savedLanguage='ko',navigatorLanguages){
  const nodes=[textNode('단색'),textNode('그라디언트 설정을 읽지 못했습니다'),textNode('왼쪽','OPTION')];
  const selector={value:'ko',addEventListener(_name,handler){this.change=handler;}};
  const guide={href:'guide.html'};
  const attributes=[attributeNode({placeholder:'assets/image.png 또는 https://…','aria-label':'언어',title:'설정 화면 배경'}),attributeNode({'aria-label':'설정 페이지',title:'설정 페이지'})];
+ const documentElement={lang:'ko',attributes:{},setAttribute(name,value){this.attributes[name]=value;},getAttribute(name){return Object.hasOwn(this.attributes,name)?this.attributes[name]:null;}};
  const document={
-  documentElement:{lang:'ko'},body:{},
+  documentElement,body:{},
   getElementById:id=>id==='ui-language'?selector:id==='guide-link'?guide:null,
   createTreeWalker(){let index=-1;return {currentNode:null,nextNode(){index++;this.currentNode=nodes[index]||null;return this.currentNode;}};},
   querySelectorAll(){return attributes;},querySelector(){return null;}
@@ -25,18 +26,21 @@ function boot(pathname='/settings.html',savedLanguage='ko'){
  const location={pathname,href:''};
  const languageEvents=[],window={dispatchEvent:event=>languageEvents.push(event)};
  const context={window,document,location,localStorage:local,NodeFilter:{SHOW_TEXT:4},CustomEvent:class{constructor(type,init){this.type=type;this.detail=init?.detail;}},MutationObserver:class{observe(){}disconnect(){}}};
+ if(navigatorLanguages)context.navigator={languages:navigatorLanguages};
  vm.runInNewContext(source,context,{filename:'i18n.js'});
  return {i18n:window.KMGI18n,nodes,selector,guide,attributes,document,location,local,languageEvents};
 }
 
-test('generic panel URL errors identify panel numbers in all languages',()=>{
+test('generic panel URL errors identify panel role names in all languages',()=>{
  const {i18n}=boot();
+ const roles=['Main','Sub 1','Sub 2','Sub 3','Side 1','Side 2','Side 3'];
  ['game','custom1','custom2','custom3','chat','translation','hand'].forEach((key,index)=>{
   for(const suffix of ['HTTP(S) web URL required','image/video assets path or HTTP(S) media URL required']){
    const error=key+': '+suffix;
    for(const language of ['ko','en','ja']){
     const message=i18n.localize(error,language);
-    assert.ok(message.startsWith(`Panel ${index+1}: `));
+    assert.ok(message.startsWith(`${roles[index]}: `));
+    assert.doesNotMatch(message,/Panel \d|패널 \d|パネル\d/);
     assert.notEqual(message,error);
    }
   }
@@ -49,6 +53,20 @@ test('Japanese UI strings cover the existing Korean-to-English interface diction
  assert.deepEqual(missing,[]);
  const liveKeys=['블러','테두리 두께','전역 설정 대신 개별 설정','콘텐츠','홍보 경로 또는 URL','홍보 파일','동시 알림은 같은 칸에서 겹칠 수 있습니다.','Chzzk 후원 URL','Youtube 후원 URL','Soop 후원 URL','미리보기에 적용했습니다','마스크 생성 실패','방송 화면 미리보기','오버레이 미리보기','설정할 패널 선택','라이트/다크 모드','배경 설정으로 이동','그라디언트 설정을 읽지 못했습니다','지원하지 않는 파일 형식입니다','배경에는 이미지를 선택하세요'];
  assert.deepEqual(liveKeys.filter(key=>!i18n.dictionaries.ja[key]),[]);
+});
+
+test('panel count labels preserve product terms through all language round trips',()=>{
+ const {i18n}=boot();
+ for(const [ko,en,ja] of [['Sub 개수','Number of Sub panels','Sub の数'],['Side 개수','Number of Side panels','Side の数']]){
+  assert.equal(i18n.localize(ko,'en'),en);assert.equal(i18n.localize(ko,'ja'),ja);
+  assert.equal(i18n.localize(en,'ko'),ko);assert.equal(i18n.localize(ja,'en'),en);
+ }
+});
+
+test('placement card heading is translated in all supported languages',()=>{
+ const {i18n}=boot();
+ assert.equal(i18n.localize('패널 위치 & 개수 설정','en'),'Panel position & count settings');
+ assert.equal(i18n.localize('패널 위치 & 개수 설정','ja'),'パネルの位置と数の設定');
 });
 
 test('shared header exposes Japanese in the locale picker',()=>{
@@ -170,6 +188,33 @@ test('full-screen preview keeps an exit control visible and translated',()=>{
  for(const value of ['ko','ja']){const app=boot('/settings.html',value);assert.equal(app.document.documentElement.lang,value);}
 });
 
+test('saved language wins over navigator.languages',()=>{
+ const app=boot('/settings.html','ja',['en-US']);
+ assert.equal(app.document.documentElement.lang,'ja');
+});
+
+test('with no saved language, navigator.languages picks the first matching ko/en/ja by its leading two letters',()=>{
+ assert.equal(boot('/settings.html',null,['ko-KR']).document.documentElement.lang,'ko');
+ assert.equal(boot('/settings.html',null,['ja-JP']).document.documentElement.lang,'ja');
+ assert.equal(boot('/settings.html',null,['fr-FR','en']).document.documentElement.lang,'en');
+ assert.equal(boot('/settings.html',null,['fr-FR','de-DE']).document.documentElement.lang,'en');
+ assert.equal(boot('/settings.html',null,['kok-IN','ja']).document.documentElement.lang,'ja');
+});
+
+test('html lang reflects the auto-detected language, which is not saved; a manual pick is saved',()=>{
+ const app=boot('/settings.html',null,['ko-KR']);
+ assert.equal(app.document.documentElement.lang,'ko');
+ assert.equal(app.local.value,null,'auto-detected choice must not be persisted');
+ app.selector.value='ja';
+ app.selector.change();
+ assert.equal(app.local.value,'ja','a manual selector change must be persisted');
+});
+
+test('a guide page shows the auto-detected matching guide without saving the choice',()=>{
+ const app=boot('/guide.html',null,['en-US']);
+ assert.equal(app.location.href,'guide-en.html');
+ assert.equal(app.local.value,null,'auto-detected guide redirect must not be persisted');
+});
 
 test('shared header lists English, Korean, Japanese in that order',()=>{
  let markup='';

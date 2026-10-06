@@ -1,6 +1,6 @@
 # QA and device handoff
 
-Current implementation: 0.7.1. The sections below preserve evidence from their named versions; automated checks do not establish live platform compatibility.
+Current implementation: 0.8.0 (unreleased source). The sections below preserve evidence from their named versions; automated checks do not establish live platform compatibility.
 
 ## Lower-panel minimum width correction (0.7.1)
 
@@ -61,7 +61,7 @@ Keep personal widget links and exported settings private. Record the commit ID, 
 
 ## Release
 
-Continue fixes on `dev`. After the required checks pass, merge the verified version into `main`, tag the release, build `dist/OBS-Streaming-Template.zip`, and attach the neutral ZIP to a GitHub Release. No production-ready claim or release tag has been made yet.
+Continue fixes on `dev`. After the required checks pass, replace the README patch notes with the released-version notes, paste the same notes into the GitHub Release body, merge the verified version into `main`, tag the release, build `dist/OBS-Streaming-Template.zip`, and attach the neutral ZIP to a GitHub Release. No production-ready claim or release tag has been made yet.
 
 ## macOS evidence (2026-10-04, partial and stopped)
 
@@ -128,3 +128,19 @@ User screenshot identifies LICENSE as the blocked file. The user-generated ZIP h
 ### User-reported live Windows broadcast — 2026-10-05
 
 The user reports successful operation after the latest installation changes and provided an OBS screenshot showing an active broadcast, game capture, translation text, web widget content, rounded masks, and panel borders. The screenshot reports zero dropped frames at capture time. This is user-supplied evidence, not an independent audio, macOS, repeated-apply, or recovery verification. README describes the successful Windows broadcast without labeling the entire product a test version.
+
+## 0.8.0 preparation — 2026-10-06
+
+This is an unreleased working-tree check on dev at 3b44626. This initial check used source 0.7.1; the final 2026-10-07 source is 0.8.0. The public pinned download remains 0.7.1.
+
+- Main stays enabled. Sub/Side counts are prefix selections, saved through the existing panelEnabled keys. Automated coverage includes legacy gaps, export keys and 360 layout combinations; Chrome checked all nine count combinations without overlaps.
+- Gap, fill opacity, blur and stroke width are five-step sliders. Count and global sliders fill the card interior. The Main/Sub checkbox is a keyboard-operable vertical switch. The selected panel tag shares the section heading row; width/content selectors use the same label-width token and measured equal at wide and 480 px sizes.
+- HTTP Chrome upload followed by tab close/reopen restored both the selected file path and actual decoded/rendered image. upload-storage.js was not changed. This proves tab-reopen persistence, not full browser-process restart, file:// or OBS browser-source persistence.
+- The extra-narrow prompt appeared in Chrome. Confirm/dismiss control returned a browser-tool timeout, so end-to-end acceptance/cancel is not passed here; automated scoped tests cover both choices and preserve regional overrides. Restoration showed no dialog.
+- Three localized guides rendered. Native OBS, real quota-warning UI, macOS and direct-file checks remain separate verification tasks. These limits prevent a complete release-readiness claim.
+
+Initial integration: Node 187/187, Python 11/11, build verified 47 files in dist/ALO4OBS-v0.7.1.zip. Native details menus were checked in Chrome at 920/480/360 px; links, opposite-page navigation, mutual exclusion and Escape passed. Wide and 360 px brand center matched header center. The outer window size was preserved. Independent high-effort header review found no confirmed defect.
+
+## Final 0.8.0 source verification — 2026-10-07
+
+Node 189/189 and Python 11/11 passed; dist/ALO4OBS-v0.8.0.zip built and verified with 47 files. Actual Chrome origin 8765 loaded versioned CSS/JavaScript after an earlier cached-style mismatch. All UI icons use official Lucide 0.468.0 stock glyphs. Global sliders update labels on input; opacity, blur and stroke width increase left to right. English/Japanese labels, preview opacity/blur, reload persistence and final left-label/right-value alignment passed. Main/Sub text is left of the vertical switch. A 480px viewport has no horizontal overflow. Independent high-effort source review passed. Native/platform limits above remain open; this is not a public-release claim.

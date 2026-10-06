@@ -47,7 +47,7 @@ test('visibility changes repair all fixed sizes before saving geometry',()=>{
 
 test('pointer slider input snaps to recalculated aspect marks while keyboard input stays precise',()=>{
  const start=source.indexOf("  form.addEventListener('input',event=>{")+"  form.addEventListener('input',event=>{".length;
- const end=source.indexOf("    if(input.matches('[data-enabled]'))",start);
+ const end=source.indexOf("    if(input.matches('[data-panel-count]'))",start);
  function slide(value,height,pointer=true){
   const input={name:'panelWidthSlider',value:String(value),min:'220',max:'660'},number={value:'0'};
   const context={selected:'custom1',snappingSlider:pointer?input:null,config:{layout:{custom1:{width:440,height}}},OverlayEvents:events,control:()=>number};
@@ -72,4 +72,24 @@ test('committing a size preserves the panel button receiving the next click',()=
  assert.equal(hits.querySelector('[data-hit="custom1"]').attributes['aria-pressed'],'true');
  assert.match(hits.querySelector('[data-hit="custom1"]').style.cssText,/width:26.041/);
  config.panelEnabled.chat=false;context.drawHits(layout);assert.equal(hits.children.length,6);assert.equal(hits.querySelector('[data-hit="chat"]'),null);
+});
+
+test('placement card has no level selects and one swap toggle that flips Main and Sub rows',()=>{
+ const start=source.indexOf('  function renderPlacement(){'),end=source.indexOf('  const editorRow=');
+ const html={};
+ const context={config:{panelPlacement:events.defaultPlacement(),panelEnabled:{}},panelGroups:{sub:keys.slice(1,4),side:keys.slice(4)},keys,names:Object.fromEntries(keys.map(k=>[k,k])),OverlayEvents:events,structuredClone,sizeConstraintTarget:null,
+  byId:()=>html,propertyRow:(label,c,name,v,checked)=>`<toggle ${name} ${checked?'on':'off'}>${c}`};
+ vm.runInNewContext(source.slice(start,end),context);
+ context.renderPlacement();
+ assert.ok(!/<select|data-placement-level/.test(html.innerHTML));
+ assert.equal((html.innerHTML.match(/type="checkbox"/g)||[]).length,0);
+ assert.equal((html.innerHTML.match(/type="range"/g)||[]).length,2);
+ assert.match(html.innerHTML,/<toggle placementSwap off>/);
+ context.updatePlacement({name:'placementSwap',checked:true});
+ const p=context.config.panelPlacement;
+ assert.equal(p.game.level2,'bottom');
+ for(const k of ['custom1','custom2','custom3'])assert.equal(p[k].level2,'top');
+ assert.match(html.innerHTML,/<toggle placementSwap on>/);
+ context.updatePlacement({name:'placementSwap',checked:false});
+ assert.equal(context.config.panelPlacement.game.level2,'top');
 });

@@ -2,6 +2,7 @@
 import importlib.util
 from contextlib import contextmanager
 from pathlib import Path
+import re
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -37,7 +38,12 @@ class BuildTests(unittest.TestCase):
         self.assertIn('window.OVERLAY_CONFIG', lua)
 
     def test_delivery_filename_contract(self):
-        self.assertEqual(builder.output.name, 'OBS-Streaming-Template.zip')
+        self.assertEqual(builder.output.name, f'ALO4OBS-v{builder.version}.zip')
+
+    def test_filename_includes_version(self):
+        version_js = (builder.source / 'version.js').read_text(encoding='utf-8')
+        version = re.search(r"'([0-9.]+)'", version_js).group(1)
+        self.assertEqual(builder.output.name, f'ALO4OBS-v{version}.zip')
 
     def test_neutral_defaults_inventory_and_crc(self):
         with temporary_destination() as destination:
@@ -86,6 +92,11 @@ class BuildTests(unittest.TestCase):
                     scripts = re.findall(r'<script[^>]*src="([^"]+)"', archive.read(entry).decode('utf-8'))
                     if 'internal/config.public.js' in scripts:
                         self.assertEqual(scripts.count('internal/config.public.js'), 1)
+                        # Guide pages only need the public repository/donation links, not a
+                        # full local-settings override.
+                        if entry.rsplit('/', 1)[-1].startswith('guide'):
+                            self.assertNotIn('config.js', scripts)
+                            continue
                         self.assertEqual(scripts.count('config.js'), 1)
                         self.assertLess(scripts.index('internal/config.public.js'), scripts.index('config.js'))
                 self.assertNotRegex(demo_js, r'team-tgm|tgm26|sample-mission|season-11|sample-handcam')
@@ -124,6 +135,18 @@ class BuildTests(unittest.TestCase):
             self.assertEqual(destination.read_bytes(), b'previous delivery')
             self.assertTrue(temporary_paths)
             self.assertTrue(all(not path.exists() for path in temporary_paths))
+
+
+class PublicConfigUrlGuardTests(unittest.TestCase):
+    def test_allowlisted_repository_and_donation_links_pass(self):
+        builder.check_public_config_urls(
+            b'repository: "https://github.com/kmg200164/OBS-streaming-template", '
+            b'donation: "https://buymeacoffee.com/kmg200164"'
+        )
+
+    def test_other_url_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, 'Public defaults must not contain personal URLs.'):
+            builder.check_public_config_urls(b'"https://example.com/not-allowed"')
 
 
 if __name__ == '__main__':

@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const api = require('../template/events.js');
-const keys = Object.keys(api.defaultPlacement());
+const keys = Object.keys(api.resolveLayout());
 const fixed = (axis, value) => ({[axis + 'Mode']:'fixed', [axis]:value});
 function layout(sizing={},enabled={},placement=api.defaultPlacement()) {
  return api.autoLayout({placement,enabled,sizing});
@@ -63,8 +63,10 @@ test('fixed sizes work in reversed rows and reordered legacy layouts',()=>{
  const reordered=api.autoLayout({order:['chat','game','custom1','custom2','custom3','translation','hand'],sizing:{game:fixed('width',600)}});
  assert.equal(reordered.game.width,440);assert.equal(reordered.custom1.width,440);separate(reordered);
 });
-test('space constraints reject overflow and invalid sizing instead of shrinking fixed dimensions',()=>{
- assert.throws(()=>layout({custom1:fixed('width',1000),custom2:fixed('width',1000)}),/Fixed panel sizes exceed available/);
+test('height overflow and invalid sizing are rejected; an overfull Sub row renders fitted',()=>{
+ const fitted=layout({custom1:fixed('width',1000),custom2:fixed('width',1000)});separate(fitted);
+ assert.ok(fitted.custom3.x+fitted.custom3.width<=1416);
+ assert.throws(()=>api.autoLayout({placement:api.defaultPlacement(),sizing:{custom1:fixed('width',660),custom2:fixed('width',660)},strict:true}),/Fixed panel sizes exceed available/);
  assert.throws(()=>layout({game:fixed('height',900),custom1:fixed('height',200)}),/Fixed panel sizes exceed available/);
  assert.throws(()=>layout({chat:fixed('height',1000)}),/Fixed panel sizes exceed available/);
  for(const input of [null,[],{game:null},{unknown:{}},{game:{widthMode:'fill'}},{game:fixed('width',0)},{game:fixed('width',2.5)},{game:fixed('width',Infinity)},{game:fixed('height',1017)}])assert.throws(()=>api.normalizeSizing(input),/siz|width|height|panel/i);
@@ -80,7 +82,7 @@ test('active-panel limits preserve readable automatic siblings over all visibili
     const boxes=layout({[key]:fixed(axis,value)},enabled);separate(boxes,enabled);
     for(const peer of keys.filter(peer=>enabled[peer])){
      assert.ok(boxes[peer][axis]>=(axis==='width'&&api.canResizeWidth(peer)?Math.min(reference[peer].height,reference[peer].width):Math.ceil(reference[peer][axis]/2)));
-     if(api.defaultPlacement()[peer].level1==='right'){assert.equal(boxes[peer].x,1448);assert.ok(boxes[peer].width<=440);}
+     if(['chat','translation','hand'].includes(peer)){assert.equal(boxes[peer].x,1448);assert.ok(boxes[peer].width<=440);}
      else assert.ok(boxes[peer].x+boxes[peer].width<=1416);
     }
    }
@@ -133,10 +135,9 @@ test('main aspect choices survive disabled lower panels and settings export',()=
  assert.throws(()=>api.normalizeSizing({game:{aspect:'4:3'}}),/aspect/);
 });
 
-test('main aspect uses its actual width with row peers or a right-side parent',()=>{
- for(const aspect of ['16:9','21:9','32:9'])for(const side of ['left','right']){
-  const placement=api.defaultPlacement();
-  if(side==='left')placement.chat.level1='left';else placement.game.level1='right';
+test('main aspect uses its actual width in either row',()=>{
+ for(const aspect of ['16:9','21:9','32:9'])for(const row of ['top','bottom']){
+  const placement=api.defaultPlacement();placement.game.level2=row;
   const boxes=layout({game:{aspect}}, {}, placement);
   assert.equal(boxes.game.height,Math.floor(boxes.game.width*9/Number(aspect.split(':')[0])));
   separate(boxes);

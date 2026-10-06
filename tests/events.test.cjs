@@ -37,16 +37,19 @@ test('auto layout preserves the seven-panel Figma geometry by default', () => {
  assert.deepEqual(api.autoLayout({placement:api.defaultPlacement()}),api.resolveLayout());
 });
 
-test('hierarchical levels move and resize panels without disturbing their peers', () => {
- const placement=api.defaultPlacement();
- placement.custom3.level1='right';placement.custom3.level2='bottom';
- const moved=api.autoLayout({placement});
- assert.deepEqual(moved.custom1,{x:32,y:842,width:676,height:206});
- assert.deepEqual(moved.custom2,{x:740,y:842,width:676,height:206});
- assert.equal(moved.custom3.x,1448);
- assert.equal(moved.custom3.width,440);
+test('old Side positions and left/right choices restore the default frames without errors', () => {
+ const old={game:{level1:'right',level2:'bottom',level3:'left'},custom1:{level1:'left',level2:'bottom',level3:'left'},custom2:{level1:'left',level2:'bottom',level3:'center'},custom3:{level1:'right',level2:'top',level3:'right'},
+  chat:{level1:'left',level2:'bottom',level3:'right'},translation:{level1:'middle',level2:'sideways',level3:'up'},hand:{level1:'right',level2:'top',level3:'left'}};
+ const normalized=api.normalizePlacement(old);
+ assert.deepEqual(normalized,api.defaultPlacement());
+ assert.deepEqual(Object.keys(normalized),['game','custom1','custom2','custom3']);
+ assert.deepEqual(api.autoLayout({placement:old}),api.resolveLayout());
+ const pack=require('../template/pack.js');
+ const content=Object.fromEntries(Object.keys(api.resolveLayout()).map(key=>[key,{type:'none',url:''}]));
+ const saved=JSON.parse(new TextDecoder().decode(pack.settingsEntries({layoutVersion:4,panelPlacement:old,panelContent:content})[0].bytes));
+ assert.deepEqual(saved.panelPlacement,api.defaultPlacement());
+ assert.deepEqual(saved.layout,api.resolveLayout());
  assert.deepEqual(api.autoLayout({placement:api.defaultPlacement(),enabled:{custom2:false}}).chat,api.resolveLayout().chat);
- assert.throws(()=>api.autoLayout({placement:{game:{level1:'middle',level2:'top',level3:'left'}}}),/frame level/);
 });
 
 test('left game and custom band normalize to opposite rows, with game retaining the large row',()=>{
@@ -62,7 +65,7 @@ test('left game and custom band normalize to opposite rows, with game retaining 
  assert.equal(boxes.game.height,778);assert.equal(boxes.game.y,270);
  for(const key of ['custom1','custom2','custom3'])assert.equal(boxes[key].height,206);
  api.validateLayout(boxes);
- const keys=Object.keys(bottom);
+ const keys=Object.keys(api.resolveLayout());
  for(let bits=0;bits<1<<keys.length;bits++){
   const enabled=Object.fromEntries(keys.map((key,index)=>[key,!!(bits&(1<<index))]));
   const layout=api.autoLayout({placement:bottom,enabled});api.validateLayout(layout);
@@ -84,13 +87,12 @@ test('explicit custom vertical change syncs the left band and puts game opposite
  api.validateLayout(boxes);
 });
 
-test('left center canonicalizes to its default row while right center remains valid',()=>{
+test('left center canonicalizes to its default row',()=>{
  const placement=api.defaultPlacement();
- placement.game.level2='center';placement.custom2.level2='center';placement.translation.level2='center';
+ placement.game.level2='center';placement.custom2.level2='center';
  const normalized=api.normalizePlacement(placement);
  assert.equal(normalized.game.level2,'top');
  assert.equal(normalized.custom2.level2,'bottom');
- assert.equal(normalized.translation.level2,'center');
  assert.throws(()=>api.normalizePlacement({...placement,game:{...placement.game,level2:'sideways'}}),/frame level/);
 });
 
@@ -119,7 +121,7 @@ test('fixed custom order survives game-bottom band placement',()=>{
 });
 
 test('hierarchical layout keeps active panels separate for every visibility combination', () => {
- const keys=Object.keys(api.defaultPlacement());
+ const keys=Object.keys(api.resolveLayout());
  for(let bits=0;bits<1<<keys.length;bits++){
   const enabled=Object.fromEntries(keys.map((key,index)=>[key,!!(bits&(1<<index))]));
   const layout=api.autoLayout({placement:api.defaultPlacement(),enabled});

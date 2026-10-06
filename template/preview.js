@@ -2,7 +2,8 @@
   const byId=id=>document.getElementById(id);
   const form=byId('settings'), frame=byId('preview'), status=byId('status');
   const keys=['game','custom1','custom2','custom3','chat','translation','hand'];
-  const names=Object.fromEntries(keys.map((key,index)=>[key,`패널 ${index+1}`]));
+  const names=OverlayEvents.panelLabels;
+  const panelGroups={sub:keys.slice(1,4),side:keys.slice(4)};
   const defaults=structuredClone(window.OVERLAY_PUBLIC_CONFIG);
   const sourceConfig=structuredClone(window.OVERLAY_CONFIG);
   const sourceFingerprint=sourceConfig?.layoutVersion>=3?JSON.stringify(sourceConfig):'';
@@ -27,12 +28,7 @@
   const cameraVideo=byId('camera-preview-video');
   byId('app-version').textContent='v'+window.KMG_VERSION;
 
-  // The Figma path selectors are a hierarchy: side → row → slot. The layout
-  // engine alone projects these groups to the OBS pixel coordinates.
-  const levelOptions={
-    level1:[['left','왼쪽'],['right','오른쪽']],
-    level2:[['top','위'],['center','가운데'],['bottom','아래']]
-  };
+  // Only Main and the Sub band swap rows; Side panels stay fixed in the right frame.
   const optionHtml=(items,value)=>items.map(([v,label])=>`<option value="${v}"${v===value?' selected':''}>${label}</option>`).join('');
   const send=(target,action,data)=>target.contentWindow?.postMessage({channel:'kmg-preview',action,data},'*');
   const control=(name)=>form.elements.namedItem(name);
@@ -48,13 +44,34 @@
     return background;
   }
   const opacityPresets=[100,70,40,20,10],blurPresets=[64,32,16,8,4],strokeWidthPresets=[8,6,4,2,1];
+  const globalOpacityPresets=[...opacityPresets].reverse(),globalBlurPresets=[...blurPresets].reverse(),globalStrokeWidthPresets=[...strokeWidthPresets].reverse();
   function nearestPreset(value,values,fallback){
     const numberValue=Number(value);if(!Number.isFinite(numberValue))return fallback;
     return values.reduce((best,candidate)=>Math.abs(candidate-numberValue)<Math.abs(best-numberValue)||Math.abs(candidate-numberValue)===Math.abs(best-numberValue)&&candidate<best?candidate:best,values[0]);
   }
-  function presetSelect(name,value,values,fallback){
-    const selected=nearestPreset(value,values,fallback),labels=['매우 강함','강함','중간','약함','매우 약함'];
+  const gapLabels=['매우 좁음','좁음','보통','넓음','매우 넓음'];
+  const globalStrengthLabels=['매우 약함','약함','중간','강함','매우 강함'];
+  function presetSelect(name,value,values,fallback,labels=['매우 강함','강함','중간','약함','매우 약함']){
+    const selected=nearestPreset(value,values,fallback);
     return `<select name="${name}">${values.map((amount,index)=>`<option value="${amount}"${amount===selected?' selected':''}>${labels[index]}</option>`).join('')}</select>`;
+  }
+  function presetRange(name,value,values,fallback,labels=['매우 강함','강함','중간','약함','매우 약함'],unit=''){
+    const selected=nearestPreset(value,values,fallback),index=values.indexOf(selected);
+    return `<div class="size-controls"><span class="value-text" data-preset-label="${name}">${presetLabel(labels,index,selected,unit)}</span><input name="${name}" type="range" min="0" max="${values.length-1}" step="1" value="${index}"><div class="size-ratio-marks" aria-hidden="true">${values.map((_,mark)=>`<span style="left:${mark/(values.length-1)*100}%">${mark+1}</span>`).join('')}</div></div>`;
+  }
+  function presetLabel(labels,index,value,unit){return `<span data-preset-strength>${window.KMGI18n?.localize(labels[index])||labels[index]}</span> (${value}${unit})`;}
+  function presetRangeValue(name,values,fallback){
+    const index=Number(control(name)?.value);
+    return values[Number.isInteger(index)&&index>=0&&index<values.length?index:values.indexOf(fallback)];
+  }
+  function globalPreset(name){
+    return name==='panelGap'?[OverlayEvents.panelGaps,gapLabels,'px']:name==='globalFillOpacity'?[globalOpacityPresets,globalStrengthLabels,'%']:name==='globalFillBlur'?[globalBlurPresets,globalStrengthLabels,'px']:name==='globalStrokeWidth'?[globalStrokeWidthPresets,globalStrengthLabels,'px']:null;
+  }
+  function updatePresetLabel(input){
+    const preset=globalPreset(input.name);if(!preset)return false;
+    const [values,labels,unit]=preset,index=Math.max(0,Math.min(values.length-1,Number(input.value)||0));
+    const label=form.querySelector(`[data-preset-label="${input.name}"]`);if(label)label.innerHTML=presetLabel(labels,index,values[index],unit);
+    return true;
   }
   function forceStrokeAlpha(part){
     if(!part||typeof part!=='object')return;
@@ -64,8 +81,8 @@
   }
   function normalizeStylePresets(next){
     const fill=next.globalStyle.fill,stroke=next.globalStyle.stroke;
-    fill.opacity=nearestPreset(fill.opacity,opacityPresets,20);fill.blur=nearestPreset(fill.blur,blurPresets,32);
-    stroke.width=nearestPreset(stroke.width,strokeWidthPresets,4);forceStrokeAlpha(stroke);next.borderOpacity=100;
+    fill.opacity=nearestPreset(fill.opacity,globalOpacityPresets,20);fill.blur=nearestPreset(fill.blur,globalBlurPresets,32);
+    stroke.width=nearestPreset(stroke.width,globalStrokeWidthPresets,4);forceStrokeAlpha(stroke);next.borderOpacity=100;
     for(const region of Object.values(next.regionBackgrounds)){
       if(!region||typeof region!=='object')continue;
       region.opacity=nearestPreset(region.fill?.opacity??region.opacity,opacityPresets,20);
@@ -102,14 +119,24 @@
     }
     return migrated;
   }
+  // Restore legacy holes by their active count; each group keeps at least one panel.
+  function normalizePanelEnabled(input){
+    const enabled={game:true};
+    for(const group of Object.values(panelGroups)){
+      const count=Math.max(1,group.filter(key=>input?.[key]!==false).length);
+      group.forEach((key,index)=>enabled[key]=index<count);
+    }
+    return enabled;
+  }
   function normalize(input){
     const next={...structuredClone(defaults),...structuredClone(input||{})};
     next.layoutVersion=4;
     next.panelSizing=OverlayEvents.normalizeSizing(next.panelSizing);
+    next.panelGap=OverlayEvents.normalizeGap(next.panelGap);
     next.panelSizing.game.aspect ||= '16:9';
     next.panelContent=migratePanelContent(input||next);
     for(const legacy of ['chatUrl','translationUrl','reactiveUrl','donationChzzk','donationTwitch','donationYoutube','donationSoop','sponsor','sponsorType','slotContent','customSlotMedia','cameraMode','handcam','platforms','showSponsor','showSubtitles','showChat','showAlerts'])delete next[legacy];
-    next.panelEnabled=Object.fromEntries(keys.map(key=>[key,next.panelEnabled?.[key]!==false]));
+    next.panelEnabled=normalizePanelEnabled(next.panelEnabled);
     next.panelPlacement=OverlayEvents.normalizePlacement(Object.fromEntries(keys.map(key=>[key,{...initialPlacement[key],...next.panelPlacement?.[key]}])));
     next.regionBackgrounds={...defaults.regionBackgrounds,...next.regionBackgrounds};
     next.regionStyleOverrides={...next.regionStyleOverrides};
@@ -142,8 +169,8 @@
       return `<${element}${attributes} aria-labelledby="${refs}">`;
     });
   }
-  function propertyRow(label,controlHtml,radioName,value,checked,choiceType='radio',variant=''){
-    const choice=radioName?`<input type="${choiceType}" name="${radioName}"${choiceType==='checkbox'?'':` value="${value}"`}${checked?' checked':''}>`:'';
+  function propertyRow(label,controlHtml,radioName,value,checked,choiceType='radio',variant='',choiceAttributes=''){
+    const choice=radioName?`<input type="${choiceType}" name="${radioName}"${choiceType==='checkbox'?'':` value="${value}"`}${choiceAttributes}${checked?' checked':''}>`:'';
     const labelId=`property-row-label-${++nextPropertyLabelId}`;
     return `<div class="property-row${variant?` ${variant}`:''}"><label>${choice}<span id="${labelId}">${label}</span></label><div class="property-value">${bindRowLabel(controlHtml,labelId)}</div></div>`;
   }
@@ -210,6 +237,9 @@
   function renderGlobal(){
     const s=config.globalStyle,b=s.background,f=s.fill,t=s.stroke;
     byId('global-settings').innerHTML=`<div class="global-stack">
+      <div class="property-section"><h4>배치</h4><div class="property-group">
+        ${propertyRow('간격',presetRange('panelGap',config.panelGap,OverlayEvents.panelGaps,32,gapLabels,'px'),'','',false,'radio','property-row--size property-row--preset')}
+      </div></div><div class="divider"></div>
       <div class="property-section" id="global-background-group"><h4>배경</h4><div class="property-group">
         ${propertyRow('단색',color('globalBackgroundColor',b.color),'globalBackgroundMode','solid',b.mode==='solid')}
         ${propertyRow('그라디언트',gradientControl('globalBackground'),'globalBackgroundMode','gradient',b.mode==='gradient')}
@@ -220,32 +250,44 @@
         ${propertyRow('없음','','globalFillMode','none',f.mode==='none')}
         ${propertyRow('단색',color('globalFillColor',f.color),'globalFillMode','solid',f.mode==='solid')}
         ${propertyRow('그라디언트',gradientControl('globalFill'),'globalFillMode','gradient',f.mode==='gradient')}
-        ${propertyRow('불투명도',presetSelect('globalFillOpacity',f.opacity,opacityPresets,20))}
-        ${propertyRow('흐림',presetSelect('globalFillBlur',f.blur,blurPresets,32))}
+        ${propertyRow('불투명도',presetRange('globalFillOpacity',f.opacity,globalOpacityPresets,20,globalStrengthLabels,'%'),'','',false,'radio','property-row--size property-row--preset')}
+        ${propertyRow('흐림',presetRange('globalFillBlur',f.blur,globalBlurPresets,32,globalStrengthLabels,'px'),'','',false,'radio','property-row--size property-row--preset')}
       </div></div><div class="divider"></div>
       <div class="property-section"><h4>패널 테두리</h4><div class="property-group">
         ${propertyRow('없음','','globalStrokeMode','none',t.mode==='none')}
         ${propertyRow('단색',color('globalStrokeColor',t.color),'globalStrokeMode','solid',t.mode==='solid')}
         ${propertyRow('그라디언트',gradientControl('globalStroke'),'globalStrokeMode','gradient',t.mode==='gradient')}
-        ${propertyRow('두께',presetSelect('globalStrokeWidth',t.width,strokeWidthPresets,4))}
+        ${propertyRow('두께',presetRange('globalStrokeWidth',t.width,globalStrokeWidthPresets,4,globalStrengthLabels,'px'),'','',false,'radio','property-row--size property-row--preset')}
       </div></div></div>`;
     control('globalBackgroundUrl').value=b.url||'';
     paintGradientControls();
   }
   function renderPlacement(){
-    byId('placement-list').innerHTML=keys.map(key=>{
-      const p=config.panelPlacement[key],fields=['level1','level2'];
-      return `<div class="placement-row" data-placement="${key}"><label class="placement-heading"><input type="checkbox" data-enabled="${key}"${config.panelEnabled[key]?' checked':''}><span>${names[key]}</span></label><div class="placement-fields">${fields.map(level=>{const options=level==='level2'&&p.level1==='left'?levelOptions.level2.filter(([value])=>value!=='center'):levelOptions[level],label=level==='level1'?'상위 프레임':'하위 프레임';return `<label class="form-field">${label}<select data-placement-level="${level}" data-panel="${key}">${optionHtml(options,p[level])}</select></label>`;}).join('')}</div></div>`;
+    const swap=propertyRow('Main·Sub 위아래 바꾸기','','placementSwap',undefined,config.panelPlacement.game.level2==='bottom','checkbox','property-row--toggle property-row--size property-row--placement-switch',' role="switch"');
+    const counts=Object.entries(panelGroups).map(([group,panels])=>{
+      const name=group+'Count',count=panels.filter(key=>config.panelEnabled[key]).length;
+      const range=`<div class="size-controls"><input name="${name}" data-panel-count="${group}" type="range" min="1" max="3" step="1" value="${count}"><div class="size-ratio-marks" aria-hidden="true">${[1,2,3].map(value=>`<span style="left:${(value-1)*50}%">${value}</span>`).join('')}</div></div>`;
+      return propertyRow(group==='sub'?'Sub 개수':'Side 개수',range,'',undefined,false,'radio','property-row--size property-row--count');
     }).join('');
+    byId('placement-list').innerHTML=swap+counts;
+  }
+  function updatePanelCount(input){
+    const group=panelGroups[input.dataset.panelCount];
+    if(!group)return false;
+    readEditor();
+    const count=Math.min(3,Math.max(1,Math.round(Number(input.value)||1)));
+    input.value=count;
+    group.forEach((key,index)=>config.panelEnabled[key]=index<count);
+    if(selected&&!config.panelEnabled[selected]){selected=null;renderEditor();}
+    sizeConstraintTarget=group[count-1];
+    return true;
   }
   function updatePlacement(input){
-    if(!input.matches('[data-placement-level]'))return false;
-    const key=input.dataset.panel,level=input.dataset.placementLevel;
-    if(!config.panelPlacement[key])return false;
+    if(input.name!=='placementSwap')return false;
     const placement=structuredClone(config.panelPlacement);
-    placement[key][level]=input.value;
-    config.panelPlacement=OverlayEvents.normalizePlacement(placement,level==='level2'?key:undefined);
-    sizeConstraintTarget=key;
+    placement.game.level2=input.checked?'bottom':'top';
+    config.panelPlacement=OverlayEvents.normalizePlacement(placement);
+    sizeConstraintTarget='game';
     renderPlacement();
     return true;
   }
@@ -259,14 +301,16 @@
   const editorToggle=(label,name,checked)=>propertyRow(label,'',name,undefined,checked,'checkbox','property-row--toggle');
   function renderEditor(){
     byId('panel-empty').hidden=!!selected;byId('panel-editor').hidden=!selected;
+    const panelTag=byId('selected-panel-tag');if(panelTag)panelTag.hidden=!selected;
     if(!selected){byId('panel-editor').replaceChildren();return;}
     const key=selected,region=config.regionBackgrounds[key]||{},item=config.panelContent[key]||{type:'none',url:''};
+    if(panelTag)panelTag.textContent=names[key];
     const kinds=[['none','없음'],['source','OBS 소스'],['web','웹 주소'],['media','이미지/영상']];
     const section=(title,html)=>`<div class="property-section"><h4>${title}</h4><div class="property-group">${html}</div></div>`;
     const content=section('콘텐츠',`${editorSelect('콘텐츠 종류','panelContentType',kinds,item.type)}<div id="panel-content-extra" class="property-group"></div>`);
     const size=config.panelSizing[key],sizeModes=[['auto','자동'],['fixed','수동']];
     const sizeControl=axis=>{const title=axis==='width'?'너비':'높이',name=axis==='width'?'panelWidth':'panelHeight';if(key==='game')return axis==='height'?editorSelect('화면 비율','panelAspect',[['auto','자동'],['16:9','16:9'],['21:9','21:9'],['32:9','32:9']],size.aspect||'16:9'):'';if(axis==='width'&&!OverlayEvents.canResizeWidth(key)||axis==='height'&&!OverlayEvents.canResizeHeight(key))return '';return editorRow(title,`<select name="${name}Mode">${optionHtml(sizeModes,size[axis+'Mode'])}</select><div class="size-controls" data-fixed-size="${axis}"${size[axis+'Mode']==='fixed'?'':' hidden'}><input name="${name}" type="number" min="1" step="1" aria-label="${title} (px)"><input name="${name}Slider" type="range" min="1" step="1" list="${name}-ratios" aria-label="${title} 슬라이더"><datalist id="${name}-ratios"></datalist><div class="size-ratio-marks" data-ratio-marks="${axis}"></div><span class="editor-help" data-size-range="${axis}"></span></div>`,'property-row--size');};
-    const sizing=section('크기',`${sizeControl('width')}${sizeControl('height')}<div class="size-help"><p class="editor-help"><span>현재 비율</span>: <span data-panel-ratio></span></p>${key==='game'?'':'<p class="editor-help">자동: 남은 공간을 채웁니다. 수동: 입력한 픽셀 크기를 유지합니다.</p><p class="editor-help">슬라이더의 1:1·16:9 눈금에 가까이 드래그하면 해당 비율에 맞춰집니다.</p>'}</div>`);
+    const sizing=section('크기',`${sizeControl('width')}${OverlayEvents.canResizeWidth(key)?'<p class="editor-help" data-sub-width-warning role="status" hidden></p>':''}${sizeControl('height')}<div class="size-help"><p class="editor-help"><span>현재 비율</span>: <span data-panel-ratio></span></p>${key==='game'?'':'<p class="editor-help">자동: 남은 공간을 채웁니다. 수동: 입력한 픽셀 크기를 유지합니다.</p><p class="editor-help">슬라이더의 1:1·16:9 눈금에 가까이 드래그하면 해당 비율에 맞춰집니다.</p>'}</div>`);
 
     const fill=region.fill||{mode:'solid',color:region.color||'#ffffff',opacity:region.opacity??20,blur:region.blur??16};
     const stroke=region.stroke||{mode:region.borderVisible===false?'none':'solid',color:region.borderColor||'#ffffff',opacity:100,width:4};
@@ -286,7 +330,7 @@
       ${fieldHtml('이미지 경로 또는 URL','regionImage','text','placeholder="assets/image.png 또는 https://…"',true)}
       ${editorFile('이미지 파일','region','image/png,image/jpeg,image/webp,image/gif')}
       </div>`);
-    byId('panel-editor').innerHTML=`<h4 class="editor-title"><span class="panel-number">${names[key]}</span></h4>${sizing}<div class="divider"></div>${content}<div class="divider"></div>${regionInputs}`;
+    byId('panel-editor').innerHTML=`${sizing}<div class="divider"></div>${content}<div class="divider"></div>${regionInputs}`;
     for(const [name,value] of Object.entries({regionColor:fill.color||region.color||'#ffffff',regionOpacity:nearestPreset(fill.opacity??region.opacity,opacityPresets,20),regionBlur:nearestPreset(fill.blur??region.blur,blurPresets,16),regionBorderColor:stroke.color||region.borderColor||'#ffffff',regionStrokeWidth:nearestPreset(stroke.width,strokeWidthPresets,4),regionImage:region.image||''})){const input=control(name);if(input)input.value=value;}
     syncSizeControls();
     renderContentExtra();
@@ -360,8 +404,9 @@
       const prefix=part===b?'globalBackground':part===f?'globalFill':'globalStroke';
       for(const suffix of fields){const input=control(prefix+suffix);if(!input)continue;const prop=suffix.toLowerCase()==='color2'?'color2':suffix.toLowerCase();part[prop]=['opacity','blur','width'].includes(prop)?Number(input.value):input.value;}
     }
-    f.opacity=nearestPreset(f.opacity,opacityPresets,20);f.blur=nearestPreset(f.blur,blurPresets,32);
-    t.width=nearestPreset(t.width,strokeWidthPresets,4);forceStrokeAlpha(t);
+    f.opacity=presetRangeValue('globalFillOpacity',globalOpacityPresets,20);f.blur=presetRangeValue('globalFillBlur',globalBlurPresets,32);
+    if(control('panelGap'))config.panelGap=OverlayEvents.normalizeGap(presetRangeValue('panelGap',OverlayEvents.panelGaps,32));
+    t.width=presetRangeValue('globalStrokeWidth',globalStrokeWidthPresets,4);forceStrokeAlpha(t);
     config.backgroundColor=b.color;config.backgroundImage=['file','url'].includes(b.mode)?b.url:'';
   }
   function liveConfig(source){
@@ -388,29 +433,38 @@
     const target=sizeConstraintTarget||selected,ordered=target?[target,...keys.filter(key=>key!==target)]:keys;
     sizeConstraintTarget=null;
     // Recompute against active siblings and gaps after any frame change.
+    // With every enabled Sub manual, Sub widths keep only their own range: a
+    // row that no longer fits is warned about (subWidthWarning), not rewritten.
+    const subs=['custom1','custom2','custom3'],allManual=subs.every(key=>config.panelEnabled[key]===false||config.panelSizing[key].widthMode==='fixed');
     for(const key of ordered)for(const axis of ['width','height']){
       const size=config.panelSizing[key];
       if(size[axis+'Mode']!=='fixed'||config.panelEnabled[key]===false)continue;
-      const bounds=OverlayEvents.sizingBounds({placement:config.panelPlacement,enabled:config.panelEnabled,sizing:config.panelSizing},key,axis);
+      const own=allManual&&axis==='width'&&subs.includes(key);
+      const sizing=own?{...config.panelSizing,...Object.fromEntries(subs.filter(peer=>peer!==key).map(peer=>[peer,{...config.panelSizing[peer],widthMode:'auto'}]))}:config.panelSizing;
+      const bounds=OverlayEvents.sizingBounds({placement:config.panelPlacement,enabled:config.panelEnabled,sizing,gap:config.panelGap},key,axis);
       size[axis]=Math.min(bounds.max,Math.max(bounds.min,Math.round(size[axis]||bounds.min)));
     }
   }
+  // Warnings never block saving or applying; the layout fits an overfull row.
+  const subWidthWarnings={gap:'빈 공간이 생겼어요. Sub 패널 하나의 너비를 자동으로 바꾸면 채워져요.',overflow:'Sub 패널 너비의 합이 프레임보다 커요. 너비를 줄이거나 하나를 자동으로 바꾸세요.'};
   function syncSizeControls(){
     if(!selected)return;
     for(const axis of ['width','height']){
-      const name=axis==='width'?'panelWidth':'panelHeight';if(!control(name))continue;const bounds=OverlayEvents.sizingBounds({placement:config.panelPlacement,enabled:config.panelEnabled,sizing:config.panelSizing},selected,axis);
+      const name=axis==='width'?'panelWidth':'panelHeight';if(!control(name))continue;const bounds=OverlayEvents.sizingBounds({placement:config.panelPlacement,enabled:config.panelEnabled,sizing:config.panelSizing,gap:config.panelGap},selected,axis);
       for(const input of [control(name),control(name+'Slider')]){input.min=bounds.min;input.max=bounds.max;input.value=config.panelSizing[selected][axis+'Mode']==='fixed'?config.panelSizing[selected][axis]:(config.layout?.[selected]?.[axis]||config.panelSizing[selected][axis]);}
       byId('panel-editor').querySelector(`[data-size-range="${axis}"]`).textContent=`${bounds.min}–${bounds.max} px`;
       const box=config.layout?.[selected]||config.panelSizing[selected],stops=OverlayEvents.aspectStops(box,axis,bounds);
       byId(name+'-ratios').innerHTML=stops.map(stop=>`<option value="${stop.value}" label="${stop.label}"></option>`).join('');
       byId('panel-editor').querySelector(`[data-ratio-marks="${axis}"]`).innerHTML=stops.map(stop=>`<span style="left:${(stop.value-bounds.min)/Math.max(1,bounds.max-bounds.min)*100}%">${stop.label}</span>`).join('');
     }
+    const warning=byId('panel-editor').querySelector('[data-sub-width-warning]');
+    if(warning){const kind=OverlayEvents.subWidthWarning(config),text=subWidthWarnings[kind]||'';warning.hidden=!text;warning.textContent=text&&(window.KMGI18n?.localize(text)||text);}
     const box=config.layout?.[selected]||config.panelSizing[selected],ratio=box.width/box.height;
     byId('panel-editor').querySelector('[data-panel-ratio]').textContent=Math.abs(box.width-box.height)<=1?'1:1':Math.abs(box.height-box.width*9/16)<=1?'16:9':Math.abs(box.height-box.width*9/21)<=1?'21:9':Math.abs(box.height-box.width*9/32)<=1?'32:9':ratio.toFixed(2)+':1';
   }
   function current(){
     readEditor();readGlobal();clampPanelSizes();
-    config.layout=OverlayEvents.autoLayout({placement:config.panelPlacement,enabled:config.panelEnabled,sizing:config.panelSizing});
+    config.layout=OverlayEvents.autoLayout({placement:config.panelPlacement,enabled:config.panelEnabled,sizing:config.panelSizing,gap:config.panelGap});
     syncSizeControls();return structuredClone(config);
   }
   function drawHits(layout){
@@ -441,7 +495,7 @@
       showStatus(warning||message||'설정 미리보기 준비 완료',!!warning);
     }catch(error){showStatus(error.message,true);}
   }
-  function selectPanel(key){if(!keys.includes(key)||!config.panelEnabled[key])return;readEditor();selected=selected===key?null:key;if(selected)byId('event-target').value=selected;renderEditor();syncCamera();drawHits(config.layout||OverlayEvents.autoLayout({placement:config.panelPlacement,enabled:config.panelEnabled,sizing:config.panelSizing}));}
+  function selectPanel(key){if(!keys.includes(key)||!config.panelEnabled[key])return;readEditor();selected=selected===key?null:key;if(selected)byId('event-target').value=selected;renderEditor();syncCamera();drawHits(config.layout||OverlayEvents.autoLayout({placement:config.panelPlacement,enabled:config.panelEnabled,sizing:config.panelSizing,gap:config.panelGap}));}
   function reset(){draftReady=true;form.inert=false;byId('bundle').disabled=false;byId('reset').disabled=false;uploadStorage.reset();uploadRequests.clear();missingUploads.clear();storageWarning='';uploads.clear();cameraActive=false;cameraController?.disconnect();config=normalize(defaults);selected=null;renderGlobal();renderPlacement();renderEditor();apply('기본 설정을 복원했습니다');}
 
   form.addEventListener('input',event=>{
@@ -455,12 +509,9 @@
       }
       control(input.name.replace('Slider','')).value=input.value;
     }
-    if(input.matches('[data-enabled]')){
-      const key=input.dataset.enabled;
-      if(!input.checked&&selected===key){readEditor();selected=null;renderEditor();}
-      config.panelEnabled[key]=input.checked;sizeConstraintTarget=key;
-    }
-    if(input.matches('[data-placement-level]'))return;
+    if(input.matches('[data-panel-count]'))updatePanelCount(input);
+    updatePresetLabel(input);
+    if(input.name==='placementSwap')return;
     if(selected&&['panelWidthMode','panelHeightMode'].includes(input.name)){
       const axis=input.name==='panelWidthMode'?'width':'height';
       if(input.value==='fixed'&&config.panelSizing[selected][axis+'Mode']==='auto')control(axis==='width'?'panelWidth':'panelHeight').value=config.layout[selected][axis];
@@ -474,7 +525,8 @@
     const input=event.target;
     if(input.matches('[data-upload]')){handleUpload(input);return;}
     if(input.name==='cameraDevice')return;
-    if(input.matches('[data-placement-level]')){updatePlacement(input);apply();return;}
+    if(input.name==='panelGap'&&presetRangeValue('panelGap',OverlayEvents.panelGaps,32)===8&&config.globalStyle.stroke.mode!=='none'&&window.confirm(localized('간격이 매우 좁습니다. 전역 테두리를 제거할까요? 패널별 개별 설정은 유지됩니다.')))control('globalStrokeMode').value='none';
+    if(input.name==='placementSwap'){updatePlacement(input);apply();return;}
     if(input.name==='regionOverride'){
       const details=byId('panel-editor').querySelector('.region-style-details');
       if(details)details.hidden=!input.checked;

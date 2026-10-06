@@ -1,19 +1,13 @@
-OBS Streaming Template
+ALO4OBS
 
-Open settings.html in the extracted template folder.
-Select Panels 1-7 and choose their content, placement, and style.
-Choose Auto or Manual for the height of Panels 5-7 and the width of Panels 2-4.
-Panels 1, 5, 6 and 7 use automatic width; their width controls are hidden.
-Panels 2-4 use automatic height. Panel 1 offers Auto, 16:9 (default), 21:9, and 32:9. Auto fills the remaining height, including the entire left parent when Panels 2-4 are disabled. Ratio choices keep the selected ratio.
-Panels 2-4 use a minimum width based on the 16:9 reference row height (206 px by default), capped by the available automatic width. Main-panel aspect changes keep this minimum; larger widths remain adjustable.
-Use the number input or slider for manual sizing.
-Limits follow active panels, gaps, and fixed sizes. Out-of-range values are adjusted.
-Uploaded images/videos are retained in this browser for the same settings page.
-Save a settings ZIP for a portable backup before clearing browser data or moving files.
+Open settings.html in this extracted folder.
 
-Save OBS-settings.zip and extract it into a new folder.
-In OBS Tools > Scripts > +, select OBS-script.lua from that extracted folder.
-Select the required sources, then apply the saved settings / auto layout.
-Keep that folder in place; OBS uses its files.
+Main is always enabled. Set the number of Sub panels (left to right) and Side panels (top to bottom); the first selected panels are enabled. Main and Sub rows can be swapped. Panel roles are Main, Sub 1–3, and Side 1–3 in every language.
 
-Personal widget addresses and settings ZIPs must remain private.
+Choose each panel's OBS source, web address, image, or video. Use Auto or Manual sizing where shown. Main offers Auto, 16:9, 21:9, and 32:9. Sub panels retain width controls; Side panels use automatic width.
+
+Use five-step sliders for gap, fill opacity, blur, and stroke width. Choosing an 8 px gap with global stroke enabled asks before disabling that global stroke. Cancel keeps it; regional style overrides are unchanged.
+
+Save OBS-settings.zip and extract it into a folder you will keep. In OBS, open Tools > Scripts > +, select OBS-script.lua from that extracted folder, select the required existing sources, then apply the saved settings / auto layout.
+
+Keep personal widget addresses and exported settings ZIPs private. Save a ZIP before clearing browser data or moving files.

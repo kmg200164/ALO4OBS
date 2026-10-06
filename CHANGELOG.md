@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased — 0.8.0
+
+- Rename the current product interface and OBS scene namespace to ALO4OBS / `ALO ·`.
+- Use Main, Sub 1–3, and Side 1–3 as the shared panel-role names.
+- Replace individual Sub and Side enable switches with panel-count sliders; exports keep the existing `panelEnabled` keys.
+- Keep Main enabled, retain the Main/Sub row swap, and normalize older non-contiguous or disabled panel settings.
+- Change gap, fill opacity, blur, and stroke width controls to five-step sliders.
+- When 8 px is selected with global stroke enabled, ask before disabling that global stroke; cancel preserves it and regional overrides are unchanged.
+- Update language selection, header navigation, and panel-size warnings for the current layout.
+- Use official Lucide 0.468.0 icons throughout the UI; retain ISC and Feather MIT notices.
+- Update slider values immediately while moving, with weaker values on the left and stronger values on the right; localize strength labels in English and Japanese.
+- Align card names left, current values right, and the vertical Main/Sub switch to the right of its label.
+
 ## 0.7.1 — 2026-10-05 23:39:36 +09:00
 
 - Set the minimum width of Panels 2–4 from their 16:9 reference row height (206 px in the default layout), capped by the available automatic width.

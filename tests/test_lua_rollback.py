@@ -15,7 +15,7 @@ class RollbackTests(unittest.TestCase):
 local function copy(t) if type(t)~='table' then return t end local n={} for k,v in pairs(t) do n[k]=copy(v) end return n end
 local function array(t) local n={} for i,v in ipairs(t) do n[i]=v end return n end
 obs={}
-local function template_owned(n) return n:match('^OST') end
+local function template_owned(n) return n:match('^ALO') end
 function obs.obs_source_get_ref(s) s.refs=(s.refs or 0)+1;return s end
 function obs.obs_source_release(s) s.refs=s.refs-1 end
 function obs.obs_source_get_name(s) return s.name end
@@ -62,8 +62,8 @@ function obs.obs_source_get_filter_by_name(s,n) for _,f in ipairs(s.filters) do 
         scenario = r"""
 local root={items={}};local nested={items={}}
 local capture={name='User Capture',settings={device='keep'},filters={},refs=0}
-local mask={name='OST Mask',settings={path='old-mask'},enabled=false,refs=0}
-local group={name='OST Group',settings={value='old'},filters={mask},nested=nested,refs=0}
+local mask={name='ALO Mask',settings={path='old-mask'},enabled=false,refs=0}
+local group={name='ALO Group',settings={value='old'},filters={mask},nested=nested,refs=0}
 local item=obs.obs_scene_add(root,group);item.info={x=10,crop_to_bounds=true};item.crop={left=2};item.locked=true;item.visible=false;item.private.collapsed=true
 local original=obs.obs_scene_add(nested,capture);original.info={x=20};original.crop={left=3};original.locked=true
 -- Original deletion is deferred until commit, keeping IDs and extra state.
@@ -72,11 +72,11 @@ local baseline=snapshot_layout(root)
 -- Model a successful first panel mutation followed by another panel failure.
 item.info.x=99;item.visible=true;item.private.collapsed=false
 original.scale_filter=3;original.blend_mode=2;original.blend_method=1;original.selected=true;original.hotkey=42
-obs.obs_scene_add(nested,{name='OST New Media',settings={},filters={}})
+obs.obs_scene_add(nested,{name='ALO New Media',settings={},filters={}})
 obs.obs_scene_add(root,capture) -- temporary hidden retention item
-obs.obs_scene_add(root,{name='OST New Group',settings={},filters={}})
+obs.obs_scene_add(root,{name='ALO New Group',settings={},filters={}})
 obs.obs_source_update(group,{value='new',introduced=true});obs.obs_source_update(mask,{path='new-mask',introduced=true});mask.enabled=true
-obs.obs_source_filter_add(group,{name='OST New Filter',settings={},enabled=true})
+obs.obs_source_filter_add(group,{name='ALO New Filter',settings={},enabled=true})
 restore_layout(baseline)
 assert(#root.items==1 and root.items[1].source==group)
 assert(item.info.x==10 and item.crop.left==2 and item.locked and not item.visible and item.private.collapsed)

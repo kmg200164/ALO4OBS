@@ -1,15 +1,15 @@
 (() => {
   const copy = {
     ko: {
-      description: '기본 배치: 왼쪽 상위 프레임의 위 하위 프레임은 패널 1, 아래 하위 프레임은 패널 2~4의 묶음입니다. 오른쪽 상위 프레임에는 패널 5~7이 위에서 아래로 놓입니다. 회색은 상위 프레임, 모드에 따라 흰색 또는 검정으로 바뀌는 부분은 하위 프레임입니다. 각 번호의 콘텐츠는 자유롭게 바꿀 수 있습니다.',
+      description: '기본 배치: 왼쪽 상위 프레임의 위 하위 프레임은 Main, 아래 하위 프레임은 Sub 1~3의 묶음입니다. 오른쪽 상위 프레임에는 Side 1~3이 위에서 아래로 놓입니다. 회색은 상위 프레임, 모드에 따라 흰색 또는 검정으로 바뀌는 부분은 하위 프레임입니다. 각 패널의 콘텐츠는 자유롭게 바꿀 수 있습니다.',
       parent: '상위 프레임', child: '하위 프레임',
     },
     en: {
-      description: 'Default layout: the left parent frame contains Panel 1 in its upper child frame and Panels 2–4 in its lower child frame. The right parent frame holds Panels 5–7 from top to bottom. Gray marks parent frames; child frames switch between white and black with the theme. Each panel can show any content.',
+      description: 'Default layout: the left parent frame holds Main in its upper child frame and Sub 1–3 in its lower child frame. The right parent frame holds Side 1–3 from top to bottom. Gray marks parent frames; child frames switch between white and black with the theme. Each panel can show any content.',
       parent: 'Parent frame', child: 'Child frame',
     },
     ja: {
-      description: '初期配置: 左側の親フレームは上の子フレームにパネル1、下の子フレームにパネル2～4を収めます。右側の親フレームにはパネル5～7が上から順に並びます。灰色が親フレーム、テーマに応じて白または黒に変わる部分が子フレームです。各パネルの内容は自由に変更できます。',
+      description: '初期配置: 左側の親フレームは上の子フレームに Main、下の子フレームに Sub 1～3 を収めます。右側の親フレームには Side 1～3 が上から順に並びます。灰色が親フレーム、テーマに応じて白または黒に変わる部分が子フレームです。各パネルの内容は自由に変更できます。',
       parent: '親フレーム', child: '子フレーム',
     },
   };
