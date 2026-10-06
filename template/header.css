@@ -39,3 +39,6 @@ html[lang=ko] button{font-weight:600}
 .app-header .brand h1{font-size:calc(var(--header-icon-size)*.5625);padding-right:calc(var(--header-icon-size)/4)}
 .app-header .version-button{padding:calc(var(--header-icon-size)/4)}
 }
+
+.app-header .brand-short{display:none}
+@media(max-width:1199px){.app-header .brand-full{display:none}.app-header .brand-short{display:inline}}
