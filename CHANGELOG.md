@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased — 0.8.0
+## 0.8.0 — 2026-10-07
 
 - Rename the current product interface and OBS scene namespace to ALO4OBS / `ALO ·`.
 - Use Main, Sub 1–3, and Side 1–3 as the shared panel-role names.

@@ -140,7 +140,7 @@ class BuildTests(unittest.TestCase):
 class PublicConfigUrlGuardTests(unittest.TestCase):
     def test_allowlisted_repository_and_donation_links_pass(self):
         builder.check_public_config_urls(
-            b'repository: "https://github.com/kmg200164/OBS-streaming-template", '
+            b'repository: "https://github.com/kmg200164/ALO4OBS", '
             b'donation: "https://buymeacoffee.com/kmg200164"'
         )
 

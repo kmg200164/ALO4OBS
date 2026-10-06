@@ -1,7 +1,7 @@
 // Neutral defaults packaged as config.js. Keep personal settings in the local config.js only.
 // Separate from OVERLAY_CONFIG so these links never end up in an exported settings JSON.
 window.OVERLAY_PUBLIC_LINKS = {
-  repository: "https://github.com/kmg200164/OBS-streaming-template",
+  repository: "https://github.com/kmg200164/ALO4OBS",
   donation: "https://buymeacoffee.com/kmg200164"
 };
 window.OVERLAY_PUBLIC_CONFIG = window.OVERLAY_CONFIG = {

@@ -8,7 +8,7 @@ test('config.public.js exposes exactly the allowed repository and donation links
  const source=fs.readFileSync(path.join(__dirname,'../template/config.public.js'),'utf8');
  const context={window:{}};vm.runInNewContext(source,context);
  assert.deepEqual(JSON.parse(JSON.stringify(context.window.OVERLAY_PUBLIC_LINKS)),{
-  repository:'https://github.com/kmg200164/OBS-streaming-template',
+  repository:'https://github.com/kmg200164/ALO4OBS',
   donation:'https://buymeacoffee.com/kmg200164'
  });
  assert.ok(!JSON.stringify(context.window.OVERLAY_CONFIG).includes('buymeacoffee'),'links must not leak into the exported settings config');

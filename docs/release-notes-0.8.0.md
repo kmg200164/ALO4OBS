@@ -1,4 +1,4 @@
-# ALO4OBS 0.8.0 — Unreleased draft
+# ALO4OBS 0.8.0
 
 - Renames the current interface and OBS scene namespace to ALO4OBS / `ALO ·`, with Main, Sub 1–3, and Side 1–3 shared across all languages.
 - Keeps Main enabled and replaces individual Sub/Side enable switches with count sliders; older disabled or non-contiguous settings normalize without changing exported `panelEnabled` keys.
@@ -9,4 +9,4 @@
 
 - Uses one official Lucide icon set throughout the UI, immediate localized slider values, and consistent left-to-right strength ordering.
 
-This is release-body draft text only. Version 0.8.0 is not released, tagged, or downloadable.
+Published as the main-branch source and downloadable 0.8.0 package. Native and platform verification boundaries remain documented in QA.md.

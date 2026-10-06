@@ -17,7 +17,7 @@ output = repository / 'dist' / f'ALO4OBS-v{version}.zip'
 # Only these two public links (repository, donation) may appear in the shipped
 # public config; anything else (chrome-extension:// included) is personal data.
 PUBLIC_URL_ALLOWLIST = {
-    'https://github.com/kmg200164/OBS-streaming-template',
+    'https://github.com/kmg200164/ALO4OBS',
     'https://buymeacoffee.com/kmg200164',
 }
 

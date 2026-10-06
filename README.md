@@ -6,7 +6,7 @@ An OBS overlay that auto-arranges your panels so they never overlap.
 
 ## Download
 
-**[Download ALO4OBS 0.7.1](https://github.com/kmg200164/OBS-streaming-template/raw/fc7f32446edfb87549596bf4a3f8f186cf8120e5/downloads/OBS-Streaming-Template.zip)**
+**[Download ALO4OBS 0.7.1](https://github.com/kmg200164/ALO4OBS/raw/fc7f32446edfb87549596bf4a3f8f186cf8120e5/downloads/OBS-Streaming-Template.zip)**
 
 The current downloadable package is **0.7.1**. The 0.8.0 notes below are an unreleased draft, not a download or release claim.
 
@@ -90,6 +90,6 @@ Code: [MIT](LICENSE), copyright 2026 KMG. Inter and Lucide assets retain their o
 
 KMG directs the product, design, requirements, and real-use evaluation. Code was implemented with [OpenAI Codex](https://openai.com/codex/) through vibe coding.
 
-[Support continued improvements](https://buymeacoffee.com/kmg200164) · [Report a bug or suggest an improvement](https://github.com/kmg200164/OBS-streaming-template/issues/new?template=feedback.yml) · [Change log](CHANGELOG.md) · [QA evidence](docs/QA.md)
+[Support continued improvements](https://buymeacoffee.com/kmg200164) · [Report a bug or suggest an improvement](https://github.com/kmg200164/ALO4OBS/issues/new?template=feedback.yml) · [Change log](CHANGELOG.md) · [QA evidence](docs/QA.md)
 
 Before sharing screenshots, hide personal widget links and stream keys.
