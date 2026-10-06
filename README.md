@@ -25,8 +25,6 @@ ALO4OBS is free, and support is entirely optional. For bug reports, include what
 
 </details>
 
-![Setup: download, extract, open settings.html, configure panels, unpack saved settings, add the OBS script.](docs/images/setup-workflow.png)
-
 ## Features
 
 - Automatically calculates a 1920 × 1080 layout for Main, Sub, and Side panels.
@@ -36,6 +34,8 @@ ALO4OBS is free, and support is entirely optional. For bug reports, include what
 - Free MIT-licensed code with no required account or subscription.
 
 ## Quick start
+
+![Setup: download, extract, open settings.html, configure panels, unpack saved settings, add the OBS script.](docs/images/setup-workflow.png)
 
 1. Download and extract the ZIP. Do not open pages inside the ZIP.
 2. Open `settings.html`, choose panel content and layout, then select **Save as ZIP**.
