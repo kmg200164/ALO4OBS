@@ -25,21 +25,9 @@ ALO4OBS is free, and support is entirely optional. For bug reports, include what
 
 **[Download ALO4OBS 0.8.0](https://github.com/kmg200164/ALO4OBS/raw/refs/heads/main/downloads/OBS-Streaming-Template.zip)**
 
-The current downloadable package is **0.8.0**. See the latest patch notes below and the full [change log](CHANGELOG.md).
+The current downloadable package is **0.8.0**. For patch notes, see [CHANGELOG.md](CHANGELOG.md).
 
-<details>
-<summary>Latest update — 0.8.0</summary>
 
-- ALO4OBS replaces the previous product name in the current interface.
-- Main, Sub 1–3, and Side 1–3 make panel roles easier to read.
-- Sub and Side panel-count sliders replace individual enable switches.
-- Gap, fill opacity, blur, and stroke width use five-step sliders.
-- Choosing an 8 px gap with global stroke enabled asks before turning that global stroke off; cancel keeps it, and regional overrides stay unchanged.
-
-- The header separates links, centered product/version, and tools; narrow screens use menus. Wide headers show Auto Layout Overlay for OBS; narrower headers show ALO4OBS.
-- All UI icons use the official Lucide set. Slider values update immediately, increase left to right, and display beside their labels.
-
-</details>
 
 ## Features
 
