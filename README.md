@@ -2,6 +2,23 @@
 
 An OBS overlay that auto-arranges your panels so they never overlap.
 
+## Support and feedback
+
+Found it useful? [Support continued improvements](https://buymeacoffee.com/kmg200164). Found a bug? [Report it here](https://github.com/kmg200164/ALO4OBS/issues/new?template=feedback.yml).
+
+<p align="center">
+  <a href="https://buymeacoffee.com/kmg200164">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy me a coffee — support KMG" width="360">
+  </a>
+</p>
+
+<details>
+<summary>Support and bug-report guidance</summary>
+
+ALO4OBS is free, and support is entirely optional. For bug reports, include what you tried, what happened, your ALO4OBS and OBS versions, and a screenshot if possible. Hide personal widget links and stream keys before sharing screenshots.
+
+</details>
+
 ![Setup: download, extract, open settings.html, configure panels, unpack saved settings, add the OBS script.](docs/images/setup-workflow.png)
 
 ## Download
@@ -10,7 +27,8 @@ An OBS overlay that auto-arranges your panels so they never overlap.
 
 The current downloadable package is **0.8.0**. See the latest patch notes below and the full [change log](CHANGELOG.md).
 
-## Latest update — 0.8.0
+<details>
+<summary>Latest update — 0.8.0</summary>
 
 - ALO4OBS replaces the previous product name in the current interface.
 - Main, Sub 1–3, and Side 1–3 make panel roles easier to read.
@@ -20,6 +38,8 @@ The current downloadable package is **0.8.0**. See the latest patch notes below 
 
 - The header separates links, centered product/version, and tools; narrow screens use menus. Wide headers show Auto Layout Overlay for OBS; narrower headers show ALO4OBS.
 - All UI icons use the official Lucide set. Slider values update immediately, increase left to right, and display beside their labels.
+
+</details>
 
 ## Features
 
@@ -76,7 +96,7 @@ Windows has live broadcast evidence. macOS verification is partial. HTTP preview
 
 </details>
 
-## Privacy, license, and support
+## Privacy and license
 
 Keep personal `config.js`, `obs-settings.json`, and `OBS-settings.zip` private: they may contain widget tokens. Browser drafts do not update OBS; exports do.
 
@@ -84,6 +104,6 @@ Code: [MIT](LICENSE), copyright 2026 KMG. Inter and Lucide assets retain their o
 
 KMG directs the product, design, requirements, and real-use evaluation. Code was implemented with [OpenAI Codex](https://openai.com/codex/) through vibe coding.
 
-[Support continued improvements](https://buymeacoffee.com/kmg200164) · [Report a bug or suggest an improvement](https://github.com/kmg200164/ALO4OBS/issues/new?template=feedback.yml) · [Change log](CHANGELOG.md) · [QA evidence](docs/QA.md)
+[Change log](CHANGELOG.md) · [QA evidence](docs/QA.md)
 
 Before sharing screenshots, hide personal widget links and stream keys.
