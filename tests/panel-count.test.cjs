@@ -96,14 +96,15 @@ test('all nine counts remain in bounds and nonoverlapping with every gap, Main a
   for(let index=1;index<side;index++)assert.ok(layout[panelGroups.side[index]].y>layout[panelGroups.side[index-1]].y);
  }
 });
-test('placement card reuses property rows and range marks with one swap checkbox',()=>{
+test('placement card reuses property rows and range marks with vertical and horizontal switches',()=>{
  const context=normalizer(),html={};
  Object.assign(context,{config:context.normalize(defaults),byId:()=>html,nextPropertyLabelId:0});
  vm.runInNewContext(source.slice(source.indexOf('  function bindRowLabel('),source.indexOf('  const color=')),context);
  vm.runInNewContext(source.slice(source.indexOf('  function renderPlacement(){'),source.indexOf('  function updatePanelCount(')),context);
  context.renderPlacement();
- assert.equal((html.innerHTML.match(/type="checkbox"/g)||[]).length,1);
+ assert.equal((html.innerHTML.match(/type="checkbox"/g)||[]).length,2);
  assert.match(html.innerHTML,/<input type="checkbox" name="placementSwap" role="switch">/);
+ assert.match(html.innerHTML,/<input type="checkbox" name="sidePosition" role="switch">/);
  assert.equal((html.innerHTML.match(/type="range"/g)||[]).length,2);
   for(const group of ['sub','side']){
   assert.match(html.innerHTML,new RegExp(`name="${group}Count"[^>]+min="1" max="3" step="1"`));
@@ -121,4 +122,18 @@ test('vertical Main and Sub switch maps checked to the bottom row and unchecked 
  assert.equal(config.panelPlacement.game.level2,'bottom');
  assert.equal(context.updatePlacement({name:'placementSwap',checked:false}),true);
  assert.equal(config.panelPlacement.game.level2,'top');
+});
+
+test('neutral startup layout matches the automatic default and preserves drafts across updates',()=>{
+ const automatic=events.autoLayout();
+ assert.deepEqual(plain(events.validateLayout(defaults.layout)),automatic);
+ const start=source.indexOf('  function restoredSettings('),end=source.indexOf('  function propertyRow(',start);
+ const context={defaults,OverlayEvents:events};
+ vm.runInNewContext(source.slice(start,end),context);
+ const saved={...plain(defaults),name:'my draft',sidePosition:'left',layout:events.autoLayout({sidePosition:'left'})};
+ const oldNeutral=plain(defaults);delete oldNeutral.layout;
+ assert.equal(context.restoredSettings(plain(defaults),saved,JSON.stringify(oldNeutral)),saved);
+ const replacement={...plain(defaults),name:'imported settings'};
+ assert.equal(context.restoredSettings(replacement,saved,JSON.stringify(oldNeutral)),replacement);
+ assert.throws(()=>events.validateLayout(undefined),/Invalid layout/);
 });

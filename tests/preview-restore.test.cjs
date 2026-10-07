@@ -120,3 +120,23 @@ test('source runtime loads neutral defaults once before optional local settings'
   assert.equal(JSON.stringify(exportedContext.window.OVERLAY_PUBLIC_CONFIG),defaults);
  }
 });
+
+
+test('shared file-restoration status precedes preview and retains hidden status / visible alert behavior',()=>{
+ const folder=path.join(__dirname,'../template');
+ for(const filename of fs.readdirSync(folder).filter(name=>/^settings(?:-(?:en|ja))?\.html$/.test(name))){
+  const html=fs.readFileSync(path.join(folder,filename),'utf8');
+  assert.equal((html.match(/id="status"/g)||[]).length,1,filename);
+  const header=html.indexOf('src="header.js'),banner=html.indexOf('<p id="status"'),preview=html.indexOf('class="app-section preview-section"');
+  assert.ok(header>=0&&header<banner&&banner<preview,filename+' header > status > preview order');
+  assert.match(html,/<main class="page-layout">\s*<p id="status" class="sr-only" role="status">/);
+ }
+ const classes=new Set(['sr-only']),attributes={role:'status'},status={textContent:'',classList:{toggle(name,value){if(value)classes.add(name);else classes.delete(name);}},setAttribute(name,value){attributes[name]=value;}};
+ const context={status,window:{KMGI18n:{localize:message=>'localized: '+message}}};
+ const begin=source.indexOf('  function showStatus('),end=source.indexOf('  const uploadStorage=',begin);
+ vm.runInNewContext(source.slice(begin,end),context);
+ context.showStatus('restore failed',true);
+ assert.equal(status.textContent,'localized: restore failed');assert.equal(classes.has('sr-only'),false);assert.equal(attributes.role,'alert');
+ context.showStatus('ready');
+ assert.equal(classes.has('sr-only'),true);assert.equal(attributes.role,'status');
+});

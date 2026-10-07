@@ -325,6 +325,8 @@ local function apply_generic(settings)
  end
  if cfg==nil then return fail('OBS script settings are unavailable.') end
  local content=obs.obs_data_get_obj(settings,'panelContent')
+ -- Exported boxes already include Side left/right and Main/Sub row placement.
+ -- Apply those coordinates directly; legacy per-panel placement is not used.
  local layout=obs.obs_data_get_obj(settings,'layout')
  local enabled=obs.obs_data_get_obj(settings,'panelEnabled')
  if content==nil or layout==nil then

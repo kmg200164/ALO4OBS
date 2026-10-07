@@ -72,7 +72,7 @@ test('header puts public links on the left and centers the brand between native 
  const source=fs.readFileSync(path.join(__dirname,'../template/header.js'),'utf8');
  let markup='';const first=source.split(/\r?\n\r?\n/)[0];
  vm.runInNewContext(first,{document:{currentScript:{insertAdjacentHTML(_position,html){markup=html;}}}});
- assert.equal((markup.match(/<details /g)||[]).length,2);assert.equal((markup.match(/<summary /g)||[]).length,2);
+ assert.equal((markup.match(/<details /g)||[]).length,3);assert.equal((markup.match(/<summary /g)||[]).length,3);
  assert.ok(markup.indexOf('id="github-link"')<markup.indexOf('class="brand"'));
  assert.ok(markup.indexOf('id="donation-link"')<markup.indexOf('class="brand"'));
  assert.ok(markup.indexOf('class="brand"')<markup.indexOf('id="settings-link"'));

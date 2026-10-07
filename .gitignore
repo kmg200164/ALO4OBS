@@ -7,4 +7,6 @@ obs-settings.json
 node_modules/
 __pycache__/
 .qa-private/
+docs/images/qa-0.9.0/
 dist/
+!downloads/ALO4OBS-v*.zip

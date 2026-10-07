@@ -27,18 +27,19 @@
     return {game:{x:32,y:32,width:1384,height:778},custom1:{x:32,y:842,width:440,height:206},custom2:{x:504,y:842,width:440,height:206},custom3:{x:976,y:842,width:440,height:206},chat:{x:1448,y:32,width:440,height:317},translation:{x:1448,y:381,width:440,height:317},hand:{x:1448,y:730,width:440,height:318}};
   }
   // One spacing value is both the outer margin and the gap between panels.
-  // The right frame keeps its width; the left frame takes what remains.
+  // The Side frame keeps its width; the Main/Sub frame takes what remains.
   const panelGaps=[8,16,24,32,48],sideWidth=440;
   function normalizeGap(value){return panelGaps.includes(value)?value:32;}
-  function frameSize(gap){return {left:1920-3*gap-sideWidth,height:1080-2*gap,sideX:1920-gap-sideWidth};}
+  function normalizeSidePosition(value){return value==='left'?'left':'right';}
+  function frameSize(gap,sidePosition){const left=normalizeSidePosition(sidePosition)==='left';return {left:1920-3*gap-sideWidth,height:1080-2*gap,mainX:left?sideWidth+2*gap:gap,sideX:left?gap:1920-gap-sideWidth};}
   function defaultPlacement() {
     return {game:{level1:'left',level2:'top',level3:'left'},
       custom1:{level1:'left',level2:'bottom',level3:'left'},
       custom2:{level1:'left',level2:'bottom',level3:'center'},
       custom3:{level1:'left',level2:'bottom',level3:'right'}};
   }
-  // Only Main and the Sub band swap rows. Side panels always fill the right
-  // frame top to bottom, so legacy Side or left/right values are ignored.
+  // Only Main and the Sub band swap rows. Side panels fill their column
+  // top to bottom; legacy per-panel Side or left/right values are ignored.
   function normalizePlacement(input,changedKey) {
     if(input!==undefined&&(!input||typeof input!=='object'||Array.isArray(input)))throw new Error('Invalid panel placement');
     const placement=defaultPlacement(),rows={};
@@ -112,15 +113,20 @@
     }
     return sizes;
   }
-  function sizingMinimum(reference,key,axis){
-    // Lower-panel widths use the baseline row height, independent of the main aspect.
-    if(axis==='width'&&canResizeWidth(key))return Math.min(reference[key].height,reference[key].width);
+  function sizingMinimum(reference,key,axis,gap=32,sidePosition='right'){
+    // The Sub minimum is a square at the height left by a 16:9 Main.
+    if(axis==='width'&&canResizeWidth(key)){
+      const frame=frameSize(gap,sidePosition);
+      return Math.max(1,frame.height-gap-Math.floor(frame.left*9/16));
+    }
+    // A Side panel at its full 440 px width must be able to reach 16:9.
+    if(axis==='height'&&['chat','translation','hand'].includes(key))return Math.min(Math.ceil(reference[key].height/2),Math.round(reference[key].width*9/16));
     return Math.ceil(reference[key][axis]/2);
   }
-  function sizedLayout(leftRows,right,sizing,gap,strict,constrained=true) {
-    const layout=baseLayout(),frame=frameSize(gap);
-    const reference=constrained?sizedLayout(leftRows,right,normalizeSizing(),gap,strict,false):null;
-    const limits=(key,axis)=>key==='game'&&axis==='height'&&sizing[key].aspect&&sizing[key].aspect!=='auto'?{minimum:1,maximum:frame.height}:reference?{minimum:sizingMinimum(reference,key,axis),maximum:Math.floor(reference[key][axis]*1.5)}:{minimum:1};
+  function sizedLayout(leftRows,right,sizing,gap,strict,constrained=true,sidePosition='right') {
+    const layout=baseLayout(),frame=frameSize(gap,sidePosition);
+    const reference=constrained?sizedLayout(leftRows,right,normalizeSizing(),gap,strict,false,sidePosition):null;
+    const limits=(key,axis)=>key==='game'&&axis==='height'&&sizing[key].aspect&&sizing[key].aspect!=='auto'?{minimum:1,maximum:frame.height}:reference?{minimum:sizingMinimum(reference,key,axis,gap,sidePosition),maximum:Math.floor(reference[key][axis]*1.5)}:{minimum:1};
     const rowWidths=row=>allocateSizes(row.items.map(key=>({fixed:fixed(key,'width'),...limits(key,'width')})),frame.left,'width',gap,!strict);
     const fixed=(key,axis)=>{
       if(constrained&&key==='game'&&axis==='height'&&sizing[key].aspect&&sizing[key].aspect!=='auto'){
@@ -143,7 +149,7 @@
       let y=gap;
       leftRows.forEach((row,rowIndex)=>{
         const height=heights[rowIndex],widths=rowWidths(row);
-        let x=gap;
+        let x=frame.mainX;
         row.items.forEach((key,index)=>{
           layout[key]={x,y,width:widths[index],height:fixed(key,'height')??height};x+=widths[index]+gap;
         });
@@ -155,19 +161,19 @@
       let y=gap;
       right.forEach((key,index)=>{
         const width=fixed(key,'width')??sideWidth,range=limits(key,'width');
-        if(width<range.minimum||width>Math.min(sideWidth,range.maximum??sideWidth))throw new Error('Fixed panel sizes exceed available width: right frame stays one column wide');
+        if(width<range.minimum||width>Math.min(sideWidth,range.maximum??sideWidth))throw new Error('Fixed panel sizes exceed available width: Side frame stays one column wide');
         layout[key]={x:frame.sideX,y,width,height:heights[index]};y+=heights[index]+gap;
       });
     }
     return layout;
   }
-  function hierarchicalLayout(placement,enabled,sizing,gap,strict) {
+  function hierarchicalLayout(placement,enabled,sizing,gap,strict,sidePosition) {
     placement=normalizePlacement(placement);
     const active=panelKeys.filter(key=>enabled[key]!==false);
     const left=active.filter(key=>placement[key]),right=active.filter(key=>!placement[key]);
     const rows=['top','bottom'].map(level=>({items:left.filter(key=>placement[key].level2===level),weight:1})).filter(row=>row.items.length);
     if(rows.length===2)for(const row of rows)row.weight=row.items.includes('game')?778:206;
-    return sizedLayout(rows,right,sizing,gap,strict);
+    return sizedLayout(rows,right,sizing,gap,strict,true,sidePosition);
   }
   function resolveLayout(positions = {}) {
     const layout=baseLayout();
@@ -182,24 +188,24 @@
     return layout;
   }
   // strict rejects an overfull Sub row (used to find limits); rendering fits it.
-  function autoLayout({order=panelKeys,placement,enabled={},sizing,gap,strict=false}={}) {
+  function autoLayout({order=panelKeys,placement,enabled={},sizing,gap,strict=false,sidePosition='right'}={}) {
     if(!Array.isArray(order)||!enabled||typeof enabled!=='object'||Array.isArray(enabled))throw new Error('Invalid auto layout');
     sizing=normalizeSizing(sizing);gap=normalizeGap(gap);
-    if(placement!==undefined)return hierarchicalLayout(placement,enabled,sizing,gap,strict);
+    if(placement!==undefined)return hierarchicalLayout(placement,enabled,sizing,gap,strict,sidePosition);
     const seen=new Set();
     for(const key of order){if(!panelKeys.includes(key)||seen.has(key))throw new Error('Invalid panel order');seen.add(key);}
     const ordered=[...order,...panelKeys.filter(key=>!seen.has(key))],active=ordered.filter(key=>enabled[key]!==false);
     if(!active.length)return baseLayout();
     const lead=active[0],bottom=ordered.slice(1,4).filter(key=>key!==lead&&enabled[key]!==false),right=ordered.slice(4).filter(key=>key!==lead&&enabled[key]!==false);
     const rows=[{items:[lead],weight:778}];if(bottom.length)rows.push({items:bottom,weight:206});
-    return sizedLayout(rows,right,sizing,gap,strict);
+    return sizedLayout(rows,right,sizing,gap,strict,true,sidePosition);
   }
   function sizingBounds(options={},key,axis) {
     if(!panelKeys.includes(key)||!['width','height'].includes(axis))throw new Error('Invalid panel size: unknown panel or axis');
     const enabled={...options.enabled,[key]:true},reference=autoLayout({...options,enabled,sizing:undefined});
-    const sizing=normalizeSizing(options.sizing),otherAxis=axis==='width'?'height':'width',frame=frameSize(normalizeGap(options.gap));
+    const sizing=normalizeSizing(options.sizing),otherAxis=axis==='width'?'height':'width',frame=frameSize(normalizeGap(options.gap),options.sidePosition);
     // Stored heights are capped at 1016 px by normalizeSizing.
-    const cap=panel=>axis==='width'?(reference[panel].x>=frame.sideX?sideWidth:frame.left):Math.min(frame.height,1016);
+    const cap=panel=>axis==='width'?((normalizeSidePosition(options.sidePosition)==='left'?reference[panel].x<frame.mainX:reference[panel].x>=frame.sideX)?sideWidth:frame.left):Math.min(frame.height,1016);
     // Reference the all-automatic layout, so dragging never moves its own limits.
     for(const panel of panelKeys){
       sizing[panel][otherAxis+'Mode']='auto';
@@ -211,7 +217,7 @@
       try{autoLayout({...options,enabled,sizing,strict:true});return true;}
       catch(error){if(error.message.startsWith('Fixed panel sizes exceed available'))return false;throw error;}
     }
-    const minimum=sizingMinimum(reference,key,axis);
+    const minimum=sizingMinimum(reference,key,axis,normalizeGap(options.gap),options.sidePosition);
     let low=minimum,high=Math.min(Math.floor(reference[key][axis]*1.5),cap(key));
     while(low<high){const middle=Math.ceil((low+high)/2);if(fits(middle))low=middle;else high=middle-1;}
     return {min:minimum,max:low};
@@ -257,7 +263,7 @@
     if(mode==='user'){let hash=0;for(const c of platform+':'+nickname)hash=(Math.imul(hash,31)+c.codePointAt(0))|0;return `hsl(${(hash>>>0)%360} 72% 75%)`;}
     return {chzzk:'#00ffa3',twitch:'#bf94ff',youtube:'#ff6464',soop:'#55cfff'}[platform]||'#dddddd';
   }
-  const api = {panelLabels,panelGaps,normalizeGap,subWidthWarning,normalizeEvent,createEventStore,handcamLayout,resolveLayout,defaultPlacement,normalizePlacement,normalizeSizing,canResizeWidth,canResizeHeight,sizingBounds,aspectStops,autoLayout,validateLayout,resolveSlots,nicknameColor};
+  const api = {panelLabels,panelGaps,normalizeGap,normalizeSidePosition,subWidthWarning,normalizeEvent,createEventStore,handcamLayout,resolveLayout,defaultPlacement,normalizePlacement,normalizeSizing,canResizeWidth,canResizeHeight,sizingBounds,aspectStops,autoLayout,validateLayout,resolveSlots,nicknameColor};
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.OverlayEvents = api;
 })(typeof window !== 'undefined' ? window : globalThis);

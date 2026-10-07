@@ -223,3 +223,17 @@ test('shared header lists English, Korean, Japanese in that order',()=>{
  const select=markup.match(/<select id="ui-language"[^>]*>([\s\S]*?)<\/select>/)[1];
  assert.deepEqual([...select.matchAll(/<option value="([^"]+)">([^<]+)<\/option>/g)].map(m=>[m[1],m[2]]),[['en','English'],['ko','한국어'],['ja','日本語']]);
 });
+
+
+test('Side switch and UI preset labels translate and round trip in all languages',()=>{
+ const {i18n}=boot();
+ for(const [ko,en,ja] of [
+  ['Side 열 왼쪽에 놓기','Place Side column on the left','Side 列を左に配置'],
+  ['UI 색상 프리셋','UI color preset','UI カラープリセット'],
+  ['체리','Cherry','チェリー'],['오렌지','Orange','オレンジ'],['바나나','Banana','バナナ'],['라임','Lime','ライム'],['알로에','Aloe','アロエ'],['솜사탕','Cotton Candy','わたあめ'],['블루베리','Blueberry','ブルーベリー'],['포도','Grape','ぶどう'],['풍선껌','Bubblegum','バブルガム'],['모노','Mono','モノ']
+ ]){
+  assert.equal(i18n.localize(ko,'en'),en);assert.equal(i18n.localize(ko,'ja'),ja);
+  assert.equal(i18n.localize(en,'ko'),ko);assert.equal(i18n.localize(ja,'en'),en);
+ }
+ for(const lang of ['ko','en','ja'])assert.notEqual(i18n.localize('Invalid Side position',lang),'Invalid Side position');
+});

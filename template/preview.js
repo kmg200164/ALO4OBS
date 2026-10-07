@@ -22,8 +22,7 @@
     if(message)showStatus(message,true);
     else if(previous&&!missingUploads.size)showStatus('설정 미리보기 준비 완료');
   }});
-  let config=structuredClone(defaults), selected=null, hovered=null, sizeConstraintTarget=null, snappingSlider=null;
-  const highlight=()=>send(frame,'highlight',{keys:document.fullscreenElement?[]:[selected,hovered].filter(Boolean),color:getComputedStyle(document.body).getPropertyValue('--accent').trim()});
+  let config=structuredClone(defaults), selected=null, sizeConstraintTarget=null, snappingSlider=null;
   let cameraState={status:'unavailable',devices:[],selectedDeviceId:'',errorName:'NotSupportedError'},cameraController=null,cameraActive=false;
   const cameraVideo=byId('camera-preview-video');
   byId('app-version').textContent='v'+window.KMG_VERSION;
@@ -51,9 +50,10 @@
   }
   const gapLabels=['매우 좁음','좁음','보통','넓음','매우 넓음'];
   const globalStrengthLabels=['매우 약함','약함','중간','강함','매우 강함'];
+  const selectShell=html=>`<span class="select-shell">${html}<svg class="lucide lucide-chevron-down select-icon" data-lucide="chevron-down" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg></span>`;
   function presetSelect(name,value,values,fallback,labels=['매우 강함','강함','중간','약함','매우 약함']){
     const selected=nearestPreset(value,values,fallback);
-    return `<select name="${name}">${values.map((amount,index)=>`<option value="${amount}"${amount===selected?' selected':''}>${labels[index]}</option>`).join('')}</select>`;
+    return selectShell(`<select name="${name}">${values.map((amount,index)=>`<option value="${amount}"${amount===selected?' selected':''}>${labels[index]}</option>`).join('')}</select>`);
   }
   function presetRange(name,value,values,fallback,labels=['매우 강함','강함','중간','약함','매우 약함'],unit=''){
     const selected=nearestPreset(value,values,fallback),index=values.indexOf(selected);
@@ -133,6 +133,7 @@
     next.layoutVersion=4;
     next.panelSizing=OverlayEvents.normalizeSizing(next.panelSizing);
     next.panelGap=OverlayEvents.normalizeGap(next.panelGap);
+    next.sidePosition=OverlayEvents.normalizeSidePosition(next.sidePosition);
     next.panelSizing.game.aspect ||= '16:9';
     next.panelContent=migratePanelContent(input||next);
     for(const legacy of ['chatUrl','translationUrl','reactiveUrl','donationChzzk','donationTwitch','donationYoutube','donationSoop','sponsor','sponsorType','slotContent','customSlotMedia','cameraMode','handcam','platforms','showSponsor','showSubtitles','showChat','showAlerts'])delete next[legacy];
@@ -151,7 +152,8 @@
   }
   function restoredSettings(runtime,saved,savedSource){
     // Replacing config.js with an exported ZIP must beat an older browser draft.
-    const exported=runtime?.layoutVersion>=3?runtime:null;
+    // Updated neutral defaults must not replace a durable browser draft.
+    const exported=runtime?.layoutVersion>=3&&JSON.stringify(runtime)!==JSON.stringify(defaults)?runtime:null;
     const fingerprint=exported?JSON.stringify(exported):'';
     if(saved?.layoutVersion>=3&&(!exported||savedSource===fingerprint)){
       try{OverlayEvents.validateLayout(saved.layout);return saved;}catch{}
@@ -237,39 +239,40 @@
   function renderGlobal(){
     const s=config.globalStyle,b=s.background,f=s.fill,t=s.stroke;
     byId('global-settings').innerHTML=`<div class="global-stack">
-      <div class="property-section"><h4>배치</h4><div class="property-group">
+      <details class="property-section" open><summary><h4>배치</h4></summary><div class="property-group">
         ${propertyRow('간격',presetRange('panelGap',config.panelGap,OverlayEvents.panelGaps,32,gapLabels,'px'),'','',false,'radio','property-row--size property-row--preset')}
-      </div></div><div class="divider"></div>
-      <div class="property-section" id="global-background-group"><h4>배경</h4><div class="property-group">
+      </div></details><div class="divider"></div>
+      <details class="property-section" id="global-background-group" open><summary><h4>배경</h4></summary><div class="property-group">
         ${propertyRow('단색',color('globalBackgroundColor',b.color),'globalBackgroundMode','solid',b.mode==='solid')}
         ${propertyRow('그라디언트',gradientControl('globalBackground'),'globalBackgroundMode','gradient',b.mode==='gradient')}
         ${propertyRow('파일',`<label class="mini-action">파일 선택<input data-upload="whole" type="file" accept="image/png,image/jpeg,image/webp,image/gif"></label>`,'globalBackgroundMode','file',b.mode==='file')}
         ${propertyRow('URL',`<input name="globalBackgroundUrl" type="url" placeholder="https://…" value="">`,'globalBackgroundMode','url',b.mode==='url','radio','property-row--long')}
-      </div></div><div class="divider"></div>
-      <div class="property-section"><h4>패널 채우기</h4><div class="property-group">
+      </div></details><div class="divider"></div>
+      <details class="property-section" open><summary><h4>패널 채우기</h4></summary><div class="property-group">
         ${propertyRow('없음','','globalFillMode','none',f.mode==='none')}
         ${propertyRow('단색',color('globalFillColor',f.color),'globalFillMode','solid',f.mode==='solid')}
         ${propertyRow('그라디언트',gradientControl('globalFill'),'globalFillMode','gradient',f.mode==='gradient')}
         ${propertyRow('불투명도',presetRange('globalFillOpacity',f.opacity,globalOpacityPresets,20,globalStrengthLabels,'%'),'','',false,'radio','property-row--size property-row--preset')}
         ${propertyRow('흐림',presetRange('globalFillBlur',f.blur,globalBlurPresets,32,globalStrengthLabels,'px'),'','',false,'radio','property-row--size property-row--preset')}
-      </div></div><div class="divider"></div>
-      <div class="property-section"><h4>패널 테두리</h4><div class="property-group">
+      </div></details><div class="divider"></div>
+      <details class="property-section" open><summary><h4>패널 테두리</h4></summary><div class="property-group">
         ${propertyRow('없음','','globalStrokeMode','none',t.mode==='none')}
         ${propertyRow('단색',color('globalStrokeColor',t.color),'globalStrokeMode','solid',t.mode==='solid')}
         ${propertyRow('그라디언트',gradientControl('globalStroke'),'globalStrokeMode','gradient',t.mode==='gradient')}
         ${propertyRow('두께',presetRange('globalStrokeWidth',t.width,globalStrokeWidthPresets,4,globalStrengthLabels,'px'),'','',false,'radio','property-row--size property-row--preset')}
-      </div></div></div>`;
+      </div></details></div>`;
     control('globalBackgroundUrl').value=b.url||'';
     paintGradientControls();
   }
   function renderPlacement(){
     const swap=propertyRow('Main·Sub 위아래 바꾸기','','placementSwap',undefined,config.panelPlacement.game.level2==='bottom','checkbox','property-row--toggle property-row--size property-row--placement-switch',' role="switch"');
+    const side=propertyRow('Side 열 왼쪽에 놓기','','sidePosition',undefined,config.sidePosition==='left','checkbox','property-row--toggle property-row--size property-row--placement-switch property-row--side-switch',' role="switch"');
     const counts=Object.entries(panelGroups).map(([group,panels])=>{
       const name=group+'Count',count=panels.filter(key=>config.panelEnabled[key]).length;
       const range=`<div class="size-controls"><input name="${name}" data-panel-count="${group}" type="range" min="1" max="3" step="1" value="${count}"><div class="size-ratio-marks" aria-hidden="true">${[1,2,3].map(value=>`<span style="left:${(value-1)*50}%">${value}</span>`).join('')}</div></div>`;
       return propertyRow(group==='sub'?'Sub 개수':'Side 개수',range,'',undefined,false,'radio','property-row--size property-row--count');
     }).join('');
-    byId('placement-list').innerHTML=swap+counts;
+    byId('placement-list').innerHTML=swap+side+counts;
   }
   function updatePanelCount(input){
     const group=panelGroups[input.dataset.panelCount];
@@ -283,12 +286,17 @@
     return true;
   }
   function updatePlacement(input){
-    if(input.name!=='placementSwap')return false;
-    const placement=structuredClone(config.panelPlacement);
-    placement.game.level2=input.checked?'bottom':'top';
-    config.panelPlacement=OverlayEvents.normalizePlacement(placement);
-    sizeConstraintTarget='game';
+    if(!['placementSwap','sidePosition'].includes(input.name))return false;
+    const focused=input.matches?.(':focus');
+    if(input.name==='sidePosition')config.sidePosition=input.checked?'left':'right';
+    else{
+      const placement=structuredClone(config.panelPlacement);
+      placement.game.level2=input.checked?'bottom':'top';
+      config.panelPlacement=OverlayEvents.normalizePlacement(placement);
+      sizeConstraintTarget='game';
+    }
     renderPlacement();
+    if(focused)control(input.name)?.focus({preventScroll:true});
     return true;
   }
   const editorRow=(label,controlHtml,variant='')=>propertyRow(label,controlHtml,'',undefined,false,'radio',variant);
@@ -296,7 +304,7 @@
   const editorPreset=(label,name,value,values,fallback)=>editorRow(label,presetSelect(name,value,values,fallback));
   const fieldHtml=(label,name,type='text',extra='',wide=false)=>editorRow(label,`<input name="${name}" type="${type}" ${extra}>`,wide?'property-row--long':'');
   const urlField=(label,name)=>fieldHtml(label,name,'url','placeholder="https://…" autocomplete="off"',true);
-  const editorSelect=(label,name,options,value)=>editorRow(label,`<select name="${name}">${optionHtml(options,value)}</select>`);
+  const editorSelect=(label,name,options,value)=>editorRow(label,selectShell(`<select name="${name}">${optionHtml(options,value)}</select>`));
   const editorFile=(label,kind,accept)=>editorRow(label,`<label class="mini-action">파일 선택<input data-upload="${kind}" type="file" accept="${accept}"></label>`);
   const editorToggle=(label,name,checked)=>propertyRow(label,'',name,undefined,checked,'checkbox','property-row--toggle');
   function renderEditor(){
@@ -306,10 +314,10 @@
     const key=selected,region=config.regionBackgrounds[key]||{},item=config.panelContent[key]||{type:'none',url:''};
     if(panelTag)panelTag.textContent=names[key];
     const kinds=[['none','없음'],['source','OBS 소스'],['web','웹 주소'],['media','이미지/영상']];
-    const section=(title,html)=>`<div class="property-section"><h4>${title}</h4><div class="property-group">${html}</div></div>`;
+    const section=(title,html)=>`<details class="property-section" open><summary><h4>${title}</h4></summary><div class="property-group">${html}</div></details>`;
     const content=section('콘텐츠',`${editorSelect('콘텐츠 종류','panelContentType',kinds,item.type)}<div id="panel-content-extra" class="property-group"></div>`);
     const size=config.panelSizing[key],sizeModes=[['auto','자동'],['fixed','수동']];
-    const sizeControl=axis=>{const title=axis==='width'?'너비':'높이',name=axis==='width'?'panelWidth':'panelHeight';if(key==='game')return axis==='height'?editorSelect('화면 비율','panelAspect',[['auto','자동'],['16:9','16:9'],['21:9','21:9'],['32:9','32:9']],size.aspect||'16:9'):'';if(axis==='width'&&!OverlayEvents.canResizeWidth(key)||axis==='height'&&!OverlayEvents.canResizeHeight(key))return '';return editorRow(title,`<select name="${name}Mode">${optionHtml(sizeModes,size[axis+'Mode'])}</select><div class="size-controls" data-fixed-size="${axis}"${size[axis+'Mode']==='fixed'?'':' hidden'}><input name="${name}" type="number" min="1" step="1" aria-label="${title} (px)"><input name="${name}Slider" type="range" min="1" step="1" list="${name}-ratios" aria-label="${title} 슬라이더"><datalist id="${name}-ratios"></datalist><div class="size-ratio-marks" data-ratio-marks="${axis}"></div><span class="editor-help" data-size-range="${axis}"></span></div>`,'property-row--size');};
+    const sizeControl=axis=>{const title=axis==='width'?'너비':'높이',name=axis==='width'?'panelWidth':'panelHeight';if(key==='game')return axis==='height'?editorSelect('화면 비율','panelAspect',[['auto','자동'],['16:9','16:9'],['21:9','21:9'],['32:9','32:9']],size.aspect||'16:9'):'';if(axis==='width'&&!OverlayEvents.canResizeWidth(key)||axis==='height'&&!OverlayEvents.canResizeHeight(key))return '';return editorRow(title,`${selectShell(`<select name="${name}Mode">${optionHtml(sizeModes,size[axis+'Mode'])}</select>`)}<div class="size-controls" data-fixed-size="${axis}"${size[axis+'Mode']==='fixed'?'':' hidden'}><input name="${name}" type="number" min="1" step="1" aria-label="${title} (px)"><div class="size-slider-track"><input name="${name}Slider" type="range" min="1" step="1" aria-label="${title} 슬라이더"></div><div class="size-ratio-marks" data-ratio-marks="${axis}"></div><span class="editor-help" data-size-range="${axis}"></span></div>`,'property-row--size');};
     const sizing=section('크기',`${sizeControl('width')}${OverlayEvents.canResizeWidth(key)?'<p class="editor-help" data-sub-width-warning role="status" hidden></p>':''}${sizeControl('height')}<div class="size-help"><p class="editor-help"><span>현재 비율</span>: <span data-panel-ratio></span></p>${key==='game'?'':'<p class="editor-help">자동: 남은 공간을 채웁니다. 수동: 입력한 픽셀 크기를 유지합니다.</p><p class="editor-help">슬라이더의 1:1·16:9 눈금에 가까이 드래그하면 해당 비율에 맞춰집니다.</p>'}</div>`);
 
     const fill=region.fill||{mode:'solid',color:region.color||'#ffffff',opacity:region.opacity??20,blur:region.blur??16};
@@ -318,15 +326,20 @@
     const regionInputs=section('영역 스타일',`
       ${editorToggle('전역 설정 대신 개별 설정','regionOverride',config.regionStyleOverrides[key])}
       <div class="property-group region-style-details"${useRegionOverride?'':' hidden'}>
+      ${section('채우기',`
       ${propertyRow('없음','','regionFillMode','none',fill.mode==='none')}
       ${propertyRow('단색',color('regionColor',fill.color||region.color||'#ffffff'),'regionFillMode','solid',fill.mode!=='none'&&fill.mode!=='gradient')}
       ${propertyRow('그라디언트',gradientControl('regionFill'),'regionFillMode','gradient',fill.mode==='gradient')}
       ${editorPreset('불투명도','regionOpacity',fill.opacity??region.opacity??20,opacityPresets,20)}
       ${editorPreset('블러','regionBlur',fill.blur??region.blur??16,blurPresets,16)}
+      `)}
+      <div class="divider"></div>
+      ${section('테두리',`
       ${propertyRow('없음','','regionStrokeMode','none',stroke.mode==='none')}
       ${propertyRow('단색',color('regionBorderColor',stroke.color||region.borderColor||'#ffffff'),'regionStrokeMode','solid',stroke.mode!=='none'&&stroke.mode!=='gradient')}
       ${propertyRow('그라디언트',gradientControl('regionStroke'),'regionStrokeMode','gradient',stroke.mode==='gradient')}
       ${editorPreset('테두리 두께','regionStrokeWidth',stroke.width??4,strokeWidthPresets,4)}
+      `)}
       ${fieldHtml('이미지 경로 또는 URL','regionImage','text','placeholder="assets/image.png 또는 https://…"',true)}
       ${editorFile('이미지 파일','region','image/png,image/jpeg,image/webp,image/gif')}
       </div>`);
@@ -441,7 +454,7 @@
       if(size[axis+'Mode']!=='fixed'||config.panelEnabled[key]===false)continue;
       const own=allManual&&axis==='width'&&subs.includes(key);
       const sizing=own?{...config.panelSizing,...Object.fromEntries(subs.filter(peer=>peer!==key).map(peer=>[peer,{...config.panelSizing[peer],widthMode:'auto'}]))}:config.panelSizing;
-      const bounds=OverlayEvents.sizingBounds({placement:config.panelPlacement,enabled:config.panelEnabled,sizing,gap:config.panelGap},key,axis);
+      const bounds=OverlayEvents.sizingBounds({placement:config.panelPlacement,enabled:config.panelEnabled,sizing,gap:config.panelGap,sidePosition:config.sidePosition},key,axis);
       size[axis]=Math.min(bounds.max,Math.max(bounds.min,Math.round(size[axis]||bounds.min)));
     }
   }
@@ -450,11 +463,10 @@
   function syncSizeControls(){
     if(!selected)return;
     for(const axis of ['width','height']){
-      const name=axis==='width'?'panelWidth':'panelHeight';if(!control(name))continue;const bounds=OverlayEvents.sizingBounds({placement:config.panelPlacement,enabled:config.panelEnabled,sizing:config.panelSizing,gap:config.panelGap},selected,axis);
+      const name=axis==='width'?'panelWidth':'panelHeight';if(!control(name))continue;const bounds=OverlayEvents.sizingBounds({placement:config.panelPlacement,enabled:config.panelEnabled,sizing:config.panelSizing,gap:config.panelGap,sidePosition:config.sidePosition},selected,axis);
       for(const input of [control(name),control(name+'Slider')]){input.min=bounds.min;input.max=bounds.max;input.value=config.panelSizing[selected][axis+'Mode']==='fixed'?config.panelSizing[selected][axis]:(config.layout?.[selected]?.[axis]||config.panelSizing[selected][axis]);}
       byId('panel-editor').querySelector(`[data-size-range="${axis}"]`).textContent=`${bounds.min}–${bounds.max} px`;
       const box=config.layout?.[selected]||config.panelSizing[selected],stops=OverlayEvents.aspectStops(box,axis,bounds);
-      byId(name+'-ratios').innerHTML=stops.map(stop=>`<option value="${stop.value}" label="${stop.label}"></option>`).join('');
       byId('panel-editor').querySelector(`[data-ratio-marks="${axis}"]`).innerHTML=stops.map(stop=>`<span style="left:${(stop.value-bounds.min)/Math.max(1,bounds.max-bounds.min)*100}%">${stop.label}</span>`).join('');
     }
     const warning=byId('panel-editor').querySelector('[data-sub-width-warning]');
@@ -464,7 +476,7 @@
   }
   function current(){
     readEditor();readGlobal();clampPanelSizes();
-    config.layout=OverlayEvents.autoLayout({placement:config.panelPlacement,enabled:config.panelEnabled,sizing:config.panelSizing,gap:config.panelGap});
+    config.layout=OverlayEvents.autoLayout({placement:config.panelPlacement,enabled:config.panelEnabled,sizing:config.panelSizing,gap:config.panelGap,sidePosition:config.sidePosition});
     syncSizeControls();return structuredClone(config);
   }
   function drawHits(layout){
@@ -482,7 +494,6 @@
       button.style.cssText=`left:${b.x/1920*100}%;top:${b.y/1080*100}%;width:${b.width/1920*100}%;height:${b.height/1080*100}%;border-radius:${16/b.width*100}% / ${16/b.height*100}%`;
       button.firstElementChild.textContent=visibleNumber;
     }
-    highlight();
   }
   function apply(message){
     try{
@@ -495,7 +506,7 @@
       showStatus(warning||message||'설정 미리보기 준비 완료',!!warning);
     }catch(error){showStatus(error.message,true);}
   }
-  function selectPanel(key){if(!keys.includes(key)||!config.panelEnabled[key])return;readEditor();selected=selected===key?null:key;if(selected)byId('event-target').value=selected;renderEditor();syncCamera();drawHits(config.layout||OverlayEvents.autoLayout({placement:config.panelPlacement,enabled:config.panelEnabled,sizing:config.panelSizing,gap:config.panelGap}));}
+  function selectPanel(key){if(!keys.includes(key)||!config.panelEnabled[key])return;readEditor();selected=selected===key?null:key;if(selected)byId('event-target').value=selected;renderEditor();syncCamera();drawHits(config.layout||OverlayEvents.autoLayout({placement:config.panelPlacement,enabled:config.panelEnabled,sizing:config.panelSizing,gap:config.panelGap,sidePosition:config.sidePosition}));}
   function reset(){draftReady=true;form.inert=false;byId('bundle').disabled=false;byId('reset').disabled=false;uploadStorage.reset();uploadRequests.clear();missingUploads.clear();storageWarning='';uploads.clear();cameraActive=false;cameraController?.disconnect();config=normalize(defaults);selected=null;renderGlobal();renderPlacement();renderEditor();apply('기본 설정을 복원했습니다');}
 
   form.addEventListener('input',event=>{
@@ -511,7 +522,7 @@
     }
     if(input.matches('[data-panel-count]'))updatePanelCount(input);
     updatePresetLabel(input);
-    if(input.name==='placementSwap')return;
+    if(['placementSwap','sidePosition'].includes(input.name))return;
     if(selected&&['panelWidthMode','panelHeightMode'].includes(input.name)){
       const axis=input.name==='panelWidthMode'?'width':'height';
       if(input.value==='fixed'&&config.panelSizing[selected][axis+'Mode']==='auto')control(axis==='width'?'panelWidth':'panelHeight').value=config.layout[selected][axis];
@@ -526,7 +537,7 @@
     if(input.matches('[data-upload]')){handleUpload(input);return;}
     if(input.name==='cameraDevice')return;
     if(input.name==='panelGap'&&presetRangeValue('panelGap',OverlayEvents.panelGaps,32)===8&&config.globalStyle.stroke.mode!=='none'&&window.confirm(localized('간격이 매우 좁습니다. 전역 테두리를 제거할까요? 패널별 개별 설정은 유지됩니다.')))control('globalStrokeMode').value='none';
-    if(input.name==='placementSwap'){updatePlacement(input);apply();return;}
+    if(['placementSwap','sidePosition'].includes(input.name)){updatePlacement(input);apply();return;}
     if(input.name==='regionOverride'){
       const details=byId('panel-editor').querySelector('.region-style-details');
       if(details)details.hidden=!input.checked;
@@ -546,10 +557,6 @@
   form.addEventListener('focusout',event=>{if(['panelWidth','panelHeight'].includes(event.target.name))apply();});
   form.addEventListener('keydown',event=>{if(event.key==='Enter'&&['panelWidth','panelHeight'].includes(event.target.name)){event.preventDefault();apply();}});
   form.addEventListener('submit',event=>event.preventDefault());
-  byId('panel-hit-areas').addEventListener('pointerover',event=>{hovered=event.target.closest('[data-hit]')?.dataset.hit||null;highlight();});
-  byId('panel-hit-areas').addEventListener('pointerleave',()=>{hovered=null;highlight();});
-  byId('panel-hit-areas').addEventListener('focusin',event=>{hovered=event.target.closest('[data-hit]')?.dataset.hit||null;highlight();});
-  byId('panel-hit-areas').addEventListener('focusout',()=>{hovered=null;highlight();});
   byId('panel-hit-areas').addEventListener('click',event=>{const button=event.target.closest('[data-hit]');if(button)selectPanel(button.dataset.hit);});
   byId('reset').onclick=reset;
   byId('send').onclick=()=>{const target=byId('event-target').value;if(!config.panelEnabled[target])return;send(frame,'receive',{target,nickname:byId('event-name').value,text:byId('event-text').value});status.textContent='샘플을 표시했습니다';};
@@ -588,7 +595,6 @@
     catch(error){logFullscreenFailure('enter',error,activation);showFullscreenMessage('전체 화면을 시작하지 못했습니다. 브라우저 권한을 확인하세요.');}
   };
   document.addEventListener('fullscreenchange',updateFullscreenLabel);
-  document.addEventListener('fullscreenchange',highlight);
   document.addEventListener('fullscreenerror',()=>showFullscreenMessage('전체 화면을 시작하지 못했습니다. 브라우저 권한을 확인하세요.'));
   window.addEventListener('kmg-language-change',()=>{apply();updateFullscreenLabel();});
 

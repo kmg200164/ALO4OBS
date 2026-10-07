@@ -2,9 +2,9 @@
 
 Auto Layout Overlay for OBS
 
-**[Download ALO4OBS 0.8.0](https://github.com/kmg200164/ALO4OBS/raw/refs/heads/main/downloads/OBS-Streaming-Template.zip)**
+**[Download ALO4OBS 0.9.0](https://github.com/kmg200164/ALO4OBS/raw/refs/heads/main/downloads/ALO4OBS-v0.9.0.zip)**
 
-The current downloadable package is **0.8.0**. For patch notes, see [CHANGELOG.md](CHANGELOG.md).
+0.9.0 is the current downloadable package, with the approved Figma themes applied to HTML. For patch notes, see [CHANGELOG.md](CHANGELOG.md).
 
 An OBS overlay that auto-arranges your panels so they never overlap.
 
@@ -31,6 +31,8 @@ ALO4OBS is free, and support is entirely optional. For bug reports, include what
 - Supports OBS sources, web URLs, and packaged image or video media.
 - Exports a portable `OBS-settings.zip` with settings, masks, and selected media.
 - Includes Korean, English, and Japanese settings and guides.
+- Offers ten approved UI color presets in dark and light modes: Cherry, Orange, Banana, Lime, Aloe, Cotton Candy, Blueberry, Grape, Bubblegum, and Mono. UI themes do not change broadcast colors or media.
+- Settings sections expand from the whole heading; selection arrows sit inside their fields.
 - Free MIT-licensed code with no required account or subscription.
 
 ## Quick start
@@ -46,7 +48,7 @@ Keep the extracted settings folder in place; OBS reads files beside the Lua scri
 
 ## Update an existing installation
 
-1. In OBS, delete the old `OST ·` sources and groups, and delete the old **OBS Streaming Template** scene.
+1. Back up your OBS scene collection and preserve personal sources. Then remove the old `OST ·` template sources/groups and the old **OBS Streaming Template** scene.
 2. Download and configure the new ZIP as above.
 3. Remove the old script entry, then add the new extracted `OBS-script.lua` and apply settings.
 
@@ -57,7 +59,7 @@ Rollback is supported only within the same installed version. Keep the previous 
 <details>
 <summary>What do Main, Sub, and Side mean?</summary>
 
-Main is the large left panel. Sub panels run left to right below or above it. Side panels run top to bottom on the right. These English role names stay the same in every language.
+Main is the large panel. Sub panels run left to right below or above it. Side panels run top to bottom, on the right by default or on the left when selected. These English role names stay the same in every language.
 
 </details>
 
@@ -78,7 +80,7 @@ Use a provider's HTTP(S) widget or display URL. Management pages and watch pages
 <details>
 <summary>What is not verified everywhere?</summary>
 
-Windows has live broadcast evidence. macOS verification is partial. HTTP preview does not prove direct `file://` compatibility, local-uploaded-media ZIP-to-OBS behavior, or every browser's storage quota behavior.
+Earlier versions have Windows live broadcast evidence and partial macOS observations. Native Windows OBS and macOS checks for this local 0.9.0 ZIP are pending. HTTP preview does not prove direct `file://` compatibility, local-uploaded-media ZIP-to-OBS behavior, or every browser's storage quota behavior.
 
 </details>
 

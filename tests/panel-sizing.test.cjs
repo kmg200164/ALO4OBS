@@ -72,16 +72,17 @@ test('height overflow and invalid sizing are rejected; an overfull Sub row rende
  for(const input of [null,[],{game:null},{unknown:{}},{game:{widthMode:'fill'}},{game:fixed('width',0)},{game:fixed('width',2.5)},{game:fixed('width',Infinity)},{game:fixed('height',1017)}])assert.throws(()=>api.normalizeSizing(input),/siz|width|height|panel/i);
 });
 test('active-panel limits preserve readable automatic siblings over all visibility combinations',()=>{
+ const minimum=(box,key,axis)=>axis==='width'&&api.canResizeWidth(key)?206:axis==='height'&&['chat','translation','hand'].includes(key)?Math.min(Math.ceil(box.height/2),248):Math.ceil(box[axis]/2);
  for(let bits=0;bits<128;bits++){
   const enabled=Object.fromEntries(keys.map((key,i)=>[key,!!(bits&(1<<i))]));
   const reference=layout({},enabled);
   for(const key of keys.filter(key=>enabled[key]))for(const axis of ['width','height']){
    const range=api.sizingBounds({placement:api.defaultPlacement(),enabled},key,axis);
-   assert.equal(range.min,axis==='width'&&api.canResizeWidth(key)?Math.min(reference[key].height,reference[key].width):Math.ceil(reference[key][axis]/2));assert.ok(range.max>=range.min);
+   assert.equal(range.min,minimum(reference[key],key,axis));assert.ok(range.max>=range.min);
    for(const value of [range.min,range.max]){
     const boxes=layout({[key]:fixed(axis,value)},enabled);separate(boxes,enabled);
     for(const peer of keys.filter(peer=>enabled[peer])){
-     assert.ok(boxes[peer][axis]>=(axis==='width'&&api.canResizeWidth(peer)?Math.min(reference[peer].height,reference[peer].width):Math.ceil(reference[peer][axis]/2)));
+     assert.ok(boxes[peer][axis]>=minimum(reference[peer],peer,axis));
      if(['chat','translation','hand'].includes(peer)){assert.equal(boxes[peer].x,1448);assert.ok(boxes[peer].width<=440);}
      else assert.ok(boxes[peer].x+boxes[peer].width<=1416);
     }
@@ -154,4 +155,20 @@ test('lower-panel minimum widths stay at the 16:9 baseline across main aspects',
   const larger=layout({game:{aspect},[key]:fixed('width',500)});
   assert.equal(larger[key].width,500);
  }
+});
+test('Sub minimum width is the square height below a 16:9 Main at every gap',()=>{
+ for(const gap of api.panelGaps){
+  const placement=api.defaultPlacement();
+  const baseline=api.autoLayout({placement,gap,sizing:{game:{aspect:'16:9'}}}).custom1.height;
+  for(const key of ['custom1','custom2','custom3']){
+   const bounds=api.sizingBounds({placement,gap},key,'width');
+   assert.equal(bounds.min,baseline,`${key} at ${gap}px gap`);
+  }
+ }
+});
+test('Side height offers 16:9 without drawing dots on the slider',()=>{
+ const placement=api.defaultPlacement(),enabled={translation:false,hand:false};
+ const box=api.autoLayout({placement,enabled}).chat;
+ const bounds=api.sizingBounds({placement,enabled},'chat','height');
+ assert.ok(api.aspectStops(box,'height',bounds).some(stop=>stop.label==='16:9'));
 });

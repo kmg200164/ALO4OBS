@@ -1,6 +1,6 @@
 # QA and device handoff
 
-Current implementation: 0.8.0 (unreleased source). The sections below preserve evidence from their named versions; automated checks do not establish live platform compatibility.
+0.9.0 release verification. JavaScript tests passed 212/212 including 20 light/dark palette render states, three guides, and 320–1200 px responsive checks; Python tests passed 12/12. Isolated Chrome confirmed translucent cards, aligned dividers, an accent-colored exterior panel selection ring, available manual 1:1/16:9 labels without white track dots, and collapsible content-sized settings cards. Sub minimum width matches the square row height below a 16:9 Main at each gap. Section chevrons sit beside names and the whole heading toggles each section. Select fields use Lucide chevron-down icons with visible right padding while property rows retain 8 px outer padding. The distribution ZIP was rebuilt and CRC/source verified; native OBS, direct-file export/reopen, and platform checks remain open. Older sections below preserve version-specific evidence.
 
 ## Lower-panel minimum width correction (0.7.1)
 
@@ -61,7 +61,7 @@ Keep personal widget links and exported settings private. Record the commit ID, 
 
 ## Release
 
-Continue fixes on `dev`. After the required checks pass, replace the README patch notes with the released-version notes, paste the same notes into the GitHub Release body, merge the verified version into `main`, tag the release, build `dist/OBS-Streaming-Template.zip`, and attach the neutral ZIP to a GitHub Release. No production-ready claim or release tag has been made yet.
+Continue fixes on `dev`. After the required checks pass, replace the README patch notes with the released-version notes, paste the same notes into the GitHub Release body, merge the verified version into `main`, tag the release, build `dist/ALO4OBS-v{version}.zip`, and attach the neutral ZIP to a GitHub Release. No production-ready claim or release tag has been made yet.
 
 ## macOS evidence (2026-10-04, partial and stopped)
 
@@ -144,3 +144,26 @@ Initial integration: Node 187/187, Python 11/11, build verified 47 files in dist
 ## Final 0.8.0 source verification — 2026-10-07
 
 Node 189/189 and Python 11/11 passed; dist/ALO4OBS-v0.8.0.zip built and verified with 47 files. Actual Chrome origin 8765 loaded versioned CSS/JavaScript after an earlier cached-style mismatch. All UI icons use official Lucide 0.468.0 stock glyphs. Global sliders update labels on input; opacity, blur and stroke width increase left to right. English/Japanese labels, preview opacity/blur, reload persistence and final left-label/right-value alignment passed. Main/Sub text is left of the vertical switch. A 480px viewport has no horizontal overflow. Independent high-effort source review passed. Native/platform limits above remain open; this is not a public-release claim.
+
+## Earlier 0.9.0 checkpoint — 2026-10-07 (superseded)
+
+At this checkpoint, Figma cleanup was complete: Primitive 48 / Palette 6 / Semantic 21; 331 superseded variables were removed after full-page/style/alias dependency checks and preservation of recovery data. Exact 20 user accent colors were retained. The user requested color revisions at the review gate, so HTML theme application and final ZIP rebuild were pending then. The earlier ZIP and 205-test evidence below do not cover the newer changes.
+
+At that checkpoint, source checks reported Node 208 passed, 0 failed, 1 opt-in rendered test skipped; Python 12/12 passed including two installed OBS LuaJIT checks. Independent focused UI checks 26/26 passed. Isolated Chrome verified full-width ranges, right-aligned live values, horizontal switches, select arrows, Fill/Stroke sections, selection outlines with broadcast strokes disabled, warning document order, five viewport widths and three languages. No new non-color regression was found. The local-only captures are not part of the public repository; work-report-0.9.0.md records the final tested scope.
+
+At this checkpoint, file:// execution, native OBS setup/output and OS export-picker behavior remained separate unverified paths. No final ZIP, commit, push, tag, GitHub Release or SNS publication had occurred then.
+## Earlier 0.9.0 candidate verification — 2026-10-07 (superseded)
+
+Uncommitted main working tree; publication explicitly withheld. See [work report](work-report-0.9.0.md) and [draft release notes](release-notes-0.9.0.md).
+
+Final source: Node 205/205, Python 12/12 plus 8 Lua subtests, build.py passed. User-defined 10 palettes / 20 exact accent HEX replace the provisional four. Source contrast: 1,660 passing essential role/state/background checks, with decorative fills recorded separately. Side source geometry covers 1,024 cases; Lua is tested against an OBS state model.
+
+Isolated headless Chrome 154.0.8037.98 checked both source HTTP and the actual rebuilt ZIP on a fresh origin: 20 palette/theme combinations each, all computed tokens matching source, unchanged broadcast-preview styles, reload persistence, three localized guides, 480×600 and 320×480 scrollable menus, Escape retaining the outer menu, no horizontal overflow and no pageerrors. Current 20-mode contact sheets and mobile captures were visually inspected. No user keyboard/mouse/window/profile/tab was touched.
+
+Neutral defaults now contain the missing startup geometry; the same omission caused initial Invalid layout on the actual 0.8.0 ZIP. Strict validation remains. The regression check verifies neutral updates preserve durable drafts while genuinely different imported settings retain precedence.
+
+At that checkpoint, local-only palette, contrast, render and ZIP audit files recorded 48 ZIP entries with no additions/removals and 21 changed entries versus 0.8.0. Those files describe an earlier candidate and are not linked as current release evidence. Older eight-color captures and audits remain historical local evidence.
+
+Four Side-state captures were separately taken in stable 0.9.0 states. The older gap 8/48 eight-case DOM log has switch/coordinate mismatches; its browser-pass claim remains withdrawn. Palette preview invariance does not replace that check or live OBS output.
+
+Direct file://, native OBS, macOS, actual OS export picker/reopen and held-pointer pixels remain unverified. HTTP/headless evidence is scoped accordingly. No commit, push, tag, Release, repository settings or SNS activity.

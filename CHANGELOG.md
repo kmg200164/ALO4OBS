@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.9.0 — 2026-10-08 (local release candidate)
+
+- Move the entire Side column left or right with a horizontal switch; older settings default to the right and keep their panel data.
+- Apply the ten approved Figma UI palettes to HTML in dark and light modes: Cherry, Orange, Banana, Lime, Aloe, Cotton Candy, Blueberry, Grape, Bubblegum, and Mono. Theme choices do not change broadcast media or output styles.
+- Replace the free UI accent color picker with named, keyboard-operable preset choices, swatches, and selection checks; preserve saved theme and migrate legacy arbitrary accent colors without deleting them.
+- Name the public download ALO4OBS-v0.9.0.zip and update its references.
+- Keep native range sliders; place Lucide chevron-down icons inside select fields with visible right padding and invert text and background colors on hover while retaining keyboard focus cues.
+- Place restore warnings below the shared header, add fill/stroke subheadings, and make each guide FAQ card invert as one clickable surface.
+- Restore translucent settings cards and aligned section dividers; return property-row outer padding to 8 px and strengthen switch contrast.
+- Keep slider numbers close to their tracks in the chosen accent color, show available 1:1 and 16:9 labels beneath manual size sliders without white track dots, and let settings cards grow or shrink with whole-heading collapsible sections and name-adjacent chevrons.
+- Size each Sub panel's minimum width as a square using the row height left by a 16:9 Main at the chosen gap; keep the brand, action text, icons, and button height steady on narrow screens.
+- Keep panel hover/selection outlines outside the broadcast stroke in the chosen accent color. Remove the duplicate preview stroke highlight so no white rim extends beyond selection.
+- The 0.9.0 source and distribution ZIP passed local automated and package checks. Native OBS and macOS verification are documented separately.
+
 ## 0.8.0 — 2026-10-07
 
 - Rename the current product interface and OBS scene namespace to ALO4OBS / `ALO ·`.

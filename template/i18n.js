@@ -138,8 +138,8 @@ Object.assign(translations,{'그라디언트 편집기를 불러오지 못했습
 Object.assign(japanese,{'홍보와 알림은 한 칸씩만 선택하세요':'プロモーションと通知はそれぞれ1枠だけ選択してください。'});
 Object.assign(translations,{'파일을 읽지 못했습니다. 파일을 다시 선택하세요.':'Could not read the file. Select it again.'});
 Object.assign(japanese,{'파일을 읽지 못했습니다. 파일을 다시 선택하세요.':'ファイルを読み込めませんでした。もう一度ファイルを選択してください。'});
-Object.assign(translations,{'변경 기록':'Release notes','설정':'Settings','가이드':'Guide','Main·Sub 위아래 바꾸기':'Swap Main and Sub rows','Sub 개수':'Number of Sub panels','Side 개수':'Number of Side panels','간격이 매우 좁습니다. 전역 테두리를 제거할까요? 패널별 개별 설정은 유지됩니다.':'The gap is extra narrow. Remove the global panel borders? Individual panel settings will be kept.'});
-Object.assign(japanese,{'변경 기록':'更新履歴','설정':'設定','가이드':'ガイド','Main·Sub 위아래 바꾸기':'Main と Sub の上下を入れ替え','Sub 개수':'Sub の数','Side 개수':'Side の数','간격이 매우 좁습니다. 전역 테두리를 제거할까요? 패널별 개별 설정은 유지됩니다.':'間隔が非常に狭くなっています。全体のパネル枠線を削除しますか？個別のパネル設定は保持されます。'});
+Object.assign(translations,{'변경 기록':'Release notes','설정':'Settings','가이드':'Guide','Main·Sub 위아래 바꾸기':'Swap Main and Sub rows','Side 열 왼쪽에 놓기':'Place Side column on the left','UI 색상 프리셋':'UI color preset','알로에':'Aloe','파랑':'Blue','분홍':'Pink','주황':'Orange','Sub 개수':'Number of Sub panels','Side 개수':'Number of Side panels','간격이 매우 좁습니다. 전역 테두리를 제거할까요? 패널별 개별 설정은 유지됩니다.':'The gap is extra narrow. Remove the global panel borders? Individual panel settings will be kept.'});
+Object.assign(japanese,{'변경 기록':'更新履歴','설정':'設定','가이드':'ガイド','Main·Sub 위아래 바꾸기':'Main と Sub の上下を入れ替え','Side 열 왼쪽에 놓기':'Side 列を左に配置','UI 색상 프리셋':'UI カラープリセット','알로에':'アロエ','파랑':'ブルー','분홍':'ピンク','주황':'オレンジ','Sub 개수':'Sub の数','Side 개수':'Side の数','간격이 매우 좁습니다. 전역 테두리를 제거할까요? 패널별 개별 설정은 유지됩니다.':'間隔が非常に狭くなっています。全体のパネル枠線を削除しますか？個別のパネル設定は保持されます。'});
 // The gradient editor creates labels in the current language. Keep their canonical
 // forms here too so an open editor survives a language change.
 for(const [ko,en,ja] of [
@@ -167,6 +167,7 @@ for(const [internal,ko,en,ja] of [
  ['Invalid background','배경 설정을 확인하세요','Check the background settings.','背景設定を確認してください。'],
  ['Discord Reactive OBS URL required','Discord Reactive의 OBS 표시 URL을 입력하세요','Enter the Discord Reactive OBS display URL.','Discord ReactiveのOBS表示URLを入力してください。'],
  ['Invalid panel placement','패널 배치를 확인하세요','Check the panel placement.','パネルの配置を確認してください。'],
+ ['Invalid Side position','Side 열 위치를 확인하세요','Check the Side column position.','Side 列の位置を確認してください。'],
  ['Invalid panel gap','간격 설정을 확인하세요','Check the spacing setting.','間隔の設定を確認してください。'],
  ['Invalid layout','배치를 확인하세요','Check the layout.','レイアウトを確認してください。'],
  ['Invalid auto layout','자동 배치를 확인하세요','Check the automatic layout.','自動レイアウトを確認してください。'],
@@ -196,6 +197,8 @@ for(const [field,koLabel] of Object.entries(validationFields)){
 for(const part of ['background','fill','stroke'])for(const prefix of ['Invalid gradient','Invalid gradient stop'])addValidation(prefix+': global '+part,'전역 그라디언트 설정을 확인하세요','Check the global gradient settings.','全体のグラデーション設定を確認してください。');
 const selector=document.getElementById('ui-language');
 const attributeOriginals=new WeakMap();
+Object.assign(translations,{"체리":"Cherry","오렌지":"Orange","바나나":"Banana","라임":"Lime","알로에":"Aloe","솜사탕":"Cotton Candy","블루베리":"Blueberry","포도":"Grape","풍선껌":"Bubblegum","모노":"Mono"});
+Object.assign(japanese,{"체리":"チェリー","오렌지":"オレンジ","바나나":"バナナ","라임":"ライム","알로에":"アロエ","솜사탕":"わたあめ","블루베리":"ブルーベリー","포도":"ぶどう","풍선껌":"バブルガム","모노":"モノ"});
 const supportedLanguages=['ko','en','ja'];
 const guideFiles={ko:'guide.html',en:'guide-en.html',ja:'guide-ja.html'};
 const originalByTranslation=new Map();

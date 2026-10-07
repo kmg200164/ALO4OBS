@@ -46,4 +46,8 @@
       </figcaption>`;
     mount.replaceWith(figure);
   });
+  document.querySelectorAll('.faq-item').forEach(card=>card.addEventListener('click',event=>{
+    if(event.target.closest('summary,a,button,input,select,textarea'))return;
+    card.open=!card.open;
+  }));
 })();
