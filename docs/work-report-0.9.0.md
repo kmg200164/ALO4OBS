@@ -1,27 +1,26 @@
-# ALO4OBS 0.9.0 — 작업·검수 보고
+# ALO4OBS 0.9.0 — Implementation and QA Report
 
-2026-10-08. **main push 전 로컬 후보 구현·ZIP 검증 기록.**
+2026-10-08. **Record of local candidate implementation and ZIP verification before the main push.**
 
-## [보고]
+## Work completed
 
-- 사용자 검수 10종 × 라이트/다크 20조합의 Figma 강조색·배경색과 21개 semantic 역할을 HTML에 반영했다. 지정된 색상값은 보정하지 않았다.
-- 기본 알로에, 테마별 배경색, Side 좌우 전환, 다운로드 이름 `ALO4OBS-v0.9.0.zip`을 반영했다.
-- 반투명 카드와 기획된 구분선을 복원했다. 설정 카드는 내용에 따라 높이가 달라지고, 배치·배경·패널 채우기·패널 테두리 및 패널별 세부 항목은 접고 펼칠 수 있다.
-- 수동 너비·높이 슬라이더는 선택 가능한 1:1·16:9 위치를 트랙 아래 강조색 글자로 표시한다. 흰색 점은 제거하고, 스냅 동작은 유지했다. Sub 최소 너비는 선택한 간격에서 Main 16:9 아래에 남는 행 높이와 같아 1:1이 된다.
-- 패널 호버·선택은 바깥쪽 강조색 윤곽으로 표시한다. 중복된 흰색 미리보기 하이라이트를 제거했다. 방송용 테두리 설정은 독립적으로 유지한다.
-- 설정 행의 바깥 여백은 8px로 복원하고, 선택창의 Lucide chevron-down 아이콘은 버튼 안쪽에 배치했다. 스위치 대비를 높이고, 클릭 후 헤더의 지속 포커스 상자는 숨기되 키보드 Tab 포커스는 유지했다.
-- 세부 영역의 셰버론은 제목 옆에 글씨색·3px 선으로 표시한다. 제목 전체를 클릭해 열고 닫는다.
-- 가이드 3언어의 추가 안내 카드는 전체가 호버 색으로 바뀌고, 제목이나 본문을 클릭해 열고 닫는다. 본문 링크는 본래 동작을 유지한다.
-- `node --test tests/*.test.cjs`: **212/212 통과, 실패·skip 0**. 20가지 테마 상태, 설정/가이드 실제 렌더, FAQ 카드, 16:9 비율 표기, 유동 카드 높이, 320–1200px 버튼 크기 검증 포함.
-- `python -m unittest discover -s tests -p 'test_*.py'`: **12/12 통과**. `git diff --check`: 오류 없음.
-- 격리된 Chrome에서 선택선 픽셀과 16:9 글자 위치를 확인했다. 트랙 위 흰색 점과 선택선 밖 흰 테두리는 없고, 카드 접기 시 실제 높이가 줄어든다.
-- `python build.py`: 중립 배포 ZIP 생성·자체 검증. `dist`와 `downloads` ZIP 바이트가 같다. **48개 ZIP 항목, CRC 통과, 버전 0.9.0, 가이드·설정·변경 기록 소스 일치**.
-- 정본 ZIP: `W:\Project\OBS-streaming-template\downloads\ALO4OBS-v0.9.0.zip`
-$13328E0BDFD73A85B85945834A377A09622056B815D3AD9E9667061DE43827DA0`
-- 이 보고서 작성 시점에는 커밋·push·태그·GitHub Release·SNS 게시가 없었다. 이후 공개 상태는 저장소 Git 이력에서 확인한다.
+- Applied the user-approved Figma accent and background colors for ten palettes across light and dark modes (20 combinations), with 21 semantic UI roles. The specified color values were not adjusted.
+- Added Aloe as the default preset, theme-specific backgrounds, a left/right switch for the Side column, and the `ALO4OBS-v0.9.0.zip` download name.
+- Restored translucent cards and the planned dividers. Settings cards resize to their content; layout, background, panel fill, panel stroke, and panel-specific details can be expanded or collapsed.
+- Manual width and height sliders show available 1:1 and 16:9 positions as accent-colored labels below the track. Removed the white dots while keeping snapping. Each Sub panel's minimum width equals the row height remaining below a 16:9 Main at the selected gap, making that minimum square.
+- Panel hover and selection use an exterior outline in the selected accent color. Removed the duplicate white preview highlight. Broadcast stroke settings remain independent.
+- Restored 8 px outer padding on property rows and placed Lucide chevron-down icons inside select fields. Increased switch contrast. A clicked header no longer retains a persistent focus box, while keyboard Tab focus remains visible.
+- Placed section chevrons beside their titles, using the text color and a 3 px stroke. Clicking the whole heading expands or collapses the section.
+- In all three guides, each additional-information card changes hover color as a whole and opens or closes when its title or body is clicked. Links inside the body keep their normal behavior.
+- `node --test tests/*.test.cjs`: **212/212 passed; 0 failures or skips**. Coverage includes 20 theme states, rendered settings and guides, FAQ cards, 16:9 ratio labels, flexible card heights, and button sizes at 320–1200 px.
+- `python -m unittest discover -s tests -p 'test_*.py'`: **12/12 passed**. `git diff --check` found no errors.
+- Isolated Chrome inspection confirmed selection-outline pixels and the position of the 16:9 label. There were no white dots on the track or white rims outside selected panels, and collapsing a card reduced its rendered height.
+- `python build.py` created and self-checked the neutral distribution ZIP. The `dist` and `downloads` ZIPs were byte-identical. **48 ZIP entries, valid CRCs, version 0.9.0, and matching guide, settings, and changelog sources** were verified.
+- Canonical ZIP at the time of this report: `W:\Project\OBS-streaming-template\downloads\ALO4OBS-v0.9.0.zip`; SHA-256: `13328E0BDFD73A85B85945834A377A09622056B815D3AD9E9667061DE43827DA0`
+- When this report was written, no commit, push, tag, GitHub Release, or social post had occurred. Check the repository history for later publication status.
 
-## 검증 범위
+## Verification scope
 
-격리 Chrome의 로컬 HTTP UI 렌더와 소스/ZIP 검증이다. 이 후보의 직접 `file://` 열기와 ZIP 저장·복원, 실제 OBS 적용, 운영체제 저장 대화상자 및 macOS 실행은 이번 검수에서 확인하지 않았다. 이전 버전의 실 OBS 증거를 0.9.0 합격 증거로 간주하지 않는다.
+This candidate was checked through isolated Chrome rendering over local HTTP and source/ZIP validation. Direct `file://` launch and ZIP save/restore, native OBS application, operating-system save dialogs, and macOS operation were not verified in this run. Native OBS evidence from earlier versions does not establish a 0.9.0 pass.
 
-이전 단계별 보고는 `.qa-private/0.9.0/historical-work-report-2026-10-07.md`에 보존했다.
+Earlier detailed reports are preserved locally at `.qa-private/0.9.0/historical-work-report-2026-10-07.md` and are not part of the public repository.
