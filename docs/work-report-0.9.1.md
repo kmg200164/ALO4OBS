@@ -73,7 +73,7 @@ The harness could not call `obs_frontend_exit` (not exposed by the installed Lua
 ## Package integrity
 
 - Existing public `downloads/ALO4OBS-v0.9.0.zip`: **955,839 bytes**, SHA-256 `3328e0bdfd73a85b85945834a377a09622056b815d3ad9e9667061de43827da0`. The file was not rebuilt/replaced; only its malformed historical report line was corrected.
-- Local candidate `downloads/ALO4OBS-v0.9.1.zip`: **2,425,673 bytes**, SHA-256 `552ecd636c7b2afb0082c23ce091238f3d8e19a591caf75c601a5310548c1930`. It contains neutral defaults, licenses and the approved distribution allowlist; the guide infographic is omitted from the personal OBS runtime. It excludes diagnostic media, personal settings and source selector mappings.
+- Local candidate `downloads/ALO4OBS-v0.9.1.zip`: **2,425,643 bytes**, SHA-256 `05a481e9068981bd38c04922d118838d24debed07f8e90536f83aa563cb1ef18`. It contains neutral defaults, licenses and the approved distribution allowlist; the guide infographic is omitted from the personal OBS runtime. It excludes diagnostic media, personal settings and source selector mappings.
 
 ## Remaining verification and approval
 
