@@ -1,6 +1,13 @@
 (() => {
   const byId=id=>document.getElementById(id);
   const form=byId('settings'), frame=byId('preview'), status=byId('status');
+  function syncHitAreaScale(){
+    const viewport=frame.contentWindow,hits=byId('panel-hit-areas');
+    // Iframe viewport rounding must match the overlay's uniform scale on both axes.
+    const scale=Math.min(viewport.innerWidth/1920,viewport.innerHeight/1080);
+    hits.style.width=`${1920*scale}px`;hits.style.height=`${1080*scale}px`;
+  }
+  new ResizeObserver(syncHitAreaScale).observe(frame);
   const keys=['game','custom1','custom2','custom3','chat','translation','hand'];
   const names=OverlayEvents.panelLabels;
   const panelGroups={sub:keys.slice(1,4),side:keys.slice(4)};
@@ -65,7 +72,7 @@
     return values[Number.isInteger(index)&&index>=0&&index<values.length?index:values.indexOf(fallback)];
   }
   function globalPreset(name){
-    return name==='panelGap'?[OverlayEvents.panelGaps,gapLabels,'px']:name==='globalFillOpacity'?[globalOpacityPresets,globalStrengthLabels,'%']:name==='globalFillBlur'?[globalBlurPresets,globalStrengthLabels,'px']:name==='globalStrokeWidth'?[globalStrokeWidthPresets,globalStrengthLabels,'px']:null;
+    return name==='panelGap'?[OverlayEvents.panelGaps,gapLabels,'px']:['globalFillOpacity','regionOpacity'].includes(name)?[globalOpacityPresets,globalStrengthLabels,'%']:['globalFillBlur','regionBlur'].includes(name)?[globalBlurPresets,globalStrengthLabels,'px']:['globalStrokeWidth','regionStrokeWidth'].includes(name)?[globalStrokeWidthPresets,globalStrengthLabels,'px']:null;
   }
   function updatePresetLabel(input){
     const preset=globalPreset(input.name);if(!preset)return false;
@@ -183,7 +190,14 @@
     if(!normalized||normalized.type!=='linear'||!Array.isArray(normalized.stops))return null;
     return normalized;
   }
+  function syncRangeProgress(){
+    form.querySelectorAll('input[type=range]').forEach(input=>{
+      const min=Number(input.min||0),max=Number(input.max||100),value=Number(input.value);
+      input.style.setProperty('--range-progress',`${Math.max(0,Math.min(100,(value-min)/Math.max(1,max-min)*100))}%`);
+    });
+  }
   function paintGradientControls(){
+    syncRangeProgress();
     if(!window.KMGGradient)return;
     form.querySelectorAll('[data-gradient-preview]').forEach(button=>{
       const part=gradientPart(button.dataset.gradientPreview);
@@ -301,7 +315,8 @@
   }
   const editorRow=(label,controlHtml,variant='')=>propertyRow(label,controlHtml,'',undefined,false,'radio',variant);
   const editorColor=(label,name,value)=>editorRow(label,color(name,value));
-  const editorPreset=(label,name,value,values,fallback)=>editorRow(label,presetSelect(name,value,values,fallback));
+  // Regional sliders share the global scale; stored settings still contain actual values.
+  const editorPreset=(label,name,value,values,fallback)=>editorRow(label,presetRange(name,value,[...values].reverse(),fallback,globalStrengthLabels,name==='regionOpacity'?'%':'px'),'property-row--size property-row--preset');
   const fieldHtml=(label,name,type='text',extra='',wide=false)=>editorRow(label,`<input name="${name}" type="${type}" ${extra}>`,wide?'property-row--long':'');
   const urlField=(label,name)=>fieldHtml(label,name,'url','placeholder="https://…" autocomplete="off"',true);
   const editorSelect=(label,name,options,value)=>editorRow(label,selectShell(`<select name="${name}">${optionHtml(options,value)}</select>`));
@@ -326,25 +341,26 @@
     const regionInputs=section('영역 스타일',`
       ${editorToggle('전역 설정 대신 개별 설정','regionOverride',config.regionStyleOverrides[key])}
       <div class="property-group region-style-details"${useRegionOverride?'':' hidden'}>
-      ${section('채우기',`
+      <div class="divider"></div>
+      ${section('패널 채우기',`
       ${propertyRow('없음','','regionFillMode','none',fill.mode==='none')}
       ${propertyRow('단색',color('regionColor',fill.color||region.color||'#ffffff'),'regionFillMode','solid',fill.mode!=='none'&&fill.mode!=='gradient')}
       ${propertyRow('그라디언트',gradientControl('regionFill'),'regionFillMode','gradient',fill.mode==='gradient')}
       ${editorPreset('불투명도','regionOpacity',fill.opacity??region.opacity??20,opacityPresets,20)}
-      ${editorPreset('블러','regionBlur',fill.blur??region.blur??16,blurPresets,16)}
+      ${editorPreset('흐림','regionBlur',fill.blur??region.blur??16,blurPresets,16)}
+      ${fieldHtml('이미지 경로 또는 URL','regionImage','text','placeholder="assets/image.png 또는 https://…"',true)}
+      ${editorFile('이미지 파일','region','image/png,image/jpeg,image/webp,image/gif')}
       `)}
       <div class="divider"></div>
-      ${section('테두리',`
+      ${section('패널 테두리',`
       ${propertyRow('없음','','regionStrokeMode','none',stroke.mode==='none')}
       ${propertyRow('단색',color('regionBorderColor',stroke.color||region.borderColor||'#ffffff'),'regionStrokeMode','solid',stroke.mode!=='none'&&stroke.mode!=='gradient')}
       ${propertyRow('그라디언트',gradientControl('regionStroke'),'regionStrokeMode','gradient',stroke.mode==='gradient')}
-      ${editorPreset('테두리 두께','regionStrokeWidth',stroke.width??4,strokeWidthPresets,4)}
+      ${editorPreset('두께','regionStrokeWidth',stroke.width??4,strokeWidthPresets,4)}
       `)}
-      ${fieldHtml('이미지 경로 또는 URL','regionImage','text','placeholder="assets/image.png 또는 https://…"',true)}
-      ${editorFile('이미지 파일','region','image/png,image/jpeg,image/webp,image/gif')}
       </div>`);
     byId('panel-editor').innerHTML=`${sizing}<div class="divider"></div>${content}<div class="divider"></div>${regionInputs}`;
-    for(const [name,value] of Object.entries({regionColor:fill.color||region.color||'#ffffff',regionOpacity:nearestPreset(fill.opacity??region.opacity,opacityPresets,20),regionBlur:nearestPreset(fill.blur??region.blur,blurPresets,16),regionBorderColor:stroke.color||region.borderColor||'#ffffff',regionStrokeWidth:nearestPreset(stroke.width,strokeWidthPresets,4),regionImage:region.image||''})){const input=control(name);if(input)input.value=value;}
+    for(const [name,value] of Object.entries({regionColor:fill.color||region.color||'#ffffff',regionBorderColor:stroke.color||region.borderColor||'#ffffff',regionImage:region.image||''})){const input=control(name);if(input)input.value=value;}
     syncSizeControls();
     renderContentExtra();
     paintGradientControls();
@@ -400,11 +416,11 @@
     if(key==='game')config.panelSizing.game.aspect=control('panelAspect')?.value||'16:9';
     const fillMode=control('regionFillMode')?.value||fill.mode||'solid',strokeMode=control('regionStrokeMode')?.value||stroke.mode||(r.borderVisible===false?'none':'solid');
     r.color=fillMode==='gradient'&&fill.gradient?.stops?.length?fill.gradient.stops[0].color:control('regionColor').value;
-    r.opacity=Number(control('regionOpacity').value);r.blur=Number(control('regionBlur').value);
+    r.opacity=presetRangeValue('regionOpacity',globalOpacityPresets,20);r.blur=presetRangeValue('regionBlur',globalBlurPresets,16);
     r.borderColor=strokeMode==='gradient'&&stroke.gradient?.stops?.length?stroke.gradient.stops[0].color:control('regionBorderColor').value;
     r.borderVisible=strokeMode!=='none';r.image=control('regionImage').value.trim();
     Object.assign(fill,{mode:fillMode,color:r.color,color2:fill.color2||r.color,opacity:r.opacity,blur:r.blur});
-    Object.assign(stroke,{mode:strokeMode,color:r.borderColor,color2:stroke.color2||r.borderColor,opacity:100,width:Number(control('regionStrokeWidth').value)});forceStrokeAlpha(stroke);
+    Object.assign(stroke,{mode:strokeMode,color:r.borderColor,color2:stroke.color2||r.borderColor,opacity:100,width:presetRangeValue('regionStrokeWidth',globalStrokeWidthPresets,4)});forceStrokeAlpha(stroke);
     r.borderOpacity=100;
     r.fill=fill;r.stroke=stroke;
     config.regionBackgrounds[key]=r;config.regionStyleOverrides[key]=control('regionOverride').checked;
@@ -498,6 +514,7 @@
   function apply(message){
     try{
       const data=current(),live=liveConfig(data);
+      syncRangeProgress();
       syncCamera();
       drawHits(data.layout);
       send(frame,'apply',live);
@@ -656,7 +673,7 @@
       status.textContent='Extract OBS-settings.zip, then select OBS-script.lua from that folder in OBS.';
     }catch(error){if(error.name==='AbortError')return;status.textContent=window.KMGI18n?.localize(error.message)||error.message;}
   };
-  frame.addEventListener('load',()=>{if(draftReady)send(frame,'apply',liveConfig(current()));});
+  frame.addEventListener('load',()=>{syncHitAreaScale();if(draftReady)send(frame,'apply',liveConfig(current()));});
   async function restoreDraft(){
     form.inert=true;byId('bundle').disabled=true;byId('reset').disabled=true;
     showStatus('저장한 설정과 파일을 불러오는 중입니다');

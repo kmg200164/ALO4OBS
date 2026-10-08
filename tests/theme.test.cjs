@@ -41,7 +41,11 @@ function matrix(){
  const combinations=[];
  for(const preset of presets)for(const theme of ['light','dark']){
   const t=tokens(preset,theme),rows=[],advisoryRows=[];
-  const add=(component,state,foreground,background,minimum)=>rows.push({component,state,foreground,background,foregroundHex:t[foreground],backgroundHex:t[background],ratio:contrast(t[foreground],t[background]),minimum});
+  // The user chose white Cherry/Bubblegum light-mode accent ink; retain and report its sub-4.5 contrast.
+  const add=(component,state,foreground,background,minimum)=>{
+   const approvedException=theme==='light'&&['red','pink'].includes(preset)&&minimum===4.5&&[['--content-on-accent','--accent-default'],['--content-on-accent-hover','--accent-hover'],['--content-on-accent-pressed','--accent-pressed']].some(([fg,bg])=>foreground===fg&&background===bg);
+   rows.push({component,state,foreground,background,foregroundHex:t[foreground],backgroundHex:t[background],ratio:contrast(t[foreground],t[background]),minimum,approvedException});
+  };
   for(const background of ['--page-background','--surface-card','--surface-field','--surface-accent-subtle']){
    add('body / card / field / guide text','default','--content-primary',background,4.5);
    add('secondary label / help / gradient value','default','--content-secondary',background,4.5);
@@ -76,11 +80,11 @@ function matrix(){
   add('fullscreen action outer focus','focus','--preview-label-content','--preview-background',3);
   combinations.push({preset,theme,semanticValues:Object.fromEntries(semanticRoles.map(role=>[role,t[role]])),tokens:t,rows,advisoryRows,minimumTextRatio:Math.min(...rows.filter(row=>row.minimum===4.5).map(row=>row.ratio)),minimumControlRatio:Math.min(...rows.filter(row=>row.minimum===3).map(row=>row.ratio))});
  }
- return {source:'template/header.css (shipped tokens synchronized with approved figma-theme-tokens.json)',semanticRoles,method:'WCAG sRGB relative luminance; (Lmax+0.05)/(Lmin+0.05); no rounding before pass/fail',backgrounds:'Opaque semantic text surfaces. Permanent button borders and native range outlines were removed by explicit user request. Button fill / raw accent contrast is measured separately and is not falsely counted as a passing outline.',limits:['Source role matrix; the opt-in isolated headless browser regression verifies actual CSS bindings separately.','Advisory rows below 3:1 are known fill/adjacent-surface contrast limitations. Labels, position, checks and keyboard focus remain independent cues; full nontext WCAG conformance is not claimed.','Native range rail/thumb painting and OS dialogs are browser-owned; removing artificial outlines preserves the requested native geometry. Raw accent vs field is reported, not a complete native raster measurement.','User media, gradient and broadcast colors are excluded. Approved Figma colors are exact; required contrast failures remain failures.'],combinations};
+ return {source:'template/header.css (shipped tokens synchronized with approved figma-theme-tokens.json)',semanticRoles,method:'WCAG sRGB relative luminance; (Lmax+0.05)/(Lmin+0.05); no rounding before pass/fail',backgrounds:'Opaque semantic text surfaces. Permanent button borders and native range outlines were removed by explicit user request. Button fill / raw accent contrast is measured separately and is not falsely counted as a passing outline.',limits:['Source role matrix; the opt-in isolated headless browser regression verifies actual CSS bindings separately.','Advisory rows below 3:1 are known fill/adjacent-surface contrast limitations. Labels, position, checks and keyboard focus remain independent cues; full nontext WCAG conformance is not claimed.','Range rails/thumbs use borderless custom paint with 24px control geometry; OS dialogs remain browser-owned. Raw accent vs field is reported, not a complete raster measurement.','User media, gradient and broadcast colors are excluded. Approved raw Figma colors are exact. Cherry/Bubblegum light-mode white accent ink is an explicit later user choice: its sub-4.5 text contrast is reported as an approved exception, not a WCAG pass.'],combinations};
 }
 const report=matrix();
-test('all twenty user UI palettes preserve essential text 4.5 and focus/position/selection cues 3 without artificial button borders',()=>{
- const failures=report.combinations.flatMap(combination=>combination.rows.filter(row=>row.ratio<row.minimum).map(row=>`${combination.preset}/${combination.theme} ${row.component} ${row.state}: ${row.ratio.toFixed(3)} < ${row.minimum}`));
+test('twenty palettes retain contrast checks with explicit white-ink exceptions for Cherry/Bubblegum light accents',()=>{
+ const failures=report.combinations.flatMap(combination=>combination.rows.filter(row=>row.ratio<row.minimum&&!row.approvedException).map(row=>`${combination.preset}/${combination.theme} ${row.component} ${row.state}: ${row.ratio.toFixed(3)} < ${row.minimum}`));
  assert.deepEqual(failures,[],'Required contrast failures:\n'+failures.join('\n'));
 });
 
@@ -104,7 +108,7 @@ test('semantic role aliases and status meaning remain independent of preset',()=
   for(const preset of presets){
    const t=tokens(preset,theme);
    for(const [alias,role] of Object.entries({'--page':'--page-background','--field':'--surface-field','--text':'--content-primary','--muted':'--content-secondary','--accent':'--accent-default'}))assert.equal(t[alias],t[role]);
-   assert.equal(t['--glass'],theme==='light'?'rgba(0,0,0,.12)':'rgba(255,255,255,.2)');
+   assert.equal(t['--glass'],theme==='light'?'rgba(255,255,255,.55)':'rgba(0,0,0,.35)');
    assert.equal(t['--line'],theme==='light'?'rgba(0,0,0,.24)':'rgba(255,255,255,.28)');
    for(const status of ['warning','error','success','info'])for(const prefix of ['--status-','--surface-'])assert.equal(t[prefix+status],reference[prefix+status]);
    assert.notEqual(t['--accent-default'],tokens(preset,theme==='light'?'dark':'light')['--accent-default']);
@@ -159,18 +163,22 @@ test('chooser uses named native radio controls and keeps broadcast configuration
  for(const filename of ['overlay.css','events.js','pack.js','OBS-script.lua'])assert.doesNotMatch(fs.readFileSync(path.join(__dirname,'../template',filename),'utf8'),/overlay-ui-preset|data-ui-preset/);
 });
 
-test('all twenty approved Figma palettes match all 21 semantic roles, public aliases and swatches exactly',()=>{
+test('all twenty palettes preserve approved raw colors and roles except the requested pure fields and light Cherry/Bubblegum white ink',()=>{
  assert.equal(paletteSource.combinations.length,20);
  assert.deepEqual([...new Set(paletteSource.combinations.map(item=>item.preset))],presets);
  assert.equal(new Set(paletteSource.combinations.map(item=>item.preset+'/'+item.theme)).size,20);
  for(const entry of paletteSource.combinations){
   const t=tokens(entry.preset,entry.theme);
   assert.deepEqual(Object.keys(entry.semanticValues).sort(),[...semanticRoles].sort());
-  for(const role of semanticRoles)assert.equal(t[role],entry.semanticValues[role],entry.preset+'/'+entry.theme+' '+role);
+  for(const role of semanticRoles){
+   const approvedWhite=entry.theme==='light'&&['red','pink'].includes(entry.preset)&&['--content-on-accent','--accent-hover','--accent-pressed'].includes(role);
+   const fieldOverride=['--surface-field','--content-on-surface-hover','--content-on-surface-pressed'].includes(role);
+   assert.equal(t[role],approvedWhite?'#FFFFFF':fieldOverride?(entry.theme==='light'?'#FFFFFF':'#000000'):entry.semanticValues[role],entry.preset+'/'+entry.theme+' '+role);
+  }
   assert.equal(t['--accent'],entry.semanticValues['--accent-default']);assert.equal(t['--swatch-'+entry.preset],entry.semanticValues['--accent-default']);
  }
 });
-test('the ten named choices preserve order, scrolling and native slider/switch geometry',()=>{
+test('the ten named choices preserve order, scrolling and stable slider/switch geometry',()=>{
  let markup='';vm.runInNewContext(header.split(/\r?\n\r?\n/)[0],{document:{currentScript:{insertAdjacentHTML(_,html){markup=html;}}}});
  assert.deepEqual([...markup.matchAll(/name="ui-accent-preset" value="([^"]+)"/g)].map(match=>match[1]),presets);
  for(const name of ["체리","오렌지","바나나","라임","알로에","솜사탕","블루베리","포도","풍선껌","모노"])assert.ok(markup.includes('>'+name+'</span>'));
@@ -180,11 +188,13 @@ test('the ten named choices preserve order, scrolling and native slider/switch g
  assert.match(css,/@media\(max-width:920px\)\{\.accent-preset-options\{position:fixed;right:72px;top:72px;/);
  const previewCss=fs.readFileSync(path.join(__dirname,'../template/preview.css'),'utf8');
  assert.match(previewCss,/input\[type=range\]\{width:100%;height:24px;margin:0;padding:0;accent-color:var\(--accent\)\}/);
- assert.doesNotMatch(previewCss,/input\[type=range\]\{[^}]*appearance:none|slider-thumb\{[^}]*(?:width:|height:|appearance:)|translateY\(var\(--space-2\)\)|gradient-edit::before/);
+ assert.match(previewCss,/slider-runnable-track\{height:6px;border:0;outline:0;box-shadow:none/);
+ assert.match(previewCss,/slider-thumb\{[^}]*width:16px;height:16px;[^}]*border:0;outline:0;box-shadow:none/);
+ assert.doesNotMatch(previewCss,/translateY\(var\(--space-2\)\)|gradient-edit::before/);
  assert.match(previewCss,/input:is\(\[name=placementSwap\],\[name=sidePosition\]\)/);
  assert.match(previewCss,/panel-hit\[aria-pressed=true\] \.panel-number::after\{content:" ✓"\}/);
 });
-test('interaction roles really swap fill and ink while native geometry stays free of permanent outlines',()=>{
+test('interaction roles swap fill and ink while controls stay free of permanent outlines',()=>{
  for(const preset of presets)for(const theme of ['light','dark']){
   const t=tokens(preset,theme);
   assert.equal(t['--accent-hover'],t['--content-on-accent']);assert.equal(t['--content-on-accent-hover'],t['--accent-default']);
@@ -193,7 +203,8 @@ test('interaction roles really swap fill and ink while native geometry stays fre
   assert.ok(luminance(tokens(preset,'light')['--page-background'])>luminance(tokens(preset,'dark')['--page-background']),'light page must be brighter than dark page');
  }
  const previewCss=fs.readFileSync(path.join(__dirname,'../template/preview.css'),'utf8');
- assert.doesNotMatch(previewCss,/slider-(?:thumb|runnable-track)\{|moz-range-(?:thumb|track)\{|background-image:linear-gradient\(45deg/);
+ assert.match(previewCss,/input\[type=range\]\{appearance:none;[^}]*border:0;box-shadow:none/);
+ assert.doesNotMatch(previewCss,/background-image:linear-gradient\(45deg/);
  assert.match(previewCss,/panel-hit\[aria-pressed=true\],\.panel-hit:hover\{outline:3px solid var\(--accent-default\);outline-offset:0/);
  const guideCss=fs.readFileSync(path.join(__dirname,'../template/guide-layout.css'),'utf8');
  assert.match(guideCss,/\.step-card \.step-content code,[^{}]*kbd[^{}]*\{background:var\(--accent-default\);color:var\(--content-on-accent\)\}/);
@@ -213,7 +224,7 @@ test('rendered settings and three guides bind theme/preset backgrounds, inverse 
     await page.evaluate(({preset,theme})=>{document.body.dataset.uiPreset=preset;document.documentElement.dataset.uiPreset=preset;document.body.dataset.theme=theme;document.documentElement.dataset.theme=theme;for(const input of document.querySelectorAll('input[name="ui-accent-preset"]'))input.checked=input.value===preset;},{preset,theme});
     const t=tokens(preset,theme);
     const backgrounds=await page.evaluate(()=>[getComputedStyle(document.body).backgroundColor,getComputedStyle(document.documentElement).backgroundColor,getComputedStyle(document.querySelector('.glass-card,.step-card')).backgroundColor]);
-    assert.deepEqual(backgrounds,[color(t['--page-background']),color(t['--page-background']),theme==='light'?'rgba(0, 0, 0, 0.12)':'rgba(255, 255, 255, 0.2)'],filename+' '+preset+'/'+theme+' actual backgrounds');
+    assert.deepEqual(backgrounds,[color(t['--page-background']),color(t['--page-background']),theme==='light'?'rgba(255, 255, 255, 0.55)':'rgba(0, 0, 0, 0.35)'],filename+' '+preset+'/'+theme+' actual backgrounds');
     if(filename==='settings.html'){
      const controls=await page.evaluate(()=>{const sw=document.querySelector('input[name=placementSwap]');return {divider:getComputedStyle(document.querySelector('.divider')).display,rail:getComputedStyle(sw).backgroundColor,thumb:getComputedStyle(sw,'::before').backgroundColor,marks:getComputedStyle(document.querySelector('.size-ratio-marks')).color,gap:getComputedStyle(document.querySelector('.property-row--count .size-controls')).gap};});
      assert.deepEqual(controls,{divider:'block',rail:color(t['--content-primary']),thumb:color(t['--surface-field']),marks:color(t['--accent-default']),gap:'4px'},filename+' '+preset+'/'+theme+' borderless controls');
@@ -249,19 +260,25 @@ test('rendered settings and three guides bind theme/preset backgrounds, inverse 
     }
     await page.locator('.accent-presets').evaluate(el=>el.open=false);
     if(filename!=='settings.html'){
-     const highlight=await page.locator('.step-content code').first().evaluate(el=>({background:getComputedStyle(el).backgroundColor,color:getComputedStyle(el).color}));
+     const highlight=await page.locator('.faq-body code').first().evaluate(el=>({background:getComputedStyle(el).backgroundColor,color:getComputedStyle(el).color}));
      assert.deepEqual(highlight,{background:color(t['--accent-default']),color:color(t['--content-on-accent'])});
      const card=page.locator('.faq-item').first(),faq=card.locator('summary');
      await card.evaluate(el=>el.open=false);
      const beforeFAQ=await card.evaluate(el=>({background:getComputedStyle(el).backgroundColor,color:getComputedStyle(el).color}));
      await faq.hover();
-     assert.deepEqual(await card.evaluate(el=>({background:getComputedStyle(el).backgroundColor,color:getComputedStyle(el).color})),{background:beforeFAQ.color,color:color(t['--surface-card'])});
+     assert.deepEqual(await card.evaluate(el=>({background:getComputedStyle(el).backgroundColor,color:getComputedStyle(el).color})),{background:color(t['--accent-default']),color:color(t['--content-on-accent'])});
      if(preset==='aloe'&&theme==='dark'){
       await faq.click();
       assert.equal(await card.evaluate(el=>el.open),true);
       await card.locator('.faq-body').click();
       assert.equal(await card.evaluate(el=>el.open),false,'FAQ body click closes the whole card');
      }
+     await page.mouse.move(0,800);
+     const files=page.locator('[data-guide-required]').nth(1);
+     await files.evaluate(el=>el.open=true);
+     await files.locator('summary').hover();
+     assert.deepEqual(await files.locator('code').first().evaluate(el=>({background:getComputedStyle(el).backgroundColor,color:getComputedStyle(el).color})),{background:color(t['--content-on-accent']),color:color(t['--accent-default'])},'file highlight inverts inside accent hover');
+     await files.evaluate(el=>el.open=false);
      await page.mouse.move(0,800);
     }
    }

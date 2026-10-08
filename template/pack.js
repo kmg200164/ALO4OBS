@@ -1,6 +1,7 @@
 (function(root){
  const events=typeof module!=='undefined'&&module.exports?require('./events.js'):root.OverlayEvents;
  function crc32(bytes){let crc=0xffffffff;for(const byte of bytes){crc^=byte;for(let bit=0;bit<8;bit++)crc=(crc>>>1)^((crc&1)?0xedb88320:0);}return (crc^0xffffffff)>>>0;}
+ // CRC and UTF-8 names keep the standalone archive readable by native extractors.
  function zip(entries){
   const locals=[],centrals=[];let offset=0;
   for(const entry of entries){
@@ -31,6 +32,7 @@
   if(Array.isArray(source.stops)){const gradient={...source,stops:source.stops.map(stop=>({...stop,opacity:100}))};if(source===part)Object.assign(result,gradient);else result.gradient=gradient;}
   return result;
  }
+ // Panel JSON stores layout/content; OBS source names remain in the Lua script entry.
  function settingsEntries(input){
   const config={...input};
   const generic=config.layoutVersion===4;

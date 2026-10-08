@@ -43,7 +43,7 @@ gift_files = {
 files = [(repository if name in {'CHANGELOG.md', 'LICENSE'} else source) / name for name in sorted(gift_files)]
 # Explicit neutral runtime package allowlist; private settings and artwork are excluded.
 gift_assets = {
-    'THIRD-PARTY-NOTICES.md',
+    'setup-workflow.png', 'THIRD-PARTY-NOTICES.md',
     'InterVariable.woff2', 'Inter-LICENSE.txt', 'Lucide-LICENSE.txt',
 }
 files += [source / 'assets' / name for name in sorted(gift_assets)]
@@ -63,11 +63,12 @@ for path in sorted(files):
         if path.suffix == '.css':
             data = data.replace(b'url("assets/', b'url("../assets/')
     entries[relative] = data
-# A saved settings ZIP carries its own OBS runtime. JavaScript is installed
+# The distribution editor and personal OBS ZIP have different inventories;
+# a saved settings ZIP carries its own OBS runtime. JavaScript is installed
 # locally by the explicitly loaded Lua script, rather than downloaded as .js.
 import base64
 import json
-runtime_names = [name for name in entries if name not in {'config.js', 'VERSION', 'OBS-script.lua'} and not name.startswith(('guide', 'settings', 'README', 'CHANGELOG')) and not name.startswith(('internal/preview', 'internal/upload-storage'))]
+runtime_names = [name for name in entries if name not in {'config.js', 'VERSION', 'OBS-script.lua', 'assets/setup-workflow.png'} and not name.startswith(('guide', 'settings', 'README', 'CHANGELOG')) and not name.startswith(('internal/preview', 'internal/upload-storage'))]
 js_names = [name for name in runtime_names if name.endswith('.js')]
 lua = entries['OBS-script.lua'].decode('utf-8')
 install = ['-- Install bundled browser runtime when this OBS script is loaded.']
@@ -119,7 +120,7 @@ def build(destination=output):
         with ZipFile(temporary, 'w', ZIP_DEFLATED) as archive:
             for name, data in entries.items():
                 archive.writestr('files/' + name, data)
-            archive.writestr('settings.html', '<!doctype html><html lang="en"><meta charset="utf-8"><title>ALO4OBS</title><meta http-equiv="refresh" content="0;url=files/guide-en.html"><body><a href="files/guide-en.html">Open ALO4OBS</a></body></html>')
+            archive.writestr('settings.html', '<!doctype html><html lang="en"><meta charset="utf-8"><title>ALO4OBS</title><meta http-equiv="refresh" content="0;url=files/settings.html"><body><a href="files/settings.html">Open ALO4OBS</a></body></html>')
         with ZipFile(temporary) as archive:
             if archive.testzip() is not None:
                 raise ValueError('Bundle ZIP CRC verification failed.')

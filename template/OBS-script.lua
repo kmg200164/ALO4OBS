@@ -1,4 +1,5 @@
 obs = obslua
+-- OBS source selections belong to this script entry, not the exported panel JSON.
 local cfg=nil
 local scene_name='ALO4OBS'
 local panel_signal_source=nil
@@ -13,7 +14,7 @@ local areas={{'chatUrl','OBS Template · Chat','chat','showChat'},
  {'donationSoop','OBS Template · SOOP Alerts','alerts','showAlerts'},
  {'reactiveUrl','OBS Template · Discord Reactive','hand','reactive'}}
 function script_description()
- return 'OBS Streaming Template: configure seven panels in settings.html, extract OBS-settings.zip beside this script, select a different existing OBS source for each panel that needs one, then Apply. Existing scenes and capture settings are preserved.'
+ return 'ALO4OBS: configure seven panels in settings.html, extract OBS-settings.zip beside this script, select a different existing OBS source for each panel that needs one, then Apply. Apply updates the ALO4OBS layout; original capture settings are preserved.'
 end
 function script_defaults(settings)
  obs.obs_data_set_default_bool(settings,'english',true)
@@ -225,6 +226,7 @@ local function copy_source_settings(source)
  obs.obs_data_release(original)
  return copy
 end
+-- Scene items own transforms; shared source settings must be restored separately.
 local function snapshot_layout(scene)
  local snapshot={sources={},scenes={}}
  local function capture(current)
@@ -317,6 +319,7 @@ local function release_layout(snapshot)
   obs.obs_source_release(saved.source)
  end
 end
+-- ALO names identify generated items; original inputs are reused without changing their settings.
 local function apply_generic(settings)
  local function fail(message)
   obs.script_log(obs.LOG_WARNING,message)
@@ -435,6 +438,7 @@ local function apply_generic(settings)
   if canvas_probe==nil then return fail('OBS color source is unavailable.') end
   obs.obs_source_release(canvas_probe)
  end
+ -- Reuse the current ALO scene; legacy OST scenes are separate and stay intact.
  local source=obs.obs_get_source_by_name(scene_name)
  local scene,created
  created=source==nil
@@ -578,7 +582,7 @@ local function apply_generic(settings)
   panel_backdrop(background_visible,'ALO · ')
   connect_panel_signal()
   obs.obs_frontend_set_current_scene(source)
-  obs.script_log(obs.LOG_INFO,'OBS Streaming Template applied: seven independent panels. No links are logged.')
+  obs.script_log(obs.LOG_INFO,'ALO4OBS applied: seven independent panels. No links are logged.')
  else
   restore_layout(previous_layout)
   obs.script_log(obs.LOG_WARNING,'Apply failed; the previous scene layout was restored.')
@@ -596,6 +600,7 @@ local function apply(props,property)
  if settings==nil then obs.script_log(obs.LOG_WARNING,'Invalid obs-settings.json. Export settings again.');return false end
  if obs.obs_data_get_int(settings,'layoutVersion')==4 then
   -- Downloaded settings contain data only; generate browser configuration locally.
+  -- Browser changes reach OBS only through the exported JSON read by this button.
   local config_path=script_path()..'config.js'
   local old_file=io.open(config_path,'rb')
   local previous=old_file and old_file:read('*a') or nil
@@ -831,7 +836,7 @@ local function apply(props,property)
  obs.obs_frontend_set_current_scene(source)
  if created then obs.obs_scene_release(scene) else obs.obs_source_release(source) end
  obs.obs_data_release(settings)
- obs.script_log(obs.LOG_INFO,'OBS Streaming Template applied. Base canvas must be 1920 x 1080. No links are logged.')
+ obs.script_log(obs.LOG_INFO,'ALO4OBS applied. Base canvas must be 1920 x 1080. No links are logged.')
  return true
 end
 function script_properties()

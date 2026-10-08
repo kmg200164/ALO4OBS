@@ -37,6 +37,14 @@ class BuildTests(unittest.TestCase):
         self.assertIn("internal/panel-media.js", lua)
         self.assertIn('window.OVERLAY_CONFIG', lua)
 
+    def test_setup_infographic_is_distributed_without_bloating_obs_runtime(self):
+        import json
+        self.assertEqual(builder.entries['assets/setup-workflow.png'],
+                         (builder.repository / 'docs/images/setup-workflow.png').read_bytes())
+        runtime = json.loads(builder.entries['internal/export-runtime.js'].decode()
+                             .removeprefix('window.OBS_EXPORT_RUNTIME = ').strip().removesuffix(';'))
+        self.assertNotIn('assets/setup-workflow.png', runtime)
+
     def test_delivery_filename_contract(self):
         self.assertEqual(builder.output.name, f'ALO4OBS-v{builder.version}.zip')
 
@@ -62,7 +70,7 @@ class BuildTests(unittest.TestCase):
                 self.assertEqual(archive.read('files/VERSION').decode().strip(), builder.version)
                 names = set(archive.namelist())
                 self.assertEqual({name.split('/')[0] for name in names}, {'settings.html', 'files'})
-                self.assertIn('files/guide-en.html', archive.read('settings.html').decode())
+                self.assertIn('files/settings.html', archive.read('settings.html').decode())
                 private_assets = {
                     'sample-handcam-topview.png', 'sample-mission-widget.png', 'season-11-lobby.png',
                     'team-tgm25.jpg', 'tgm26-logo.png', 'tgm26-qualified-banner.png',

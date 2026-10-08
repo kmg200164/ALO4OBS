@@ -23,7 +23,22 @@ body[data-theme=light]{--guide-frame-child:var(--neutral-white);--guide-frame-te
 /* Literal controls and file names are highlights; ordinary strong text stays ordinary text. */
 .step-card .step-content code,.faq-item .faq-body code,.step-card kbd,.faq-item kbd,.step-card .control-label{background:var(--accent-default);color:var(--content-on-accent)}
 .step-card kbd,.faq-item kbd{padding:2px 6px;border-radius:4px;font:inherit;font-weight:600}
-.faq-item:hover,.faq-item:has(summary:focus-visible){background:var(--content-primary);color:var(--surface-card);cursor:pointer}
-.faq-item:hover .faq-body p,.faq-item:hover .faq-body strong,.faq-item:hover .faq-body a,.faq-item:has(summary:focus-visible) .faq-body p,.faq-item:has(summary:focus-visible) .faq-body strong,.faq-item:has(summary:focus-visible) .faq-body a{color:var(--surface-card)}
+.faq-item:hover,.faq-item:has(summary:focus-visible){background:var(--accent-default);color:var(--content-on-accent);cursor:pointer}
+.faq-item:hover .faq-body p,.faq-item:hover .faq-body strong,.faq-item:hover .faq-body a,.faq-item:has(summary:focus-visible) .faq-body p,.faq-item:has(summary:focus-visible) .faq-body strong,.faq-item:has(summary:focus-visible) .faq-body a{color:var(--content-on-accent)}
 .faq-item:hover summary::after,.faq-item:has(summary:focus-visible) summary::after{color:currentColor}
-.faq-item summary:focus-visible{outline-color:var(--accent-default);outline-offset:-3px}
+.faq-item summary:focus-visible{outline-color:var(--content-on-accent);outline-offset:-3px}
+
+/* Keep the first view short; detailed setup and recovery stay behind native details. */
+.guide-workflow{margin:0 auto;width:min(100%,760px)}
+.guide-workflow img{display:block;width:100%;height:auto;border-radius:12px}
+.guide-process-list{list-style:none;margin:16px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.guide-process-list li{display:flex;align-items:flex-start;gap:8px;font-size:14px;line-height:1.4;color:var(--text)}
+.guide-process-number{flex:none;font-weight:600;color:var(--accent)}
+.faq-item summary{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.guide-chevron{display:block;flex:none;color:currentColor;transition:transform .15s ease}
+.faq-item[open] .guide-chevron{transform:rotate(180deg)}
+.faq-item .faq-body{gap:12px}
+@media(max-width:760px){.faq-item{padding:0}.guide-process-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px}}
+@media(prefers-reduced-motion:reduce){.guide-chevron{transition:none}}
+
+.faq-item:is(:hover,:has(summary:focus-visible)) :is(code,kbd,.control-label){background:var(--content-on-accent);color:var(--accent-default)}

@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.9.1 — 2026-10-08
+
+- Match regional fill-opacity, blur and stroke-width controls to the global five-step sliders; retain saved style values.
+- Lead Korean, English and Japanese guides with the existing six-step setup infographic; keep required instructions and extra tips collapsed while retaining the complete setup, update and recovery workflow.
+- Correct translucent section surfaces to 55% white in light mode and 35% black in dark mode; remove browser-painted slider outlines without changing control sizes or keyboard focus.
+- Highlight the entire guide disclosure card with the active accent color on hover and keyboard focus, with matching readable text and chevrons; invert nested filename and button highlights so they remain distinct.
+- Use white text and icons inside Cherry and Bubblegum accents in light mode, following visual review; retain the original accent/background colors and report the resulting small-text contrast limitation.
+- Align hover and selection hit areas with the preview iframe's uniform scale after window resizing.
+- Use pure white selection/text fields in light mode and pure black fields in dark mode via the shared surface token.
+- Separate the individual-style override from panel fill with a divider and consistent spacing.
+- Distinguish the distribution archive from personal settings ZIPs; document whole-folder dependencies, safe ALO4OBS updates, legacy OST coexistence and version-matched rollback.
+- Document config.js-based settings migration and required source reselection; separate the OBS 30.1 API minimum from Windows OBS 32.2.2 verification and pending macOS checks.
+- Open the settings editor directly from the distribution root launcher.
+- Update the distribution version, cache references and download link to 0.9.1; preserve the published 0.9.0 ZIP unchanged.
+- Add rendered regression coverage for themes, progressive guides, regional sliders and preview alignment; record isolated Windows OBS update-preservation checks and unverified environments.
+- Add concept comments and correct the historical work-report ZIP SHA-256.
+
 ## 0.9.0 — 2026-10-08 (local release candidate)
 
 - Move the entire Side column left or right with a horizontal switch; older settings default to the right and keep their panel data.
