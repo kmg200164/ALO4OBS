@@ -112,3 +112,7 @@ KMG directs the product, design, requirements, and real-use evaluation. Code was
 [Change log](CHANGELOG.md) · [QA evidence](docs/QA.md)
 
 Before sharing screenshots, hide personal widget links and stream keys.
+
+## Documentation language
+
+ALO4OBS project documentation must be written in English. This includes README files, changelogs, QA records, work reports, development guidance and concept-explanation comments. English is the canonical documentation language. Explicitly localized product UI and Korean/Japanese user guides remain translated and must stay consistent with the English guide.
