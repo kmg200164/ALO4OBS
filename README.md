@@ -38,7 +38,9 @@ Switch layouts from the header. Each layout retains its panel content and settin
 - Use **Korean, English or Japanese**, with localized guides and icon-button tooltips, dark/light modes and ten UI color themes. UI themes do not alter broadcast colors or media.
 - Free MIT-licensed code, with no required account or subscription.
 
-## Quick start
+<a name="quick-start"></a>
+
+## How to start
 
 ![Setup: download, extract, open settings.html, configure panels, unpack saved settings, add the OBS script.](docs/images/setup-workflow.png)
 
@@ -53,7 +55,9 @@ Keep the Lua script, configuration, masks, assets and runtime files together. Mo
 
 Browser edits do not automatically update OBS. Save and extract a new personal ZIP, update or register its script path, reload the script, check source selections and Apply again. The included Korean, English and Japanese guides contain the full procedure.
 
-## Update an existing installation
+<a name="update-an-existing-installation"></a>
+
+## How to update
 
 Back up your **OBS scene collection**, the **complete old application folder** and every panel's script source selection. Keep the last working version available and use a separate folder for the new distribution.
 
