@@ -1,7 +1,7 @@
 ALO4OBS
-Auto Layout Overlay for OBS — 0.10.2
+Auto Layout Overlay for OBS — 0.10.3
 
-ALO4OBS-v0.10.2.zip is this distribution archive. Settings-Bento.zip / Settings-Overlap.zip is your personal saved application package.
+ALO4OBS-v0.10.3.zip is this distribution archive. Settings-Bento.zip / Settings-Overlap.zip is your personal saved application package.
 
 1. Use OBS Studio 30.1 or newer with Browser Source and Tools > Scripts. The script needs obs_sceneitem_get_info2 / obs_sceneitem_set_info2 (30.1 APIs); isolated Windows OBS 32.2.2 migration checks passed in the scope below. macOS is unverified for this version.
 2. Use a 1920 x 1080 base canvas (Settings > Video). Choose a separate profile if your production profile uses another size; do not overwrite it arbitrarily.

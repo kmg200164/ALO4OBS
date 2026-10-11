@@ -70,18 +70,24 @@
       const pending=queue.then(()=>locks?locks.request('obs-overlay-draft|'+scope,commit):commit()).catch(()=>{onWarning('파일 또는 설정을 브라우저에 저장하지 못했습니다. 현재 창에서만 유지됩니다. ZIP으로 저장하세요.');return false;});
       queue=pending.catch(()=>{});return pending;
     }
+    function compatibleScope(id){
+      const savedScope=id.slice(0,id.lastIndexOf('|'));
+      if(savedScope===scope)return true;
+      // The browser database enforces origin isolation; versioned folders must not reject retained bytes.
+      try{const saved=new URL(savedScope),current=new URL(scope);return saved.protocol===current.protocol&&saved.origin===current.origin;}catch{return false;}
+    }
     async function restore(config){
       const entries=new Map(),missing=[];
       const manifest=Array.isArray(config?._localUploads)?config._localUploads:[];
       for(const item of manifest){
-        if(!item||typeof item.id!=='string'||!item.id.startsWith(scope+'|')||typeof item.path!=='string'||!/^assets\/(?!.*\.\.)[\w.-]+\.(png|jpe?g|webp|gif|mp4|webm)$/i.test(item.path)||typeof item.key!=='string'){missing.push(item?.key||'file');continue;}
+        if(!item||typeof item.id!=='string'||!compatibleScope(item.id)||typeof item.path!=='string'||!/^assets\/(?!.*\.\.)[\w.-]+\.(png|jpe?g|webp|gif|mp4|webm)$/i.test(item.path)||typeof item.key!=='string'){missing.push(item?.key||'file');continue;}
         try{
           const file=await assets.get(item.id);
           if(!file||!(file.size>0)||typeof file.arrayBuffer!=='function'){missing.push(item.key);continue;}
           fileIds.set(file,item.id);persisted.add(item.id);knownIds.add(item.id);entries.set(item.key,{file,path:item.path});
         }catch{missing.push(item.key);}
       }
-      for(const item of manifest)if(typeof item?.id==='string'&&item.id.startsWith(scope+'|'))knownIds.add(item.id);
+      for(const item of manifest)if(typeof item?.id==='string'&&compatibleScope(item.id))knownIds.add(item.id);
       return {entries,missing};
     }
     return {save,restore,reset:()=>{resetPending=true;},flush:()=>queue};

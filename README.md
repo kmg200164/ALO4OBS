@@ -2,7 +2,7 @@
 
 Auto Layout Overlay for OBS
 
-**[Download ALO4OBS 0.10.2](https://github.com/kmg200164/ALO4OBS/raw/refs/heads/main/downloads/ALO4OBS-v0.10.2.zip)** · [What's new](CHANGELOG.md)
+**[Download ALO4OBS 0.10.3](https://github.com/kmg200164/ALO4OBS/raw/refs/heads/main/downloads/ALO4OBS-v0.10.3.zip)** · [What's new](CHANGELOG.md)
 
 Arrange your OBS overlay in a browser, then apply it in OBS. Choose **Bento** to keep all panels separate, or **Overlap** to place auxiliary panels over a full-screen Main panel.
 
@@ -159,3 +159,5 @@ Older [0.10.1](https://github.com/kmg200164/ALO4OBS/raw/refs/heads/main/download
 Project documentation, including README files, changelogs, QA records, work reports, development guidance and concept-explanation comments, is canonical in English. Localized product UI and Korean/Japanese user guides remain translated and consistent with the English guide.
 
 </details>
+
+0.10.3 restores retained uploaded media after moving the editor folder within the same browser origin. Missing or browser-deleted file bytes still require selecting the file again; saved settings are preserved.

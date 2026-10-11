@@ -140,12 +140,24 @@ test('denied shared lock reports session-only persistence without an unhandled r
   assert.equal(await api.save(draft(),files(),'source'),false);assert.equal(f.local.size,0);assert.match(f.warnings.at(-1),/현재 창에서만/);
 });
 
-test('a moved settings path cannot reuse another path uploads and retains the saved draft',async()=>{
- const f=fixture();await controller(f).save(draft(),files(),'source');const before=f.local.get('obs-overlay-config');
- const restored=await controller(f,{scope:'file:///new-folder/settings.html'}).restore(JSON.parse(before));
- assert.deepEqual(restored.missing,['whole','custom1','region-game']);assert.equal(restored.entries.size,0);
- assert.equal(f.local.get('obs-overlay-config'),before);assert.equal(f.records.size,3);
+test('moving the editor folder restores existing bytes and retains them after save and reopen',async()=>{
+ const f=fixture();await controller(f).save(draft(),files(),'source');
+ const before=f.local.get('obs-overlay-config'),saved=JSON.parse(before);
+ const moved=controller(f,{scope:'file:///new-folder/settings.html'}),restored=await moved.restore(saved);
+ assert.deepEqual(restored.missing,[]);assert.equal(restored.entries.size,3);
+ assert.equal(f.local.get('obs-overlay-config'),before);
+ assert.equal(await moved.save(saved,restored.entries,'source'),true);
+ const reopened=await controller(f,{scope:'file:///new-folder/settings.html'}).restore(JSON.parse(f.local.get('obs-overlay-config')));
+ assert.deepEqual(reopened.missing,[]);
+ for(const [key,bytes] of [['whole',[1,2,3]],['custom1',[4,5,6]],['region-game',[7,8,9]]])assert.deepEqual(Array.from(new Uint8Array(await reopened.entries.get(key).file.arrayBuffer())),bytes);
 });
+
+test('restoration does not accept file references from another browser origin',async()=>{
+ const f=fixture();await controller(f,{scope:'https://one.example/settings.html'}).save(draft(),files(),'source');
+ const restored=await controller(f,{scope:'https://two.example/settings.html'}).restore(JSON.parse(f.local.get('obs-overlay-config')));
+ assert.deepEqual(restored.missing,['whole','custom1','region-game']);assert.equal(restored.entries.size,0);
+});
+
 test('unavailable file storage reports missing uploads without deleting saved settings or bytes',async()=>{
  const f=fixture();await controller(f).save(draft(),files(),'source');const before=f.local.get('obs-overlay-config');
  const restored=await controller(f,{assets:{...f.assets,get:async()=>{throw new Error('SecurityError');}}}).restore(JSON.parse(before));

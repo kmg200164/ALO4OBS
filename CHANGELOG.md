@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.10.3 — 2026-10-12
+
+- Restore retained image and video uploads after moving or renaming the editor folder within the same browser origin.
+- Preserve saved settings when browser storage is unavailable or media bytes are missing. Different browser origins remain isolated.
+- Preserve all previously published ZIPs. No tag, GitHub Release or streaming presets.
+
 ## 0.10.2 — 2026-10-11
 
 - Replace native save-picker writes with the existing standard browser download flow. Assemble the complete ZIP before starting a download, preventing a failed export from leaving a newly created zero-byte ZIP.
