@@ -80,7 +80,7 @@ local function validate(settings)
     def test_preflight_probes_never_publish_transient_sources_to_the_frontend(self):
         code = SOURCE.read_text(encoding='utf-8')
         start = code.index(' local needs_canvas=false')
-        end = code.index(' -- Reuse the current ALO scene', start)
+        end = code.index(' -- Each layout owns its scene', start)
         preflight = code[start:end]
         for missing, expected in [(None, None), ('browser_source', 'OBS Browser Source is unavailable.'),
                                   ('mask_filter', 'OBS mask filter is unavailable for Panel 1-1.'),
@@ -116,7 +116,7 @@ assert(result==EXPECTED,tostring(result))
 assert(outstanding==0,'every preflight exit releases its temporary sources')
 assert(queued_public_sources==0,'temporary probes must not queue frontend mixer/source events')
 """.replace('EXPECTED', lua_table(expected))
-                self.run_lua(model+preflight+scenario)
+                self.run_lua(model+"\nlocal prefix='ALO · '\n"+preflight+scenario)
 
     def test_overlap_allows_fractional_auxiliary_geometry_under_full_main(self):
         self.validate(config())
@@ -191,6 +191,7 @@ local panels={}
 for i,k in ipairs(panel_keys) do panels[k]={name=names[i]} end
 add('ALO · Background');add('Unrelated User Item');add('ALO · Panel Fill');add('ALO · Overlay');add('ALO · Panel Stroke')
 for _,name in ipairs(names) do add('ALO · '..name..' Group') end
+local prefix='ALO · '
 local result=true;local layout_mode='overlap'
 """
         scenario = """
@@ -280,7 +281,7 @@ sources['User Main']={name='User Main',kind='capture',data={device='Main'},filte
         after="""
 assert(result)
 for index,key in ipairs(panel_keys) do
- local group=scene.items['ALO \u00b7 '..panel_names[index]..' Group']
+ local group=scene.items[prefix..panel_names[index]..' Group']
  local enabled=settings.panelRenderEnabled or settings.panelEnabled
  assert(group and group.visible==(enabled==nil or enabled[key]~=false))
  local capture=group.nested.items[cfg['panelSource_'..key]]
@@ -427,6 +428,7 @@ assert(selection.panelSource_custom1=='Keep Bento Camera' and selection.panelSou
         catalog=code[code.index('local panel_keys='):code.index('-- Hold original sources')]
         model="""
 obs={}
+local prefix='ALO · '
 local scene={groups={}}
 function obs.obs_scene_get_group(s,n) return s.groups[n] end
 function obs.obs_sceneitem_set_visible(item,visible) item.visible=visible end

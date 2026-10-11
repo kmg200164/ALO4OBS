@@ -33,6 +33,9 @@ Keep the Lua script, configuration, masks, assets and runtime files together. Mo
 
 Browser edits do not automatically update OBS. Save and extract a new personal ZIP, update or register its script path, reload the script, check source selections and Apply again. The included Korean, English and Japanese guides contain the full procedure.
 
+
+Applying an exported layout creates or updates its own OBS scene: `ALO4OBS · BENTO` or `ALO4OBS · OVERLAP`. Apply each type once to create both scenes. Generated sources and runtime files are separated by type; existing `ALO4OBS` scenes are kept unchanged. Download a fresh package and export a new settings ZIP to use this behavior.
+
 </details>
 
 <a name="how-to-update"></a>

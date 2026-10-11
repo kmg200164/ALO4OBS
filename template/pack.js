@@ -141,5 +141,17 @@
   const json=JSON.stringify(config,null,2),bytes=value=>new TextEncoder().encode(value);
   return [{name:'config.json',bytes:bytes(json)},{name:'obs-settings.json',bytes:bytes(json)}];
  }
- const api={zip,settingsEntries};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.OverlayPack=api;
+ function isolateRuntime(entries,mode){
+  if(mode!=='bento'&&mode!=='overlap')throw new Error('Invalid layout type');
+  const directory='layouts/'+mode+'/';
+  const script=entries.find(entry=>entry.name==='OBS-script.lua');
+  if(!script)throw new Error('Missing OBS script');
+  // Keep root assets for editor compatibility; OBS uses only its type's snapshot.
+  const scoped=entries.filter(entry=>entry!==script).map(entry=>({...entry,name:directory+entry.name}));
+  const bootstrap="local export_root=script_path()\nfunction script_path() return export_root..'"+directory+"' end\n";
+  script.bytes=new TextEncoder().encode(bootstrap+new TextDecoder().decode(script.bytes));
+  entries.push(...scoped);
+  return entries;
+ }
+ const api={zip,settingsEntries,isolateRuntime};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.OverlayPack=api;
 })(typeof window!=='undefined'?window:globalThis);

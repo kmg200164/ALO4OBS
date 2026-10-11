@@ -84,12 +84,13 @@ local function fail(message) error(message) end
 local panel_keys={'game','custom1','custom2','custom3','chat','translation','hand'}
 local panel_names={'Main','Sub 1','Sub 2','Sub 3','Side 1','Side 2','Side 3'}
 local cfg={}
+local prefix='ALO · '
 """
         scenario = r"""
 for index,key in ipairs(panel_keys) do
- local group=scene.items['ALO · '..panel_names[index]..' Group']
+ local group=scene.items[prefix..panel_names[index]..' Group']
  assert(group,'missing group '..key)
- local item=group.nested.items['ALO · '..panel_names[index]..' Web']
+ local item=group.nested.items[prefix..panel_names[index]..' Web']
  local box=settings.layout[key]
  assert(item.pos.x==box.x and item.pos.y==box.y,key..' position changed')
  assert(item.bounds.x==box.width and item.bounds.y==box.height,key..' bounds changed')

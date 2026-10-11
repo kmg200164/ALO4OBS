@@ -902,6 +902,7 @@
           entries.push({name:path,bytes:new Uint8Array(await response.arrayBuffer())});
         }catch{throw new Error('Could not include saved media. Re-upload local files before saving ZIP.');}
       }
+      OverlayPack.isolateRuntime(entries,data.layoutMode||'bento');
       const blob=new Blob([OverlayPack.zip(entries)],{type:'application/zip'});
       if(saveHandle){const writable=await saveHandle.createWritable();try{await writable.write(blob);await writable.close();}catch(error){await writable.abort().catch(()=>{});throw error;}}
       else{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='OBS-settings.zip';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}

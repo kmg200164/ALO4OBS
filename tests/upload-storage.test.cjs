@@ -33,7 +33,7 @@ test('ZIP export after reopening uses restored bytes and preserves its snapshot 
   let entries;const bundle={},status={},keys=['game','custom1','custom2','custom3','chat','translation','hand'];
   const data={...saved,layout:Object.fromEntries(keys.map(key=>[key,{}]))};
   const context={OverlayEvents:require('../template/events.js'),showStatus:(message)=>{status.textContent=message;},uploads:restored.entries,keys,status,current:()=>structuredClone(data),byId:()=>bundle,window:{OBS_EXPORT_RUNTIME:{}},
-    alphaMask:async(_,name)=>({name,bytes:new Uint8Array([0])}),OverlayPack:{settingsEntries:()=>[],zip:input=>{entries=input;return new Uint8Array([0]);}},
+    alphaMask:async(_,name)=>({name,bytes:new Uint8Array([0])}),OverlayPack:{isolateRuntime:entries=>entries,settingsEntries:()=>[],zip:input=>{entries=input;return new Uint8Array([0]);}},
     Uint8Array,Blob,URL:{createObjectURL:()=> 'blob:zip',revokeObjectURL(){}},document:{createElement:()=>({click(){}})},setTimeout(){}};
   vm.runInNewContext(preview.slice(start,end),context);const exporting=bundle.onclick();restored.entries.clear();await exporting;
   assert.equal(entries.filter(entry=>/^assets\/(background|custom1)/.test(entry.name)&&!entry.name.endsWith('-alpha-mask.png')).length,3);

@@ -2,10 +2,10 @@ obs = obslua
 -- OBS source selections belong to this script entry, not the exported panel JSON.
 local cfg=nil
 local scene_name='ALO4OBS'
-local panel_signal_source=nil
+local panel_signal_sources={}
 local browser_css='body { background: transparent; margin: 0; overflow: hidden; }'
 local boxes={game={32,32,1384,778},custom1={32,842,440,206},custom2={504,842,440,206},custom3={976,842,440,206},chat={1448,32,440,317},translation={1448,381,440,317},hand={1448,730,440,318}}
-local function template_owned(name) return name:match('^ALO · ') or name:match('^OBS Template · ') or name:match('^KMG · ') end
+local function template_owned(name) return name:match('^ALO · ') or name:match('^ALO4OBS · BENTO · ') or name:match('^ALO4OBS · OVERLAP · ') or name:match('^OBS Template · ') or name:match('^KMG · ') end
 local areas={{'chatUrl','OBS Template · Chat','chat','showChat'},
  {'translationUrl','OBS Template · Translation','translation','showSubtitles'},
  {'donationChzzk','OBS Template · CHZZK Alerts','alerts','showAlerts'},
@@ -35,21 +35,22 @@ local function sync_panel_fill(calldata)
  local item=obs.calldata_sceneitem(calldata,'item')
  if item==nil then return end
  local name=obs.obs_source_get_name(obs.obs_sceneitem_get_source(item))
- local prefix=name:match('^(ALO · )Background$') or name:match('^(OBS Template · )Background$')
+ local prefix=name:match('^(ALO4OBS · BENTO · )Background$') or name:match('^(ALO4OBS · OVERLAP · )Background$') or name:match('^(ALO · )Background$') or name:match('^(OBS Template · )Background$')
  if prefix~=nil then panel_backdrop(obs.obs_sceneitem_visible(item),prefix) end
 end
-local function connect_panel_signal()
- if panel_signal_source~=nil then
-  obs.signal_handler_disconnect(obs.obs_source_get_signal_handler(panel_signal_source),'item_visible',sync_panel_fill)
-  obs.obs_source_release(panel_signal_source)
+local function connect_panel_signal(target_scene)
+ local name=target_scene or scene_name
+ if panel_signal_sources[name]~=nil then return end
+ local source=obs.obs_get_source_by_name(name)
+ if source~=nil then
+  panel_signal_sources[name]=source
+  obs.signal_handler_connect(obs.obs_source_get_signal_handler(source),'item_visible',sync_panel_fill)
  end
- panel_signal_source=obs.obs_get_source_by_name(scene_name)
- if panel_signal_source~=nil then obs.signal_handler_connect(obs.obs_source_get_signal_handler(panel_signal_source),'item_visible',sync_panel_fill) end
 end
 function script_unload()
- if panel_signal_source~=nil then
-  obs.signal_handler_disconnect(obs.obs_source_get_signal_handler(panel_signal_source),'item_visible',sync_panel_fill)
-  obs.obs_source_release(panel_signal_source);panel_signal_source=nil
+ for name,source in pairs(panel_signal_sources) do
+  obs.signal_handler_disconnect(obs.obs_source_get_signal_handler(source),'item_visible',sync_panel_fill)
+  obs.obs_source_release(source);panel_signal_sources[name]=nil
  end
  if cfg~=nil then obs.obs_data_release(cfg);cfg=nil end
 end
@@ -375,6 +376,8 @@ local function apply_generic(settings)
   if enabled~=nil then obs.obs_data_release(enabled) end
   return fail('Invalid layout preset.')
  end
+ local scene_name='ALO4OBS · '..layout_mode:upper()
+ local prefix=scene_name..' · '
  local function finite(value) return value==value and value~=math.huge and value~=-math.huge end
  local panel_keys={'game','custom1','custom2','custom3','chat','translation','hand'}
  local panel_names={'Main','Sub 1','Sub 2','Sub 3','Side 1','Side 2','Side 3'}
@@ -483,7 +486,7 @@ local function apply_generic(settings)
  local needs_canvas=false
  local probe_data=obs.obs_data_create()
  obs.obs_data_set_int(probe_data,'width',1920);obs.obs_data_set_int(probe_data,'height',1080)
- local browser_probe=obs.obs_source_create_private('browser_source','ALO · Browser Probe',probe_data)
+ local browser_probe=obs.obs_source_create_private('browser_source',prefix..'Browser Probe',probe_data)
  obs.obs_data_release(probe_data)
  if browser_probe==nil then return fail('OBS Browser Source is unavailable.') end
  obs.obs_source_release(browser_probe)
@@ -494,7 +497,7 @@ local function apply_generic(settings)
    local filter_data=obs.obs_data_create()
    obs.obs_data_set_string(filter_data,'type','mask_alpha_filter.effect')
    obs.obs_data_set_string(filter_data,'image_path',script_path()..'assets/'..key..'-alpha-mask.png')
-   local filter_probe=obs.obs_source_create_private('mask_filter','ALO · Mask Probe',filter_data)
+   local filter_probe=obs.obs_source_create_private('mask_filter',prefix..'Mask Probe',filter_data)
    obs.obs_data_release(filter_data)
    if filter_probe==nil then return fail('OBS mask filter is unavailable for '..panel.name..'.') end
    obs.obs_source_release(filter_probe)
@@ -503,12 +506,12 @@ local function apply_generic(settings)
  if needs_canvas then
   local canvas_data=obs.obs_data_create()
   obs.obs_data_set_int(canvas_data,'width',1920);obs.obs_data_set_int(canvas_data,'height',1080)
-  local canvas_probe=obs.obs_source_create_private('color_source_v3','ALO · Canvas Probe',canvas_data)
+  local canvas_probe=obs.obs_source_create_private('color_source_v3',prefix..'Canvas Probe',canvas_data)
   obs.obs_data_release(canvas_data)
   if canvas_probe==nil then return fail('OBS color source is unavailable.') end
   obs.obs_source_release(canvas_probe)
  end
- -- Reuse the current ALO scene; legacy OST scenes are separate and stay intact.
+ -- Each layout owns its scene and generated sources; existing untyped scenes stay intact.
  local source=obs.obs_get_source_by_name(scene_name)
  local scene,created
  created=source==nil
@@ -520,8 +523,8 @@ local function apply_generic(settings)
   return fail('Could not open the ALO4OBS scene.')
  end
  -- A name already used outside this scene may belong to the user. Never update it.
- local new_names={'ALO · Panel Fill','ALO · Background','ALO · Overlay','ALO · Panel Stroke'}
- local local_files={['ALO · Panel Fill']='background.html',['ALO · Background']='wallpaper.html',['ALO · Overlay']='overlay.html',['ALO · Panel Stroke']='frame.html'}
+ local new_names={prefix..'Panel Fill',prefix..'Background',prefix..'Overlay',prefix..'Panel Stroke'}
+ local local_files={[prefix..'Panel Fill']='background.html',[prefix..'Background']='wallpaper.html',[prefix..'Overlay']='overlay.html',[prefix..'Panel Stroke']='frame.html'}
  local function local_file_matches(candidate,filename)
   if obs.obs_source_get_id(candidate)~='browser_source' then return false end
   local data=obs.obs_source_get_settings(candidate)
@@ -532,30 +535,30 @@ local function apply_generic(settings)
   return matches
  end
  local function known_group(label)
-  local group=obs.obs_scene_get_group(scene,'ALO · '..label..' Group')
+  local group=obs.obs_scene_get_group(scene,prefix..label..' Group')
   local nested=group~=nil and obs.obs_sceneitem_group_get_scene(group) or nil
-  local canvas=nested~=nil and obs.obs_scene_find_source(nested,'ALO · Clip Canvas') or nil
+  local canvas=nested~=nil and obs.obs_scene_find_source(nested,prefix..'Clip Canvas') or nil
   local canvas_source=canvas~=nil and obs.obs_sceneitem_get_source(canvas) or nil
   return canvas_source~=nil and obs.obs_source_get_id(canvas_source)=='color_source_v3'
  end
  for _,key in ipairs(panel_keys) do
   local panel=panels[key]
-  new_names[#new_names+1]='ALO · '..panel.name..' Group'
+  new_names[#new_names+1]=prefix..panel.name..' Group'
   if panel.active and ((panel.kind=='source' and panel.source~='') or ((panel.kind=='web' or panel.kind=='media') and panel.url~='')) then
-   if panel.kind=='web' then new_names[#new_names+1]='ALO · '..panel.name..' Web' end
-   if panel.kind=='media' then new_names[#new_names+1]='ALO · '..panel.name..' Media' end
+   if panel.kind=='web' then new_names[#new_names+1]=prefix..panel.name..' Web' end
+   if panel.kind=='media' then new_names[#new_names+1]=prefix..panel.name..' Media' end
   end
  end
- if needs_canvas then new_names[#new_names+1]='ALO · Clip Canvas' end
+ if needs_canvas then new_names[#new_names+1]=prefix..'Clip Canvas' end
  for _,name in ipairs(new_names) do
   local occupied=obs.obs_get_source_by_name(name)
   if occupied~=nil then
-   local group_index=panel_indexes[name:match('^ALO · (.+) Group$') or '']
-   local web_index=panel_indexes[name:match('^ALO · (.+) Web$') or '']
-   local media_index=panel_indexes[name:match('^ALO · (.+) Media$') or '']
+   local group_index=panel_indexes[name:match('^'..prefix..'(.+) Group$') or '']
+   local web_index=panel_indexes[name:match('^'..prefix..'(.+) Web$') or '']
+   local media_index=panel_indexes[name:match('^'..prefix..'(.+) Media$') or '']
    local expected_type
    if group_index then expected_type=obs.obs_source_is_group(occupied) and known_group(panel_names[group_index])
-   elseif name=='ALO · Clip Canvas' then
+   elseif name==prefix..'Clip Canvas' then
     expected_type=obs.obs_source_get_id(occupied)=='color_source_v3'
     local in_existing_group=false
     for _,label in ipairs(all_panel_names) do if known_group(label) then in_existing_group=true;break end end
@@ -563,19 +566,19 @@ local function apply_generic(settings)
    elseif local_files[name] then
     expected_type=local_file_matches(occupied,local_files[name])
    elseif web_index then
-    local group=obs.obs_scene_get_group(scene,'ALO · '..panel_names[web_index]..' Group')
+    local group=obs.obs_scene_get_group(scene,prefix..panel_names[web_index]..' Group')
     local nested=group~=nil and obs.obs_sceneitem_group_get_scene(group) or nil
     expected_type=obs.obs_source_get_id(occupied)=='browser_source' and known_group(panel_names[web_index]) and nested~=nil and obs.obs_scene_find_source(nested,name)~=nil
    elseif media_index then
     local key=panel_keys[media_index]
-    local group=obs.obs_scene_get_group(scene,'ALO · '..panel_names[media_index]..' Group')
+    local group=obs.obs_scene_get_group(scene,prefix..panel_names[media_index]..' Group')
     local nested=group~=nil and obs.obs_sceneitem_group_get_scene(group) or nil
     expected_type=key~=nil and local_file_matches(occupied,'panel-media-'..key..'.html') and known_group(panel_names[media_index]) and nested~=nil and obs.obs_scene_find_source(nested,name)~=nil
    else expected_type=false end
    local placed=obs.obs_scene_find_source(scene,name) or obs.obs_scene_get_group(scene,name)
    if placed==nil then
     for _,label in ipairs(all_panel_names) do
-     local group=obs.obs_scene_get_group(scene,'ALO · '..label..' Group')
+     local group=obs.obs_scene_get_group(scene,prefix..label..' Group')
      local nested=group~=nil and obs.obs_sceneitem_group_get_scene(group) or nil
      if nested~=nil then placed=obs.obs_scene_find_source(nested,name) end
      if placed~=nil then break end
@@ -588,11 +591,11 @@ local function apply_generic(settings)
    end
   end
  end
- local existing_panels=obs.obs_scene_find_source(scene,'ALO · Panel Stroke') or obs.obs_scene_find_source(scene,'OBS Template · Panel Stroke') or obs.obs_scene_find_source(scene,'OBS Template · Panels')
+ local existing_panels=obs.obs_scene_find_source(scene,prefix..'Panel Stroke') or obs.obs_scene_find_source(scene,'OBS Template · Panel Stroke') or obs.obs_scene_find_source(scene,'OBS Template · Panels')
  local panels_visible=existing_panels==nil or obs.obs_sceneitem_visible(existing_panels)
- local existing_fill=obs.obs_scene_find_source(scene,'ALO · Panel Fill') or obs.obs_scene_find_source(scene,'OBS Template · Panel Fill')
+ local existing_fill=obs.obs_scene_find_source(scene,prefix..'Panel Fill') or obs.obs_scene_find_source(scene,'OBS Template · Panel Fill')
  local fill_visible=existing_fill==nil or obs.obs_sceneitem_visible(existing_fill)
- local existing_background=obs.obs_scene_find_source(scene,'ALO · Background') or obs.obs_scene_find_source(scene,'OBS Template · Background')
+ local existing_background=obs.obs_scene_find_source(scene,prefix..'Background') or obs.obs_scene_find_source(scene,'OBS Template · Background')
  local background_visible=existing_background==nil or obs.obs_sceneitem_visible(existing_background)
  local previous_layout=snapshot_layout(scene)
  local result=true
@@ -602,7 +605,7 @@ local function apply_generic(settings)
  local applied,apply_error=xpcall(function()
  for _,key in ipairs(panel_keys) do
   local panel=panels[key]
-  local name='ALO · '..panel.name
+  local name=prefix..panel.name
   local group=name..' Group'
   local selected=panel.kind=='source' and panel.source or panel.kind=='web' and panel.url~='' and name..' Web' or panel.kind=='media' and panel.url~='' and name..' Media' or ''
   local url=panel.kind=='web' and panel.url or panel.kind=='media' and script_path()..'panel-media-'..key..'.html' or nil
@@ -613,17 +616,17 @@ local function apply_generic(settings)
    if item~=nil then obs.obs_sceneitem_set_visible(item,false) end
   elseif selected=='' then unused_groups[#unused_groups+1]=group
   else
-   if not clip(scene,group,selected,script_path()..'assets/'..key..'-alpha-mask.png',panel.box,url,'ALO · ',panel.kind=='media',retained_sources,pending_removals) then
+   if not clip(scene,group,selected,script_path()..'assets/'..key..'-alpha-mask.png',panel.box,url,prefix,panel.kind=='media',retained_sources,pending_removals) then
     obs.script_log(obs.LOG_WARNING,'Could not mask '..panel.name..'. Check Browser Source and mask files.')
     result=false;break
    end
   end
  end
  if result then
-  result=browser(scene,'ALO · Panel Fill',script_path()..'background.html',true,0,0,1920,1080,nil,true)
-   and browser(scene,'ALO · Background',script_path()..'wallpaper.html',true,0,0,1920,1080,nil,true)
-   and browser(scene,'ALO · Overlay',script_path()..'overlay.html',true,0,0,1920,1080,browser_css)
-   and browser(scene,'ALO · Panel Stroke',script_path()..'frame.html',true,0,0,1920,1080)
+  result=browser(scene,prefix..'Panel Fill',script_path()..'background.html',true,0,0,1920,1080,nil,true)
+   and browser(scene,prefix..'Background',script_path()..'wallpaper.html',true,0,0,1920,1080,nil,true)
+   and browser(scene,prefix..'Overlay',script_path()..'overlay.html',true,0,0,1920,1080,browser_css)
+   and browser(scene,prefix..'Panel Stroke',script_path()..'frame.html',true,0,0,1920,1080)
   if not result then obs.script_log(obs.LOG_WARNING,'Could not create a required template browser source.') end
  end
  -- Overlap fills and shadows sit above Main and below the auxiliary content.
@@ -632,9 +635,9 @@ local function apply_generic(settings)
    local item=obs.obs_scene_find_source(scene,name)
    if item~=nil then obs.obs_sceneitem_set_order(item,obs.OBS_ORDER_MOVE_TOP) end
   end
-  raise('ALO · Main Group');raise('ALO · Panel Fill')
-  for index=2,#panel_keys do raise('ALO · '..panels[panel_keys[index]].name..' Group') end
-  raise('ALO · Overlay');raise('ALO · Panel Stroke')
+  raise(prefix..'Main Group');raise(prefix..'Panel Fill')
+  for index=2,#panel_keys do raise(prefix..panels[panel_keys[index]].name..' Group') end
+  raise(prefix..'Overlay');raise(prefix..'Panel Stroke')
  end
  if result then
   -- Commit removals only once all panel and layer updates have succeeded.
@@ -652,7 +655,7 @@ local function apply_generic(settings)
   -- Keep inactive preset groups and original sources for the user's next switch.
   for index,key in ipairs(all_panel_keys) do
    if panels[key]==nil then
-    local item=obs.obs_scene_get_group(scene,'ALO · '..all_panel_names[index]..' Group')
+    local item=obs.obs_scene_get_group(scene,prefix..all_panel_names[index]..' Group')
     if item~=nil then obs.obs_sceneitem_set_visible(item,false) end
    end
   end
@@ -668,13 +671,13 @@ local function apply_generic(settings)
    for _,suffix in ipairs({'',' Clip'}) do remove(scene,'OBS Template · Custom '..index..suffix) end
   end
   remove(scene,'OBS Template · Panels')
-  obs.obs_sceneitem_set_visible(obs.obs_scene_find_source(scene,'ALO · Panel Stroke'),panels_visible)
-  obs.obs_sceneitem_set_visible(obs.obs_scene_find_source(scene,'ALO · Panel Fill'),fill_visible)
-  obs.obs_sceneitem_set_visible(obs.obs_scene_find_source(scene,'ALO · Background'),background_visible)
-  panel_backdrop(background_visible,'ALO · ')
-  connect_panel_signal()
+  obs.obs_sceneitem_set_visible(obs.obs_scene_find_source(scene,prefix..'Panel Stroke'),panels_visible)
+  obs.obs_sceneitem_set_visible(obs.obs_scene_find_source(scene,prefix..'Panel Fill'),fill_visible)
+  obs.obs_sceneitem_set_visible(obs.obs_scene_find_source(scene,prefix..'Background'),background_visible)
+  panel_backdrop(background_visible,prefix)
+  connect_panel_signal(scene_name)
   obs.obs_frontend_set_current_scene(source)
-  obs.script_log(obs.LOG_INFO,'ALO4OBS applied: seven independent panels. No links are logged.')
+  obs.script_log(obs.LOG_INFO,scene_name..' applied. No links are logged.')
  end
  end,debug.traceback)
  if not applied then
