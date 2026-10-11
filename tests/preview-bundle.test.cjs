@@ -7,7 +7,7 @@ const source=fs.readFileSync(path.join(__dirname,'../template/preview.js'),'utf8
 const start=source.indexOf("  byId('bundle').onclick=async()=>{"),end=source.indexOf("  frame.addEventListener('load'",start);
 
 function harness(options={}){
- let releaseMasks,captured;
+ let releaseMasks,captured,downloadName;
  const maskGate=new Promise(resolve=>{releaseMasks=resolve;});
  const oldFile={async arrayBuffer(){return Uint8Array.from([10,20,30]).buffer;}};
  const uploads=new Map([['whole',{path:'assets/background-whole.png',file:oldFile}]]);
@@ -19,10 +19,10 @@ function harness(options={}){
   byId:id=>id==='bundle'?bundle:null,current:()=>structuredClone(data),
   alphaMask:async(_,name)=>{await maskGate;return {name,bytes:new Uint8Array([1])};},
   OverlayPack:{isolateRuntime:entries=>entries,settingsEntries:input=>[{name:'obs-settings.json',bytes:new TextEncoder().encode(JSON.stringify(input))}],zip:entries=>{captured=entries;return new Uint8Array([0]);}},
-  document:{createElement:()=>({click(){}})},window:{OBS_EXPORT_RUNTIME:{},showSaveFilePicker:options.showSaveFilePicker}
+  document:{createElement:()=>({click(){downloadName=this.download;}})},window:{OBS_EXPORT_RUNTIME:{},showSaveFilePicker:options.showSaveFilePicker}
  };
  vm.runInNewContext(source.slice(start,end),context);
- return {uploads,bundle,status,data,releaseMasks,get captured(){return captured;}};
+ return {uploads,bundle,status,data,releaseMasks,get captured(){return captured;},get downloadName(){return downloadName;}};
 }
 
 test('reset during mask generation cannot remove assets referenced by the captured ZIP config',async()=>{
@@ -54,26 +54,27 @@ test('unreadable restored media prevents an incomplete ZIP download',async()=>{
  assert.equal(h.status.error,true);
 });
 
-test('native save writes ZIP and closes without triggering a download',async()=>{
- let written,closed=false;
- const h=harness({showSaveFilePicker:async options=>{assert.equal(options.suggestedName,'Settings-Bento.zip');return {createWritable:async()=>({write:async blob=>{written=blob;},close:async()=>{closed=true;},abort:async()=>{}})};}});
- h.releaseMasks();await h.bundle.onclick();assert.equal(written.type,'application/zip');assert.ok(closed);
-});
-test('canceling the save picker does not build a ZIP',async()=>{
- const h=harness({showSaveFilePicker:async()=>{throw Object.assign(new Error('cancel'),{name:'AbortError'});}});
- await h.bundle.onclick();assert.equal(h.captured,undefined);assert.equal(h.status.textContent,undefined);
+test('native picker is not opened before the complete ZIP download',async()=>{
+ let pickerCalls=0;
+ const h=harness({showSaveFilePicker:async()=>{pickerCalls++;throw new Error('Native save must not create an empty file');}});
+ const exporting=h.bundle.onclick();assert.equal(h.downloadName,undefined);
+ h.releaseMasks();await exporting;
+ assert.equal(pickerCalls,0);assert.equal(h.downloadName,'Settings-Bento.zip');
 });
 
-test('Bento → Overlap → Bento export captures the type before an asynchronous save picker',async()=>{
+test('failed asset collection never opens a picker or downloads an empty ZIP',async()=>{
+ let pickerCalls=0;
+ const h=harness({restored:true,showSaveFilePicker:async()=>{pickerCalls++;},fetch:async()=>{throw new Error('blocked');}});
+ h.releaseMasks();await h.bundle.onclick();
+ assert.equal(pickerCalls,0);assert.equal(h.downloadName,undefined);assert.equal(h.captured,undefined);assert.equal(h.status.error,true);
+});
+
+test('Bento to Overlap to Bento export captures the type before asynchronous ZIP generation',async()=>{
  for(const mode of ['bento','overlap','bento']){
-  let name;
-  const h=harness({layoutMode:mode,showSaveFilePicker:async options=>{
-   name=options.suggestedName;
-   h.data.layoutMode=mode==='bento'?'overlap':'bento';
-   return {createWritable:async()=>({write:async()=>{},close:async()=>{},abort:async()=>{}})};
-  }});
-  h.releaseMasks();await h.bundle.onclick();
-  assert.equal(name,mode==='bento'?'Settings-Bento.zip':'Settings-Overlap.zip');
+  const h=harness({layoutMode:mode}),exporting=h.bundle.onclick();
+  h.data.layoutMode=mode==='bento'?'overlap':'bento';
+  h.releaseMasks();await exporting;
+  assert.equal(h.downloadName,mode==='bento'?'Settings-Bento.zip':'Settings-Overlap.zip');
   assert.equal(JSON.parse(new TextDecoder().decode(h.captured[0].bytes)).layoutMode,mode);
  }
 });

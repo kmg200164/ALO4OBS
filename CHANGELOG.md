@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.10.2 — 2026-10-11
+
+- Replace native save-picker writes with the existing standard browser download flow. Assemble the complete ZIP before starting a download, preventing a failed export from leaving a newly created zero-byte ZIP.
+- Verified three real Chrome exports with the native picker present but unused, then extracted all 95/113/95 entries through the Windows compressed-folder engine and compared every file byte. Node 288 and Python 35 checks passed.
+- Keep Settings-Bento.zip / Settings-Overlap.zip names and internal paths. Browser download settings determine the destination.
+- Add regression checks for no file creation before assembly, failed media collection without an empty download, and type capture during asynchronous generation.
+- Preserve the published 0.10.0 and 0.10.1 archives; provide a new 0.10.2 distribution. No tag, GitHub Release or streaming presets.
+
 ## 0.10.1 — 2026-10-11
 
 ### Fixed

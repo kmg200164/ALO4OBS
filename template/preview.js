@@ -900,7 +900,6 @@
       const data=current(),uploadSnapshot=Array.from(uploads,([key,entry])=>[key,{...entry}]),entries=OverlayPack.settingsEntries(data);
       if(!window.OBS_EXPORT_RUNTIME)throw new Error('Open settings from the downloaded template package before saving.');
       const archiveName=data.layoutMode==='overlap'?'Settings-Overlap.zip':'Settings-Bento.zip';
-      const saveHandle=window.showSaveFilePicker?await window.showSaveFilePicker({suggestedName:archiveName,types:[{description:'ZIP archive',accept:{'application/zip':['.zip']}}]}):null;
       for(const [name,encoded] of Object.entries(window.OBS_EXPORT_RUNTIME))entries.push({name,bytes:Uint8Array.from(atob(encoded),c=>c.charCodeAt(0))});
       for(const key of OverlayEvents.activePanelKeys(data))entries.push(await alphaMask(data.layout[key],'assets/'+key+'-alpha-mask.png',data));
       for(const [key,entry] of uploadSnapshot){const selectedPath=key==='whole'?data.backgroundImage:key==='sponsor'?data.sponsor:key.startsWith('region-')?(data.regionBackgrounds[key.slice(7)]?.imageFile||data.regionBackgrounds[key.slice(7)]?.image):data.panelContent[key]?.url;if(selectedPath===entry.path)entries.push({name:entry.path,bytes:new Uint8Array(await entry.file.arrayBuffer())});}
@@ -915,8 +914,8 @@
       }
       OverlayPack.isolateRuntime(entries,data.layoutMode||'bento');
       const blob=new Blob([OverlayPack.zip(entries)],{type:'application/zip'});
-      if(saveHandle){const writable=await saveHandle.createWritable();try{await writable.write(blob);await writable.close();}catch(error){await writable.abort().catch(()=>{});throw error;}}
-      else{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=archiveName;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+      // Native save pickers can leave a zero-byte file if later ZIP creation or writing fails.
+      const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=archiveName;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
       status.textContent=localized('설정 ZIP 전체를 압축 해제한 뒤, 같은 폴더의 OBS-script.lua를 OBS에 추가하세요.');
     }catch(error){if(error.name==='AbortError')return;showStatus(error.message,true);}
   };
