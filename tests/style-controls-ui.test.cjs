@@ -5,7 +5,7 @@ test('regional image radios, gradient defaults, switches and uniform vertical al
  const browser=await playwright.chromium.launch({channel:'chrome',headless:true});
  try{
   const page=await browser.newPage();page.setDefaultTimeout(5000);
-  await require('./helpers/expanded-sections.cjs')(page);await page.goto('http://127.0.0.1:8783/review/files/settings.html');await page.locator('[data-layout-choice=bento]').click();
+  await require('./helpers/expanded-sections.cjs')(page);await page.goto(new URL('settings.html',process.env.KMG_THEME_RENDER_URL||'http://127.0.0.1:8783/review/files/').href);await page.locator('[data-layout-choice=bento]').click();
   await page.locator('[data-hit=custom1] .panel-number').click();
   const override=page.locator('[name=regionOverride]');assert.equal(await override.getAttribute('role'),'switch');await override.check();
   assert.deepEqual(await page.locator('[name=regionFillMode]').evaluateAll(nodes=>nodes.map(node=>node.value)),['none','solid','gradient','url','file']);
