@@ -14,33 +14,11 @@ Found it useful? [Support continued improvements](https://buymeacoffee.com/kmg20
   </a>
 </p>
 
-## Two layout types
-
-| | Bento | Overlap |
-| --- | --- | --- |
-| Arrangement | All panels stay separate | Auxiliary panels sit above full-screen Main |
-| Panels | Main, up to 3 Sub and 3 Side panels | Main and up to 15 auxiliary panels across 5 columns |
-| Placement | Main/Sub row order and left/right Side position | Fixed columns, automatic stack alignment or manual vertical placement |
-| Wider panels | Bento width controls | Wider width switch on columns 1, 3 and 5 |
-
-Switch layouts from the header. Each layout retains its panel content and settings; Main and global appearance are shared. Existing 0.9.1 configurations migrate to Bento. Curated streaming presets are planned for **0.10.1**.
-
-## Features
-
-- Configure a **1920 × 1080** layout with a sticky preview beside the settings. Both work areas stay side by side; narrow settings use one column.
-- Select a panel directly in the preview. The panel-settings section remains visible with a selection hint until you choose one.
-- Use **OBS sources, web widgets, images or videos** as panel content.
-- Adjust panel gap, corners, fill, stroke and shadow globally or per panel. Image URL and uploaded image file are separate fill choices.
-- In Overlap, enable or hide fixed columns, choose 1–3 panels per column, and widen columns 1/3/5. Wider columns temporarily hide their occupied neighbors without erasing settings.
-- Adjust Overlap height and Y with Auto/Manual switches, numbers, sliders or vertical preview dragging. Applied geometry fits available space while preserving panel order, gaps and a **128 px minimum height**. Feasible manual positions stay fixed; requested values remain saved if rendering must clamp them.
-- Toggle the editor-only safety guide to see game-UI warning areas. It is not broadcast and does not block placement; its usefulness depends on the game.
-- Export a portable **OBS-settings.zip** containing settings, masks and selected media. Hidden panels and both layout snapshots stay saved.
-- Use **Korean, English or Japanese**, with localized guides and icon-button tooltips, dark/light modes and ten UI color themes. UI themes do not alter broadcast colors or media.
-- Free MIT-licensed code, with no required account or subscription.
-
+<a name="how-to-start"></a>
 <a name="quick-start"></a>
 
-## How to start
+<details>
+<summary><strong>How to start</strong></summary>
 
 ![Setup: download, extract, open settings.html, configure panels, unpack saved settings, add the OBS script.](docs/images/setup-workflow.png)
 
@@ -55,9 +33,13 @@ Keep the Lua script, configuration, masks, assets and runtime files together. Mo
 
 Browser edits do not automatically update OBS. Save and extract a new personal ZIP, update or register its script path, reload the script, check source selections and Apply again. The included Korean, English and Japanese guides contain the full procedure.
 
+</details>
+
+<a name="how-to-update"></a>
 <a name="update-an-existing-installation"></a>
 
-## How to update
+<details>
+<summary><strong>How to update</strong></summary>
 
 Back up your **OBS scene collection**, the **complete old application folder** and every panel's script source selection. Keep the last working version available and use a separate folder for the new distribution.
 
@@ -79,13 +61,57 @@ The running script can restore its prior scene layout and config.js after a cont
 
 </details>
 
-## Verification
+</details>
+
+<a name="two-layout-types"></a>
+
+<details>
+<summary><strong>Two layout types</strong></summary>
+
+| | Bento | Overlap |
+| --- | --- | --- |
+| Arrangement | All panels stay separate | Auxiliary panels sit above full-screen Main |
+| Panels | Main, up to 3 Sub and 3 Side panels | Main and up to 15 auxiliary panels across 5 columns |
+| Placement | Main/Sub row order and left/right Side position | Fixed columns, automatic stack alignment or manual vertical placement |
+| Wider panels | Bento width controls | Wider width switch on columns 1, 3 and 5 |
+
+Switch layouts from the header. Each layout retains its panel content and settings; Main and global appearance are shared. Existing 0.9.1 configurations migrate to Bento. Curated streaming presets are planned for **0.10.1**.
+
+</details>
+
+<a name="features"></a>
+
+<details>
+<summary><strong>Features</strong></summary>
+
+- Configure a **1920 × 1080** layout with a sticky preview beside the settings. Both work areas stay side by side; narrow settings use one column.
+- Select a panel directly in the preview. The panel-settings section remains visible with a selection hint until you choose one.
+- Use **OBS sources, web widgets, images or videos** as panel content.
+- Adjust panel gap, corners, fill, stroke and shadow globally or per panel. Image URL and uploaded image file are separate fill choices.
+- In Overlap, enable or hide fixed columns, choose 1–3 panels per column, and widen columns 1/3/5. Wider columns temporarily hide their occupied neighbors without erasing settings.
+- Adjust Overlap height and Y with Auto/Manual switches, numbers, sliders or vertical preview dragging. Applied geometry fits available space while preserving panel order, gaps and a **128 px minimum height**. Feasible manual positions stay fixed; requested values remain saved if rendering must clamp them.
+- Toggle the editor-only safety guide to see game-UI warning areas. It is not broadcast and does not block placement; its usefulness depends on the game.
+- Export a portable **OBS-settings.zip** containing settings, masks and selected media. Hidden panels and both layout snapshots stay saved.
+- Use **Korean, English or Japanese**, with localized guides and icon-button tooltips, dark/light modes and ten UI color themes. UI themes do not alter broadcast colors or media.
+- Free MIT-licensed code, with no required account or subscription.
+
+</details>
+
+<a name="verification"></a>
+
+<details>
+<summary><strong>Verification</strong></summary>
 
 0.10.0 passed **305 tests over HTTP and 305 with direct file opening**, **35 Python checks**, a **96-condition language/theme/layout/width matrix**, **139 height-control UI states** and **20,000 generated geometry configurations**. An isolated Windows **OBS 32.2.2** run passed **52 Apply calls and 2,164 assertions**, including a controlled internal failure, rollback and successful reapplication. All **484 production OBS configuration file hashes** remained unchanged.
 
 These checks use synthetic OBS sources. macOS, real camera/capture devices, authenticated personal widgets and the native save-dialog flow remain unverified. The original intermittent native mutex crash has not been uniquely attributed; repeated-Apply success does not certify every plugin/device combination. See [release verification and remaining boundaries](docs/release-readiness-0.10.0.md).
 
-## FAQ
+</details>
+
+<a name="faq"></a>
+
+<details>
+<summary><strong>FAQ</strong></summary>
 
 <details>
 <summary>Do uploaded files stay after reopening?</summary>
@@ -101,7 +127,12 @@ Use a provider's HTTP(S) widget/display URL or a direct media URL. Management an
 
 </details>
 
-## Privacy and license
+</details>
+
+<a name="privacy-and-license"></a>
+
+<details>
+<summary><strong>Privacy and license</strong></summary>
 
 Keep personal **config.js**, **obs-settings.json** and **OBS-settings.zip** private: they may contain widget tokens. Hide personal widget links and stream keys in bug-report screenshots.
 
@@ -111,6 +142,13 @@ KMG directs the product, design, requirements and real-use evaluation. Code was 
 
 Older [0.9.1](https://github.com/kmg200164/ALO4OBS/raw/refs/heads/main/downloads/ALO4OBS-v0.9.1.zip) and [0.9.0](https://github.com/kmg200164/ALO4OBS/raw/refs/heads/main/downloads/ALO4OBS-v0.9.0.zip) distribution archives remain unchanged. [Change log](CHANGELOG.md) · [Historical QA](docs/QA.md)
 
-## Documentation language
+</details>
+
+<a name="documentation-language"></a>
+
+<details>
+<summary><strong>Documentation language</strong></summary>
 
 Project documentation, including README files, changelogs, QA records, work reports, development guidance and concept-explanation comments, is canonical in English. Localized product UI and Korean/Japanese user guides remain translated and consistent with the English guide.
+
+</details>
