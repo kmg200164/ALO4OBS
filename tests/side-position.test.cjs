@@ -4,7 +4,7 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 const events=require('../template/events.js');
 const pack=require('../template/pack.js');
-const keys=Object.keys(events.panelLabels),subs=keys.slice(1,4),sides=keys.slice(4);
+const keys=events.bentoPanelKeys,subs=keys.slice(1,4),sides=keys.slice(4);
 const content=Object.fromEntries(keys.map(key=>[key,{type:'none',url:''}]));
 const source=fs.readFileSync(require.resolve('../template/preview.js'),'utf8');
 function exported(input){return JSON.parse(new TextDecoder().decode(pack.settingsEntries({layoutVersion:4,panelContent:content,...input})[0].bytes));}
@@ -84,7 +84,7 @@ test('native Side checkbox change routes through the shared placement handler be
   updatePresetLabel(){},updatePlacement(input){calls.push(['placement',input.name,input.checked]);},apply(){calls.push(['apply']);},paintGradientControls(){}};
  const start=source.indexOf("  form.addEventListener('input',event=>{"),end=source.indexOf("  form.addEventListener('click',event=>",start);
  vm.runInNewContext(source.slice(start,end),context);
- const input={name:'sidePosition',checked:true,matches:()=>false};
+ const input={dataset:{},name:'sidePosition',checked:true,matches:()=>false};
  handlers.input({target:input});assert.deepEqual(calls,[]);
  handlers.change({target:input});assert.deepEqual(calls,[['placement','sidePosition',true],['apply']]);
 });

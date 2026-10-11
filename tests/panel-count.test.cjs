@@ -5,14 +5,14 @@ const vm=require('node:vm');
 const events=require('../template/events.js');
 const pack=require('../template/pack.js');
 const source=fs.readFileSync(require.resolve('../template/preview.js'),'utf8');
-const keys=Object.keys(events.panelLabels);
+const keys=events.bentoPanelKeys;
 const panelGroups={sub:keys.slice(1,4),side:keys.slice(4)};
 const publicContext={window:{}};
 vm.runInNewContext(fs.readFileSync(require.resolve('../template/config.public.js'),'utf8'),publicContext);
 const defaults=publicContext.window.OVERLAY_PUBLIC_CONFIG;
 const plain=value=>JSON.parse(JSON.stringify(value));
 function normalizer(){
- const context={keys,panelGroups,defaults,OverlayEvents:events,structuredClone,initialPlacement:events.defaultPlacement()};
+ const context={keys,panelGroups,defaults,OverlayEvents:events,structuredClone,freshSmoothing:0,initialPlacement:events.defaultPlacement()};
  const start=source.indexOf('  const defaultStyle='),end=source.indexOf('  function restoredSettings(');
  vm.runInNewContext(source.slice(start,end),context);
  return context;

@@ -11,6 +11,7 @@ function editor(values,region={}){
  const inputs=Object.fromEntries(Object.entries({regionFillMode:'solid',regionStrokeMode:'solid',regionColor:'#123456',regionBorderColor:'#abcdef',regionOpacity:'1',regionBlur:'2',regionStrokeWidth:'2',regionImage:'assets/card.png',panelContentType:'none',...values}).map(([name,value])=>[name,{name,value:String(value)}]));
  inputs.regionOverride={checked:true};
  const context={selected:'custom1',config:{panelSizing:{custom1:{width:300,height:150}},regionBackgrounds:{custom1:region},regionStyleOverrides:{},panelContent:{}},control:name=>inputs[name]};
+ vm.runInNewContext(source.slice(source.indexOf('  const modeValue='),source.indexOf('  const modeSwitch=')),context);
  vm.runInNewContext(presets,context);
  const start=source.indexOf('  function readEditor(){'),end=source.indexOf('  function readGlobal(){',start);
  vm.runInNewContext(source.slice(start,end),context);
@@ -33,6 +34,7 @@ test('regional slider indices save real strengths in nested and legacy fields, a
 
 test('regional ranges retain saved defaults and use the same ascending five-step presentation',()=>{
  const context={window:{},editorRow:(_label,html,variant)=>`<row class="${variant}">${html}</row>`};
+ vm.runInNewContext(source.slice(source.indexOf('  const modeValue='),source.indexOf('  const modeSwitch=')),context);
  vm.runInNewContext(presets,context);
  const start=source.indexOf('  const editorPreset='),end=source.indexOf('  const fieldHtml=',start);
  vm.runInNewContext(source.slice(start,end)+';this.renderPreset=editorPreset;',context);
@@ -54,11 +56,12 @@ test('regional ranges retain saved defaults and use the same ascending five-step
 test('regional slider input updates translated labels before change with global handler',()=>{
  let handler,applies=0;const label={};
  const context={selected:'custom1',OverlayEvents:{panelGaps:[8,16,24,32,48]},form:{querySelector:()=>label,addEventListener(_event,callback){handler=callback;}},apply(){applies++;},paintGradientControls(){},window:{KMGI18n:{localize:value=>({'매우 강함':'Very strong'}[value]||value)}}};
+ vm.runInNewContext(source.slice(source.indexOf('  const modeValue='),source.indexOf('  const modeSwitch=')),context);
  vm.runInNewContext(presets,context);
  const start=source.indexOf("  form.addEventListener('input',event=>{"),end=source.indexOf("  form.addEventListener('change'",start);
  vm.runInNewContext(source.slice(start,end),context);
  for(const [name,values] of Object.entries(scales)){
-  handler({target:{name,value:'4',matches:()=>false}});
+  handler({target:{dataset:{},name,value:'4',matches:()=>false,closest:()=>null}});
   assert.equal(label.innerHTML,`<span data-preset-strength>Very strong</span> (${values[4]}${name==='regionOpacity'?'%':'px'})`);
  }
  assert.equal(applies,3);
@@ -95,27 +98,28 @@ test('rendered regional controls share global slider, gradient and collapsible s
  const {chromium}=require(process.env.KMG_PLAYWRIGHT_PATH||'C:/Users/KMG/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
  const browser=await chromium.launch({headless:true,channel:'chrome'});
  try{
-  const page=await browser.newPage({viewport:{width:1440,height:900}});
-  await page.goto(new URL('settings.html',process.env.KMG_THEME_RENDER_URL).href);
+  const page=await browser.newPage({locale:'ko-KR',viewport:{width:1440,height:900}});
+  await require('./helpers/expanded-sections.cjs')(page);await page.goto(new URL('settings.html',process.env.KMG_THEME_RENDER_URL).href);
+  await page.locator('[data-layout-choice=bento]').click();
   await page.waitForSelector('html[data-i18n-ready]');
   await page.locator('.panel-hit[data-hit=custom1]').click();
   await page.locator('[name=regionOverride]').check();
   const region=page.locator('.region-style-details');
-  const fillSection=region.locator('details.property-section').first(),strokeSection=region.locator('details.property-section').last();
+  const fillSection=region.locator('details.property-section').first(),strokeSection=region.locator('details.property-section').nth(1);
   assert.equal(await fillSection.locator('[name=regionImage]').count(),1);assert.equal(await fillSection.locator('[data-upload=region]').count(),1);
   assert.equal(await strokeSection.locator('[name=regionImage],[data-upload=region]').count(),0);
   assert.equal(await fillSection.locator('summary h4').textContent(),'패널 채우기');assert.equal(await strokeSection.locator('summary h4').textContent(),'패널 테두리');
   assert.equal(await region.evaluate(el=>getComputedStyle(el).gap),'24px');
-  assert.equal(await region.locator(':scope>.divider').count(),2);
+  assert.equal(await region.locator(':scope>.divider').count(),3);
   assert.equal(await region.evaluate(el=>getComputedStyle(el.parentElement).gap),'24px');
   await page.locator('[name=regionOverride]').uncheck();assert.equal(await region.locator(':scope>.divider').first().isVisible(),false);await page.locator('[name=regionOverride]').check();
   const ranges=await page.locator('#settings input[type=range]').evaluateAll(els=>els.map(el=>({name:el.name,appearance:getComputedStyle(el).appearance,height:getComputedStyle(el).height,border:getComputedStyle(el).borderTopWidth,progress:el.style.getPropertyValue('--range-progress')})));
   assert.ok(ranges.every(range=>range.appearance==='none'&&range.height==='24px'&&range.border==='0px'&&range.progress.endsWith('%')));
   for(const name of ['subCount','sideCount']){const count=page.locator(`[name=${name}]`);await count.evaluate(el=>el.value='2');await count.dispatchEvent('input');assert.equal(await count.evaluate(el=>el.style.getPropertyValue('--range-progress')),'50%');await count.evaluate(el=>el.value='3');await count.dispatchEvent('input');}
-  await page.locator('[name=panelWidthMode]').selectOption('fixed');
+  await page.locator('[name=panelWidthMode]').check();
   const sizeSlider=page.locator('[name=panelWidthSlider]');await sizeSlider.evaluate(el=>el.value=el.min);await sizeSlider.dispatchEvent('input');
   assert.equal(await sizeSlider.evaluate(el=>el.style.getPropertyValue('--range-progress')),'0%');
-  await page.locator('[name=panelWidthMode]').selectOption('auto');
+  await page.locator('[name=panelWidthMode]').uncheck();
   for(const [regional,global] of [['regionOpacity','globalFillOpacity'],['regionBlur','globalFillBlur'],['regionStrokeWidth','globalStrokeWidth']]){
    const geometry=el=>{const row=el.closest('.property-row'),s=getComputedStyle(el);return {type:el.type,min:el.min,max:el.max,step:el.step,height:s.height,marks:row.querySelectorAll('.size-ratio-marks span').length};};
    assert.deepEqual(await page.locator(`[name=${regional}]`).evaluate(geometry),await page.locator(`[name=${global}]`).evaluate(geometry));

@@ -29,6 +29,7 @@ body[data-theme=light]{--guide-frame-child:var(--neutral-white);--guide-frame-te
 .faq-item summary:focus-visible{outline-color:var(--content-on-accent);outline-offset:-3px}
 
 /* Keep the first view short; detailed setup and recovery stay behind native details. */
+.guide-quick-start{margin-top:var(--space-4)}
 .guide-workflow{margin:0 auto;width:min(100%,760px)}
 .guide-workflow img{display:block;width:100%;height:auto;border-radius:12px}
 .guide-process-list{list-style:none;margin:16px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}

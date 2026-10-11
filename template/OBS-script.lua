@@ -14,7 +14,7 @@ local areas={{'chatUrl','OBS Template · Chat','chat','showChat'},
  {'donationSoop','OBS Template · SOOP Alerts','alerts','showAlerts'},
  {'reactiveUrl','OBS Template · Discord Reactive','hand','reactive'}}
 function script_description()
- return 'ALO4OBS: configure seven panels in settings.html, extract OBS-settings.zip beside this script, select a different existing OBS source for each panel that needs one, then Apply. Apply updates the ALO4OBS layout; original capture settings are preserved.'
+ return 'ALO4OBS: choose Bento or Overlap panels in settings.html, extract OBS-settings.zip beside this script, select a different existing OBS source for each panel that needs one, then Apply. Apply updates the ALO4OBS layout; original capture settings are preserved.'
 end
 function script_defaults(settings)
  obs.obs_data_set_default_bool(settings,'english',true)
@@ -107,28 +107,33 @@ local function preserve_and_remove_old_group(scene,name,current_sources)
  end
 end
 local function browser(scene,name,url,file,x,y,w,h,css,bottom)
- local data=obs.obs_data_create()
- obs.obs_data_set_int(data,'width',w);obs.obs_data_set_int(data,'height',h)
+ local data,source,properties
+ local ok,result=pcall(function()
+ data=obs.obs_data_create()
+ obs.obs_data_set_int(data,'width',math.ceil(w));obs.obs_data_set_int(data,'height',math.ceil(h))
  obs.obs_data_set_string(data,'css',css or browser_css)
  obs.obs_data_set_bool(data,'is_local_file',file)
  obs.obs_data_set_string(data,file and 'local_file' or 'url',url)
- local source=obs.obs_get_source_by_name(name)
+ source=obs.obs_get_source_by_name(name)
  if source==nil then source=obs.obs_source_create('browser_source',name,data,nil)
  else
   obs.obs_source_update(source,data)
   if file then
-   local properties=obs.obs_source_properties(source)
+   properties=obs.obs_source_properties(source)
    if properties~=nil then
     local refresh=obs.obs_properties_get(properties,'refreshnocache')
     if refresh~=nil then obs.obs_property_button_clicked(refresh,source) end
-    obs.obs_properties_destroy(properties)
+    obs.obs_properties_destroy(properties);properties=nil
    end
   end
  end
- local placed=source~=nil and place(scene,source,x,y,w,h,bottom)
+ return source~=nil and place(scene,source,x,y,w,h,bottom)
+ end)
+ if properties~=nil then obs.obs_properties_destroy(properties) end
  if source~=nil then obs.obs_source_release(source) end
- obs.obs_data_release(data)
- return placed
+ if data~=nil then obs.obs_data_release(data) end
+ if not ok then assert(false,result) end
+ return result
 end
 local function clip(scene,name,selected,mask_path,box,url,internal_prefix,url_file,retained_sources,pending_removals)
  internal_prefix=internal_prefix or 'OBS Template · '
@@ -140,13 +145,15 @@ local function clip(scene,name,selected,mask_path,box,url,internal_prefix,url_fi
  local mask=io.open(mask_path,'rb')
  if mask==nil then return false end
  mask:close()
- local group=existing or obs.obs_scene_add_group(scene,name)
+ local group,private,canvas,data,capture,filter,items
+ local protected,result=pcall(function()
+ group=existing or obs.obs_scene_add_group(scene,name)
  if group==nil then return false end
  if existing==nil then
-  local private=obs.obs_sceneitem_get_private_settings(group)
+  private=obs.obs_sceneitem_get_private_settings(group)
   if private~=nil then
    obs.obs_data_set_bool(private,'collapsed',true)
-   obs.obs_data_release(private)
+   obs.obs_data_release(private);private=nil
   end
  end
  obs.obs_sceneitem_set_locked(group,true)
@@ -161,25 +168,25 @@ local function clip(scene,name,selected,mask_path,box,url,internal_prefix,url_fi
   return fail_group()
  end
  local canvas_name=internal_prefix..'Clip Canvas'
- local canvas=obs.obs_get_source_by_name(canvas_name)
- local data=obs.obs_data_create()
+ canvas=obs.obs_get_source_by_name(canvas_name)
+ data=obs.obs_data_create()
  obs.obs_data_set_int(data,'color',0)
  obs.obs_data_set_int(data,'width',1920)
  obs.obs_data_set_int(data,'height',1080)
  if canvas==nil then canvas=obs.obs_source_create('color_source_v3',canvas_name,data,nil)
  else obs.obs_source_update(canvas,data) end
- obs.obs_data_release(data)
+ obs.obs_data_release(data);data=nil
  if canvas==nil then return fail_group() end
  local canvas_placed=place(nested,canvas,0,0,1920,1080,true)
- obs.obs_source_release(canvas)
+ obs.obs_source_release(canvas);canvas=nil
  if not canvas_placed then return fail_group() end
  if url~=nil then
   if not browser(nested,selected,url,url_file==true,unpack(box)) then return fail_group() end
  else
-  local capture=obs.obs_get_source_by_name(selected)
+  capture=obs.obs_get_source_by_name(selected)
   if capture==nil then return fail_group() end
   local capture_placed=place(nested,capture,unpack(box))
-  obs.obs_source_release(capture)
+  obs.obs_source_release(capture);capture=nil
   if not capture_placed then return fail_group() end
  end
  data=obs.obs_data_create()
@@ -187,37 +194,52 @@ local function clip(scene,name,selected,mask_path,box,url,internal_prefix,url_fi
  obs.obs_data_set_string(data,'image_path',mask_path)
  obs.obs_data_set_int(data,'opacity',100)
  obs.obs_data_set_bool(data,'stretch',true)
- local filter=obs.obs_source_get_filter_by_name(clip_source,internal_prefix..'Alpha Mask')
+ filter=obs.obs_source_get_filter_by_name(clip_source,internal_prefix..'Alpha Mask')
  if filter==nil then filter=obs.obs_source_create('mask_filter',internal_prefix..'Alpha Mask',data,nil);if filter~=nil then obs.obs_source_filter_add(clip_source,filter) end
  else obs.obs_source_update(filter,data) end
- obs.obs_data_release(data)
+ obs.obs_data_release(data);data=nil
  local ok=filter~=nil
- if filter~=nil then obs.obs_source_release(filter) end
+ if filter~=nil then obs.obs_source_release(filter);filter=nil end
  if ok then ok=place(scene,clip_source,0,0,1920,1080) end
  if not ok then return fail_group() end
  -- Keep the previous contents until the replacement and its mask are ready.
- local items=obs.obs_scene_enum_items(nested)
+ items=obs.obs_scene_enum_items(nested)
  if items~=nil then
   for _,item in ipairs(items) do
    local item_name=obs.obs_source_get_name(obs.obs_sceneitem_get_source(item))
    if item_name~=selected and item_name~=canvas_name then
     if not retain_user_source(scene,obs.obs_sceneitem_get_source(item),retained_sources) then
-     obs.sceneitem_list_release(items)
+     obs.sceneitem_list_release(items);items=nil
      obs.script_log(obs.LOG_WARNING,'Could not retain a user source; previous panel item was preserved.')
      return false
     end
     if pending_removals~=nil then pending_removals[#pending_removals+1]=item else obs.obs_sceneitem_remove(item) end
    end
   end
-  obs.sceneitem_list_release(items)
+  obs.sceneitem_list_release(items);items=nil
  end
  return ok
+ end)
+ if private~=nil then obs.obs_data_release(private) end
+ if data~=nil then obs.obs_data_release(data) end
+ if canvas~=nil then obs.obs_source_release(canvas) end
+ if capture~=nil then obs.obs_source_release(capture) end
+ if filter~=nil then obs.obs_source_release(filter) end
+ if items~=nil then obs.sceneitem_list_release(items) end
+ if not protected then assert(false,result) end
+ return result
 end
 local panel_keys={'game','custom1','custom2','custom3','chat','translation','hand'}
 -- Role names identify panels in OBS; settings JSON keeps the panel keys above.
 local panel_names={'Main','Sub 1','Sub 2','Sub 3','Side 1','Side 2','Side 3'}
-local panel_indexes={}
-for index,name in ipairs(panel_names) do panel_indexes[name]=index end
+local all_panel_keys,all_panel_names={},{}
+for index,key in ipairs(panel_keys) do all_panel_keys[index]=key;all_panel_names[index]=panel_names[index] end
+for column=1,5 do
+ for row=1,3 do
+  all_panel_keys[#all_panel_keys+1]='panel'..column..'_'..row
+  all_panel_names[#all_panel_names+1]='Panel '..column..'-'..row
+ end
+end
 -- Hold original sources while groups are edited; a failed apply must not expose
 -- a mixture of the previous layout and the partially applied next layout.
 local function copy_source_settings(source)
@@ -271,17 +293,19 @@ local function restore_layout(snapshot)
  -- Restore children first so the original group transform is applied last.
  for index=#snapshot.scenes,1,-1 do
   local state=snapshot.scenes[index]
-  local originals={}
+  local originals,present={},{}
   for _,saved in ipairs(state.items) do originals[obs.obs_sceneitem_get_id(saved.item)]=true end
   local items=obs.obs_scene_enum_items(state.scene)
   if items~=nil then
    for _,item in ipairs(items) do
-    if not originals[obs.obs_sceneitem_get_id(item)] then obs.obs_sceneitem_remove(item) end
+    local id=obs.obs_sceneitem_get_id(item)
+    if not originals[id] then obs.obs_sceneitem_remove(item) else present[id]=true end
    end
    obs.sceneitem_list_release(items)
   end
   for _,saved in ipairs(state.items) do
-   local item=saved.item
+   local item=present[obs.obs_sceneitem_get_id(saved.item)] and saved.item or obs.obs_scene_add(state.scene,saved.source)
+   if item==nil then assert(false,'Could not restore an original scene item.') end
    if item~=nil then
     obs.obs_sceneitem_set_info2(item,saved.info);obs.obs_sceneitem_set_crop(item,saved.crop)
     obs.obs_sceneitem_set_visible(item,saved.visible);obs.obs_sceneitem_set_locked(item,saved.locked)
@@ -310,14 +334,19 @@ local function restore_layout(snapshot)
  end
 end
 local function release_layout(snapshot)
+ local failed=false
+ local function release(method,value)
+  if value~=nil and not pcall(method,value) then failed=true end
+ end
  for _,state in ipairs(snapshot.scenes) do
-  for _,saved in ipairs(state.items) do obs.obs_sceneitem_release(saved.item) end
+  for _,saved in ipairs(state.items) do release(obs.obs_sceneitem_release,saved.item) end
  end
  for _,saved in pairs(snapshot.sources) do
-  if saved.settings~=nil then obs.obs_data_release(saved.settings) end
-  for _,filter in ipairs(saved.filters) do obs.obs_data_release(filter.settings);obs.obs_source_release(filter.source) end
-  obs.obs_source_release(saved.source)
+  release(obs.obs_data_release,saved.settings)
+  for _,filter in ipairs(saved.filters) do release(obs.obs_data_release,filter.settings);release(obs.obs_source_release,filter.source) end
+  release(obs.obs_source_release,saved.source)
  end
+ if failed then assert(false,'Layout snapshot release failed.') end
 end
 -- ALO names identify generated items; original inputs are reused without changing their settings.
 local function apply_generic(settings)
@@ -331,13 +360,35 @@ local function apply_generic(settings)
  -- Exported boxes already include Side left/right and Main/Sub row placement.
  -- Apply those coordinates directly; legacy per-panel placement is not used.
  local layout=obs.obs_data_get_obj(settings,'layout')
- local enabled=obs.obs_data_get_obj(settings,'panelEnabled')
+ local enabled=obs.obs_data_get_obj(settings,'panelRenderEnabled')
+ if enabled==nil then enabled=obs.obs_data_get_obj(settings,'panelEnabled') end
  if content==nil or layout==nil then
   if content~=nil then obs.obs_data_release(content) end
   if layout~=nil then obs.obs_data_release(layout) end
   if enabled~=nil then obs.obs_data_release(enabled) end
-  return fail('Export a fresh settings ZIP with all seven panel contents and positions.')
+  return fail('Export a fresh settings ZIP with all active panel contents and positions.')
  end
+ local layout_mode=obs.obs_data_get_string(settings,'layoutMode')
+ if layout_mode=='' then layout_mode='bento' end
+ if layout_mode~='bento' and layout_mode~='overlap' then
+  obs.obs_data_release(content);obs.obs_data_release(layout)
+  if enabled~=nil then obs.obs_data_release(enabled) end
+  return fail('Invalid layout preset.')
+ end
+ local function finite(value) return value==value and value~=math.huge and value~=-math.huge end
+ local panel_keys={'game','custom1','custom2','custom3','chat','translation','hand'}
+ local panel_names={'Main','Sub 1','Sub 2','Sub 3','Side 1','Side 2','Side 3'}
+ if layout_mode=='overlap' then
+  panel_keys={'game'};panel_names={'Main'}
+  for column=1,5 do
+   for row=1,3 do
+    panel_keys[#panel_keys+1]='panel'..column..'_'..row
+    panel_names[#panel_names+1]='Panel '..column..'-'..row
+   end
+  end
+ end
+ local panel_indexes={}
+ for index,name in ipairs(panel_names) do panel_indexes[name]=index end
  local panels,used={},{}
  local error_message=nil
  for index,key in ipairs(panel_keys) do
@@ -357,7 +408,8 @@ local function apply_generic(settings)
   local h=obs.obs_data_get_double(position,'height')
   obs.obs_data_release(part);obs.obs_data_release(position)
   if not ({none=true,source=true,web=true,media=true})[kind] then error_message='Invalid '..panel_names[index]..' content.';break end
-  if x~=math.floor(x) or y~=math.floor(y) or w~=math.floor(w) or h~=math.floor(h) or x<0 or y<0 or w<=0 or h<=0 or x+w>1920 or y+h>1080 then error_message='Invalid '..panel_names[index]..' position.';break end
+  if not finite(x) or not finite(y) or not finite(w) or not finite(h) or x<0 or y<0 or w<=0 or h<=0 or x+w>1920+0.000001 or y+h>1080+0.000001 then error_message='Invalid '..panel_names[index]..' position.';break end
+  if layout_mode=='overlap' and active and key~='game' and h<128-0.000001 then error_message='Panel height must be at least 128 px: '..panel_names[index];break end
   local selected=kind=='source' and obs.obs_data_get_string(cfg,'panelSource_'..key) or ''
   if active and kind=='source' and selected~='' then
    if used[selected] then error_message='Select a different OBS source for each panel: '..used[selected]..' and '..panel_names[index];break end
@@ -385,6 +437,23 @@ local function apply_generic(settings)
  obs.obs_data_release(content);obs.obs_data_release(layout)
  if enabled~=nil then obs.obs_data_release(enabled) end
  if error_message~=nil then return fail(error_message) end
+ if layout_mode=='overlap' then
+  local main=panels.game.box
+  if main[1]~=0 or main[2]~=0 or main[3]~=1920 or main[4]~=1080 then return fail('Overlap Main must cover the full 1920 x 1080 canvas.') end
+ end
+ -- Only Overlap Main may intersect other panels.
+ if layout_mode=='bento' or layout_mode=='overlap' then
+ for first=1,#panel_keys do
+  local a=panels[panel_keys[first]]
+  for second=first+1,#panel_keys do
+   local b=panels[panel_keys[second]]
+   if a.active and b.active and not (layout_mode=='overlap' and (a.name=='Main' or b.name=='Main')) then
+    local x,y=a.box,b.box
+    if x[1]<y[1]+y[3]-0.000001 and y[1]<x[1]+x[3]-0.000001 and x[2]<y[2]+y[4]-0.000001 and y[2]<x[2]+x[4]-0.000001 then return fail('Panels overlap: '..a.name..' and '..b.name..'.') end
+   end
+  end
+ end
+ end
  for _,name in ipairs({'overlay.html','background.html','frame.html','wallpaper.html'}) do
   local file=io.open(script_path()..name,'r')
   if file==nil then return fail('Keep '..name..' beside OBS-script.lua.') end
@@ -410,10 +479,11 @@ local function apply_generic(settings)
   if renderer==nil then return fail('Keep panel-media.js or internal/panel-media.js in the template folder.') end
   renderer:close()
  end
+ -- Private probes cannot leave queued mixer events after their immediate release.
  local needs_canvas=false
  local probe_data=obs.obs_data_create()
  obs.obs_data_set_int(probe_data,'width',1920);obs.obs_data_set_int(probe_data,'height',1080)
- local browser_probe=obs.obs_source_create('browser_source','ALO · Browser Probe',probe_data,nil)
+ local browser_probe=obs.obs_source_create_private('browser_source','ALO · Browser Probe',probe_data)
  obs.obs_data_release(probe_data)
  if browser_probe==nil then return fail('OBS Browser Source is unavailable.') end
  obs.obs_source_release(browser_probe)
@@ -424,7 +494,7 @@ local function apply_generic(settings)
    local filter_data=obs.obs_data_create()
    obs.obs_data_set_string(filter_data,'type','mask_alpha_filter.effect')
    obs.obs_data_set_string(filter_data,'image_path',script_path()..'assets/'..key..'-alpha-mask.png')
-   local filter_probe=obs.obs_source_create('mask_filter','ALO · Mask Probe',filter_data,nil)
+   local filter_probe=obs.obs_source_create_private('mask_filter','ALO · Mask Probe',filter_data)
    obs.obs_data_release(filter_data)
    if filter_probe==nil then return fail('OBS mask filter is unavailable for '..panel.name..'.') end
    obs.obs_source_release(filter_probe)
@@ -433,7 +503,7 @@ local function apply_generic(settings)
  if needs_canvas then
   local canvas_data=obs.obs_data_create()
   obs.obs_data_set_int(canvas_data,'width',1920);obs.obs_data_set_int(canvas_data,'height',1080)
-  local canvas_probe=obs.obs_source_create('color_source_v3','ALO · Canvas Probe',canvas_data,nil)
+  local canvas_probe=obs.obs_source_create_private('color_source_v3','ALO · Canvas Probe',canvas_data)
   obs.obs_data_release(canvas_data)
   if canvas_probe==nil then return fail('OBS color source is unavailable.') end
   obs.obs_source_release(canvas_probe)
@@ -461,8 +531,8 @@ local function apply_generic(settings)
   obs.obs_data_release(data)
   return matches
  end
- local function known_group(index)
-  local group=obs.obs_scene_get_group(scene,'ALO · '..panel_names[index]..' Group')
+ local function known_group(label)
+  local group=obs.obs_scene_get_group(scene,'ALO · '..label..' Group')
   local nested=group~=nil and obs.obs_sceneitem_group_get_scene(group) or nil
   local canvas=nested~=nil and obs.obs_scene_find_source(nested,'ALO · Clip Canvas') or nil
   local canvas_source=canvas~=nil and obs.obs_sceneitem_get_source(canvas) or nil
@@ -484,28 +554,28 @@ local function apply_generic(settings)
    local web_index=panel_indexes[name:match('^ALO · (.+) Web$') or '']
    local media_index=panel_indexes[name:match('^ALO · (.+) Media$') or '']
    local expected_type
-   if group_index then expected_type=obs.obs_source_is_group(occupied) and known_group(group_index)
+   if group_index then expected_type=obs.obs_source_is_group(occupied) and known_group(panel_names[group_index])
    elseif name=='ALO · Clip Canvas' then
     expected_type=obs.obs_source_get_id(occupied)=='color_source_v3'
     local in_existing_group=false
-    for index=1,7 do if known_group(index) then in_existing_group=true;break end end
+    for _,label in ipairs(all_panel_names) do if known_group(label) then in_existing_group=true;break end end
     expected_type=expected_type and in_existing_group
    elseif local_files[name] then
     expected_type=local_file_matches(occupied,local_files[name])
    elseif web_index then
     local group=obs.obs_scene_get_group(scene,'ALO · '..panel_names[web_index]..' Group')
     local nested=group~=nil and obs.obs_sceneitem_group_get_scene(group) or nil
-    expected_type=obs.obs_source_get_id(occupied)=='browser_source' and known_group(web_index) and nested~=nil and obs.obs_scene_find_source(nested,name)~=nil
+    expected_type=obs.obs_source_get_id(occupied)=='browser_source' and known_group(panel_names[web_index]) and nested~=nil and obs.obs_scene_find_source(nested,name)~=nil
    elseif media_index then
     local key=panel_keys[media_index]
     local group=obs.obs_scene_get_group(scene,'ALO · '..panel_names[media_index]..' Group')
     local nested=group~=nil and obs.obs_sceneitem_group_get_scene(group) or nil
-    expected_type=key~=nil and local_file_matches(occupied,'panel-media-'..key..'.html') and known_group(media_index) and nested~=nil and obs.obs_scene_find_source(nested,name)~=nil
+    expected_type=key~=nil and local_file_matches(occupied,'panel-media-'..key..'.html') and known_group(panel_names[media_index]) and nested~=nil and obs.obs_scene_find_source(nested,name)~=nil
    else expected_type=false end
    local placed=obs.obs_scene_find_source(scene,name) or obs.obs_scene_get_group(scene,name)
    if placed==nil then
-    for index=1,7 do
-     local group=obs.obs_scene_get_group(scene,'ALO · '..panel_names[index]..' Group')
+    for _,label in ipairs(all_panel_names) do
+     local group=obs.obs_scene_get_group(scene,'ALO · '..label..' Group')
      local nested=group~=nil and obs.obs_sceneitem_group_get_scene(group) or nil
      if nested~=nil then placed=obs.obs_scene_find_source(nested,name) end
      if placed~=nil then break end
@@ -529,6 +599,7 @@ local function apply_generic(settings)
  local unused_groups={}
  local retained_sources={}
  local pending_removals={}
+ local applied,apply_error=xpcall(function()
  for _,key in ipairs(panel_keys) do
   local panel=panels[key]
   local name='ALO · '..panel.name
@@ -536,7 +607,11 @@ local function apply_generic(settings)
   local selected=panel.kind=='source' and panel.source or panel.kind=='web' and panel.url~='' and name..' Web' or panel.kind=='media' and panel.url~='' and name..' Media' or ''
   local url=panel.kind=='web' and panel.url or panel.kind=='media' and script_path()..'panel-media-'..key..'.html' or nil
   if not panel.active then selected='' end
-  if selected=='' then unused_groups[#unused_groups+1]=group
+  if not panel.active and layout_mode=='overlap' then
+   -- Count changes hide dormant groups; their original inputs stay connected.
+   local item=obs.obs_scene_get_group(scene,group)
+   if item~=nil then obs.obs_sceneitem_set_visible(item,false) end
+  elseif selected=='' then unused_groups[#unused_groups+1]=group
   else
    if not clip(scene,group,selected,script_path()..'assets/'..key..'-alpha-mask.png',panel.box,url,'ALO · ',panel.kind=='media',retained_sources,pending_removals) then
     obs.script_log(obs.LOG_WARNING,'Could not mask '..panel.name..'. Check Browser Source and mask files.')
@@ -551,6 +626,16 @@ local function apply_generic(settings)
    and browser(scene,'ALO · Panel Stroke',script_path()..'frame.html',true,0,0,1920,1080)
   if not result then obs.script_log(obs.LOG_WARNING,'Could not create a required template browser source.') end
  end
+ -- Overlap fills and shadows sit above Main and below the auxiliary content.
+ if result and layout_mode=='overlap' then
+  local function raise(name)
+   local item=obs.obs_scene_find_source(scene,name)
+   if item~=nil then obs.obs_sceneitem_set_order(item,obs.OBS_ORDER_MOVE_TOP) end
+  end
+  raise('ALO · Main Group');raise('ALO · Panel Fill')
+  for index=2,#panel_keys do raise('ALO · '..panels[panel_keys[index]].name..' Group') end
+  raise('ALO · Overlay');raise('ALO · Panel Stroke')
+ end
  if result then
   -- Commit removals only once all panel and layer updates have succeeded.
   for _,item in ipairs(pending_removals) do obs.obs_sceneitem_remove(item) end
@@ -563,6 +648,13 @@ local function apply_generic(settings)
   -- Remove only temporary items added by this application, never manual root items.
   for name,item in pairs(retained_sources) do
    if current_sources[name] then obs.obs_sceneitem_remove(item) end
+  end
+  -- Keep inactive preset groups and original sources for the user's next switch.
+  for index,key in ipairs(all_panel_keys) do
+   if panels[key]==nil then
+    local item=obs.obs_scene_get_group(scene,'ALO · '..all_panel_names[index]..' Group')
+    if item~=nil then obs.obs_sceneitem_set_visible(item,false) end
+   end
   end
   for _,name in ipairs(unused_groups) do preserve_and_remove_old_group(scene,name,current_sources) end
   for index=1,7 do preserve_and_remove_old_group(scene,'OBS Template · Panel '..index..' Group',current_sources) end
@@ -583,11 +675,19 @@ local function apply_generic(settings)
   connect_panel_signal()
   obs.obs_frontend_set_current_scene(source)
   obs.script_log(obs.LOG_INFO,'ALO4OBS applied: seven independent panels. No links are logged.')
- else
-  restore_layout(previous_layout)
-  obs.script_log(obs.LOG_WARNING,'Apply failed; the previous scene layout was restored.')
  end
- release_layout(previous_layout)
+ end,debug.traceback)
+ if not applied then
+  result=false
+  obs.script_log(obs.LOG_WARNING,'Apply raised a Lua error; the previous layout will be restored.')
+ end
+ if not result then
+  local restored,restore_error=pcall(restore_layout,previous_layout)
+  if restored then obs.script_log(obs.LOG_WARNING,'Apply failed; the previous scene layout was restored.')
+  else obs.script_log(obs.LOG_WARNING,'Could not restore the previous scene layout; recover it from the last working scene collection.') end
+ end
+ local released,release_error=pcall(release_layout,previous_layout)
+ if not released then obs.script_log(obs.LOG_WARNING,'Could not release the layout snapshot.') end
  if created then obs.obs_scene_release(scene) else obs.obs_source_release(source) end
  obs.obs_data_release(settings)
  return result
@@ -607,17 +707,32 @@ local function apply(props,property)
   if old_file then old_file:close() end
   local output=io.open(config_path,'wb')
   if not output then obs.obs_data_release(settings);obs.script_log(obs.LOG_WARNING,'Cannot write config.js in the installation folder.');return false end
-  local canonical=obs.obs_data_get_json(settings)
-  local written=output:write('window.OVERLAY_CONFIG = '..canonical..';\n')
-  local closed=output:close()
-  if not written or not closed then
-   if previous then local restore=io.open(config_path,'wb');if restore then restore:write(previous);restore:close() end else os.remove(config_path) end
+  local function restore_config()
+   local ok,restored=pcall(function()
+    if previous==nil then return os.remove(config_path) end
+    local restore=io.open(config_path,'wb')
+    if restore==nil then return false end
+    local wrote,bytes=pcall(restore.write,restore,previous)
+    local closed,done=pcall(restore.close,restore)
+    return wrote and bytes and closed and done
+   end)
+   if not ok or not restored then obs.script_log(obs.LOG_WARNING,'Could not restore previous config.js; recover it from the last working ZIP.') end
+  end
+  local write_ok,written=pcall(function()
+   return output:write('window.OVERLAY_CONFIG = '..obs.obs_data_get_json(settings)..';\n')
+  end)
+  local close_ok,closed=pcall(output.close,output)
+  if not write_ok or not written or not close_ok or not closed then
+   restore_config()
    obs.obs_data_release(settings);obs.script_log(obs.LOG_WARNING,'Cannot save browser configuration.');return false
   end
-  local result=apply_generic(settings)
-  if not result then
-   if previous then local restore=io.open(config_path,'wb');if restore then restore:write(previous);restore:close() end else os.remove(config_path) end
+  local applied,result=pcall(apply_generic,settings)
+  if not applied then
+   obs.obs_data_release(settings)
+   obs.script_log(obs.LOG_WARNING,'Apply raised an error; browser configuration will be restored.')
+   result=false
   end
+  if not result then restore_config() end
   return result
  end
  -- Copy visibility before checking live dependencies. Release the OBS data
@@ -845,12 +960,21 @@ function script_properties()
  obs.obs_properties_add_bool(p,'english','English UI (reload after changing)')
  local file=io.open(script_path()..'obs-settings.json','r')
  local generic=false
+ local layout_mode='bento'
  if file~=nil then
   local saved=obs.obs_data_create_from_json(file:read('*a'))
   file:close()
-  if saved~=nil then generic=obs.obs_data_get_int(saved,'layoutVersion')==4;obs.obs_data_release(saved) end
+  if saved~=nil then generic=obs.obs_data_get_int(saved,'layoutVersion')==4;layout_mode=obs.obs_data_get_string(saved,'layoutMode');obs.obs_data_release(saved) end
  end
  local labels={game=en and 'Existing game source' or '기존 게임 소스',hand=en and 'Existing camera source' or '기존 캠 소스',custom1Source=en and 'Custom 1 OBS source' or '커스텀 1 OBS 소스',custom2Source=en and 'Custom 2 OBS source' or '커스텀 2 OBS 소스',custom3Source=en and 'Custom 3 OBS source' or '커스텀 3 OBS 소스'}
+ local panel_keys={'game','custom1','custom2','custom3','chat','translation','hand'}
+ local panel_names={'Main','Sub 1','Sub 2','Sub 3','Side 1','Side 2','Side 3'}
+ if generic and layout_mode=='overlap' then
+  panel_keys={'game'};panel_names={'Main'}
+  for column=1,5 do for row=1,3 do
+   panel_keys[#panel_keys+1]='panel'..column..'_'..row;panel_names[#panel_names+1]='Panel '..column..'-'..row
+  end end
+ end
  local keys=generic and panel_keys or {'game','hand','custom1Source','custom2Source','custom3Source'}
  for index,raw_key in ipairs(keys) do
   local key=generic and 'panelSource_'..raw_key or raw_key

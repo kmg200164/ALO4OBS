@@ -3,17 +3,33 @@
  if(!canvas)return;
  const frame=document.body.dataset.mode==='frame';
  const transparentPixel='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
- const tiles=Object.fromEntries(Object.keys(OverlayEvents.resolveLayout()).map(key=>{const tile=document.createElement('div');tile.className='tile';tile.dataset.region=key;canvas.append(tile);if(frame)return [key,{tile}];const surface=document.createElement('div'),image=document.createElement('img'),glass=document.createElement('img');glass.className='backdrop';surface.className='surface';image.className='panel-image';tile.append(glass,surface,image);return [key,{tile,surface,image,glass}];}));
+ const tiles=Object.fromEntries((OverlayEvents.allPanelKeys||Object.keys(OverlayEvents.resolveLayout())).map(key=>{const tile=document.createElement('div');tile.className='tile';tile.dataset.region=key;canvas.append(tile);if(frame)return [key,{tile}];const surface=document.createElement('div'),image=document.createElement('img'),glass=document.createElement('img');glass.className='backdrop';surface.className='surface';image.className='panel-image';tile.append(glass,surface,image);return [key,{tile,surface,image,glass}];}));
  function safeImage(value){return typeof value==='string'&&(/^(https?:\/\/|blob:|data:image\/(png|jpeg|webp|gif);base64,)/i.test(value)||/^assets\/(?!.*\.\.)[\w./-]+$/i.test(value))?value:'';}
  function applyConfig(config=document.body.classList?.contains('preview-mode')?window.OVERLAY_PUBLIC_CONFIG:window.OVERLAY_CONFIG){
-  const layout=config.layoutVersion>=3?OverlayEvents.validateLayout(config.layout):OverlayEvents.resolveLayout(config.layoutVersion===2?config.layout:undefined),backdrop=safeImage(config.backgroundImage),style=config.globalStyle||{};
+  const layout=OverlayEvents.resolveConfigLayout?OverlayEvents.resolveConfigLayout(config):config.layoutVersion>=3?OverlayEvents.validateLayout(config.layout):OverlayEvents.resolveLayout(config.layoutVersion===2?config.layout:undefined),backdrop=safeImage(config.backgroundImage),style=config.globalStyle||{};
   const hex=value=>/^#[0-9a-f]{6}$/i.test(value||'');
   const pct=value=>Number.isFinite(value)?Math.max(0,Math.min(100,value))/100:1;
  const gradient=part=>window.KMGGradient.css(part);
  const opaqueStroke=part=>{if(!part||typeof part!=='object')return part;const result={...part,opacity:100};if(Object.prototype.hasOwnProperty.call(part,'borderOpacity'))result.borderOpacity=100;const source=part.gradient&&typeof part.gradient==='object'?part.gradient:part;if(Array.isArray(source.stops)){const gradient={...source,stops:source.stops.map(stop=>({...stop,opacity:100}))};if(source===part)Object.assign(result,gradient);else result.gradient=gradient;}return result;};
+  const shape=window.KMGPanelShape;
+  let shadowLayer;
+  if(shape&&!frame){
+   shadowLayer=canvas.querySelector('.panel-shadow-layer');
+   if(!shadowLayer){shadowLayer=document.createElement('div');shadowLayer.className='panel-shadow-layer';Object.assign(shadowLayer.style,{position:'absolute',inset:'0',pointerEvents:'none',zIndex:'0'});canvas.prepend(shadowLayer);}
+   shadowLayer.replaceChildren();
+  }
+  const active=new Set(OverlayEvents.activePanelKeys?.(config)||Object.keys(layout)),visible=OverlayEvents.effectivePanelEnabled(config);
   for(const [key,{tile,surface,image,glass}] of Object.entries(tiles)){
-   const box=layout[key],setting=config.regionBackgrounds?.[key]||{},src=safeImage(setting.image),gradientBackdrop=style.background?.mode==='gradient',hasBackdrop=!!backdrop||gradientBackdrop,override=config.regionStyleOverrides?.[key]===true;
-   tile.style.display=config.panelEnabled?.[key]===false?'none':'block';
+   if(!active.has(key)||!layout[key]){tile.style.display='none';continue;}
+   const box=layout[key],setting=config.regionBackgrounds?.[key]||{},src=setting.imageMode!==undefined&&(setting.imageMode==='none'||config.regionStyleOverrides?.[key]!==true)?'':safeImage(setting.image),gradientBackdrop=style.background?.mode==='gradient',hasBackdrop=!!backdrop||gradientBackdrop,override=config.regionStyleOverrides?.[key]===true;
+   tile.style.display=visible[key]===false||(!frame&&config.layoutMode==='overlap'&&key==='game')?'none':'block';
+   if(shape){
+    const geometry=shape.styleFor(config,key);
+    Object.assign(tile.style,{left:box.x+'px',top:box.y+'px',width:box.width+'px',height:box.height+'px'});
+    if(frame){tile.className='tile shape-frame';Object.assign(tile.style,{border:'0',outline:'0',overflow:'visible',borderRadius:'0'});tile.replaceChildren();const stroke=shape.strokeNode(box.width,box.height,geometry,document);if(stroke)tile.append(stroke);continue;}
+    shape.apply(tile,box.width,box.height,geometry);tile.style.zIndex='1';
+    if(visible[key]!==false){const shadow=shape.shadowNode(box.width,box.height,geometry,document);if(shadow){shadow.style.left=(box.x+parseFloat(shadow.style.left))+'px';shadow.style.top=(box.y+parseFloat(shadow.style.top))+'px';shadowLayer.append(shadow);}}
+   }
    if(frame){
     const local=override?setting.stroke:undefined,sourceStroke=local||(!override?style.stroke:undefined),stroke=opaqueStroke(sourceStroke),mode=stroke?.mode,width=Number.isFinite(stroke?.width)?Math.max(0,Math.min(32,stroke.width)):4;
     const gradientVisible=mode==='gradient'&&width>0;

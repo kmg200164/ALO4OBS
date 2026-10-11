@@ -63,6 +63,7 @@
   document.addEventListener('click',event=>{if(!presetMenu.contains(event.target))presetMenu.open=false;});
   const settingsLink=header.querySelector('#settings-link');
   const guideLink=header.querySelector('#guide-link');
+  header.querySelector('#header-left-links').append(guideLink);
   const currentPath=location.pathname.replace(/\/+$/,'')||'/';
   const guidePath=/\/guide(?:-(?:en|ja))?\.html$/i.test(currentPath);
   settingsLink.hidden=!guidePath;
@@ -85,4 +86,23 @@
   // Fail-safe: never leave the page hidden if i18n.js never runs (its translate()
   // normally clears this once the shown language is set).
   setTimeout(()=>document.documentElement.setAttribute('data-i18n-ready',''),1500);
+})();
+
+// Read the current localized label on entry so preset and language changes stay in sync.
+(() => {
+ const tip=document.createElement('div');tip.id='icon-tooltip';tip.className='icon-tooltip';tip.setAttribute('role','tooltip');tip.hidden=true;document.body.append(tip);
+ let owner=null,savedTitle=null;
+ const hide=()=>{if(owner&&savedTitle!==null)owner.setAttribute('title',savedTitle);owner=null;savedTitle=null;tip.hidden=true;};
+ const show=event=>{
+  const button=event.target.closest?.('.app-header .icon-button,.app-header #ui-language,.editor-workspace .section-bar .action-button,.kmg-gradient-action-button,.mini-action[data-upload-trigger]');
+  if(!button||button.disabled||button===owner)return;
+  if(button.matches('.action-button')&&getComputedStyle(button.querySelector('span')).display!=='none')return;
+  hide();owner=button;savedTitle=button.getAttribute('title');
+  tip.textContent=button.id==='change-layout'?button.textContent.trim():button.getAttribute('aria-label')||button.getAttribute('title')||button.textContent.trim();
+  if(!tip.textContent){hide();return;}button.removeAttribute('title');tip.hidden=false;
+  const r=button.getBoundingClientRect(),t=tip.getBoundingClientRect();tip.style.left=Math.max(8,Math.min(innerWidth-t.width-8,r.left+(r.width-t.width)/2))+'px';tip.style.top=(r.bottom+t.height+16>innerHeight?Math.max(8,r.top-t.height-8):r.bottom+8)+'px';
+ };
+ document.addEventListener('pointerover',show);document.addEventListener('focusin',show);
+ document.addEventListener('pointerout',event=>{if(owner&&owner.contains(event.target)&&!owner.contains(event.relatedTarget))hide();});
+ document.addEventListener('focusout',hide);document.addEventListener('pointerdown',hide);document.addEventListener('keydown',event=>{if(event.key==='Escape')hide();});window.addEventListener('resize',hide);document.addEventListener('scroll',hide,true);
 })();

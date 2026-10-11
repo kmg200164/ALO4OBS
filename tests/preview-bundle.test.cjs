@@ -15,7 +15,7 @@ function harness(options={}){
  const data={backgroundImage:'assets/background-whole.png',layout:Object.fromEntries(keys.map(key=>[key,{}]))};
  if(options.restored)uploads.clear();
  const bundle={},status={};
- const context={fetch:options.fetch,uploads,status,keys,Uint8Array,Blob,URL:{createObjectURL:()=> 'blob:test',revokeObjectURL(){}},setTimeout(){},
+ const context={OverlayEvents:require('../template/events.js'),showStatus:(message,error)=>{status.textContent=message;status.error=error;},fetch:options.fetch,uploads,status,keys,Uint8Array,Blob,URL:{createObjectURL:()=> 'blob:test',revokeObjectURL(){}},setTimeout(){},
   byId:id=>id==='bundle'?bundle:null,current:()=>structuredClone(data),
   alphaMask:async(_,name)=>{await maskGate;return {name,bytes:new Uint8Array([1])};},
   OverlayPack:{settingsEntries:input=>[{name:'obs-settings.json',bytes:new TextEncoder().encode(JSON.stringify(input))}],zip:entries=>{captured=entries;return new Uint8Array([0]);}},
@@ -51,6 +51,7 @@ test('unreadable restored media prevents an incomplete ZIP download',async()=>{
  h.releaseMasks();await h.bundle.onclick();
  assert.equal(h.captured,undefined);
  assert.match(h.status.textContent,/Re-upload local files/);
+ assert.equal(h.status.error,true);
 });
 
 test('native save writes ZIP and closes without triggering a download',async()=>{

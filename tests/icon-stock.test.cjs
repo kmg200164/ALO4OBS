@@ -6,6 +6,12 @@ const vm=require('node:vm');
 const crypto=require('node:crypto');
 // Glyph SHA-256 values from the integrity-verified official lucide-static 0.468.0 tarball.
 const stockHashes={
+  "rotate-cw": "b4f31acff76780c596365bab1ee89bf110d8c173e674216437e3df1a71467ddc",
+  "plus": "b5d12bc3003fba43ad285f58ea6ce2f4848663f640a225e4fc8806daddec24b4",
+  "folder-open": "246593aa16c23a474202507af81083866ffd565437f2455c69897fb8e1b4a1a1",
+
+  "triangle-alert": "da211fdedcb9ae15d2b50f9e2ac5bd4ea8eddb7383112714ce58ce0b5294b9ec",
+  "arrow-left-right": "4b1646f25bca2a557e83347e39c1e29ab5422f8f8f98ef41a0659ac1de67784b",
   "menu": "37e4a3677b750d39d95c49cdb0fa27a2efb8b015d7761d0ec2b5d055fdb4dc7e",
   "languages": "240f444c8044ba544a5a443367dd5267a81095ec9c2a209ecf536738720d026b",
   "palette": "0618babf2628cebef6f8eaeec70452d29f9c8905aa59327148475e419d9b0c3f",
@@ -27,8 +33,12 @@ test('every UI icon retains its pinned Lucide stock glyph and common stroke with
  let header='';
  vm.runInNewContext(headerSource.split(/\r?\n\r?\n/)[0],{document:{currentScript:{insertAdjacentHTML(_where,markup){header=markup;}}}});
  const settings=fs.readFileSync(path.join(__dirname,'../template/settings.html'),'utf8');
+ const gradientSource=fs.readFileSync(path.join(__dirname,'../template/gradient.js'),'utf8');
+ const gradientIcons=JSON.parse(gradientSource.match(/const actionIcons=(\{[\s\S]*?\});/)[1]);
+ const previewSource=fs.readFileSync(path.join(__dirname,'../template/preview.js'),'utf8');
+ const fileIcon=JSON.parse(previewSource.match(/const fileIcon=("[^\r\n]*");/)[1]);
  const found=new Set();let count=0;
- for(const [markup,size] of [[header,32],[settings,24]])for(const icon of markup.matchAll(/<svg\b([^>]*)>([\s\S]*?)<\/svg>/g)){
+ for(const [markup,size] of [[header,32],[settings,24],[Object.values(gradientIcons).join(''),24],[fileIcon,24]])for(const icon of markup.matchAll(/<svg\b([^>]*)>([\s\S]*?)<\/svg>/g)){
   const name=icon[1].match(/data-lucide="([^"]+)"/)?.[1];
   assert.ok(stockHashes[name],`untracked UI icon ${name}`);
   const glyph=icon[2].replace(/>\s+</g,'><').trim();
@@ -38,7 +48,7 @@ test('every UI icon retains its pinned Lucide stock glyph and common stroke with
   assert.match(icon[1],/aria-hidden="true"/);assert.match(icon[1],/focusable="false"/);
   found.add(name);count++;
  }
- assert.equal(count,16);assert.deepEqual([...found].sort(),Object.keys(stockHashes).sort());
+ assert.equal(count,22);assert.deepEqual([...found].sort(),Object.keys(stockHashes).filter(name=>name!=='play').sort());
  assert.match(header,/data-lucide="sun"[^>]*class|class="[^"]*theme-icon-sun/);
  assert.match(header,/class="[^"]*theme-icon-moon/);
  assert.doesNotMatch(headerSource,/createElementNS/);

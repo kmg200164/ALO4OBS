@@ -32,7 +32,7 @@ test('ZIP export after reopening uses restored bytes and preserves its snapshot 
   const start=preview.indexOf("  byId('bundle').onclick=async()=>{"),end=preview.indexOf("  frame.addEventListener('load'",start);
   let entries;const bundle={},status={},keys=['game','custom1','custom2','custom3','chat','translation','hand'];
   const data={...saved,layout:Object.fromEntries(keys.map(key=>[key,{}]))};
-  const context={uploads:restored.entries,keys,status,current:()=>structuredClone(data),byId:()=>bundle,window:{OBS_EXPORT_RUNTIME:{}},
+  const context={OverlayEvents:require('../template/events.js'),showStatus:(message)=>{status.textContent=message;},uploads:restored.entries,keys,status,current:()=>structuredClone(data),byId:()=>bundle,window:{OBS_EXPORT_RUNTIME:{}},
     alphaMask:async(_,name)=>({name,bytes:new Uint8Array([0])}),OverlayPack:{settingsEntries:()=>[],zip:input=>{entries=input;return new Uint8Array([0]);}},
     Uint8Array,Blob,URL:{createObjectURL:()=> 'blob:zip',revokeObjectURL(){}},document:{createElement:()=>({click(){}})},setTimeout(){}};
   vm.runInNewContext(preview.slice(start,end),context);const exporting=bundle.onclick();restored.entries.clear();await exporting;
@@ -59,7 +59,7 @@ test('missing stored bytes are reported so the editor cannot silently overwrite 
   const saved=JSON.parse(f.local.get('obs-overlay-config'));f.records.delete(saved._localUploads[0].id);
   const restored=await controller(f).restore(saved);assert.deepEqual(restored.missing,['whole']);
   assert.equal(f.local.get('obs-overlay-config'),JSON.stringify(saved));
-  const preview=fs.readFileSync(require.resolve('../template/preview.js'),'utf8');assert.match(preview,/draftReady&&!missingUploads\.size/);
+  const preview=fs.readFileSync(require.resolve('../template/preview.js'),'utf8');assert.match(preview,/draftReady&&!migrationBackupFailed&&!missingUploads\.size/);
 });
 test('new exported source takes precedence over a durable browser draft without applying its upload manifest',async()=>{
   const f=fixture(),api=controller(f);await api.save(draft(),files(),'old source');
@@ -117,7 +117,7 @@ test('empty selected upload is rejected before reading or replacing a valid file
 test('malformed draft recovery enables export and reset without overwriting the stored draft',()=>{
   const preview=fs.readFileSync(require.resolve('../template/preview.js'),'utf8'),start=preview.indexOf('  function recoverDraft('),end=preview.indexOf('  void restoreDraft()',start);
   const bundle={disabled:true},reset={disabled:true},form={inert:true},oldFile={path:'bad'},uploads=new Map([['whole',oldFile]]),missingUploads=new Set(['whole']);let writes=0,status;
-  const context={config:{invalid:true},selected:'game',defaults:{layout:{game:{}}},normalize:value=>structuredClone(value),uploads,missingUploads,draftReady:false,form,
+  const context={document:{querySelectorAll:()=>[]},config:{invalid:true},selected:'game',defaults:{layout:{game:{}}},normalize:value=>structuredClone(value),uploads,missingUploads,draftReady:false,form,
     byId:id=>id==='bundle'?bundle:reset,renderGlobal(){},renderPlacement(){},renderEditor(){},drawHits(){},send(){},frame:{},liveConfig:value=>value,
     showStatus:(message,error)=>{status={message,error};},uploadStorage:{save(){writes++;}}};
   vm.runInNewContext(preview.slice(start,end),context);context.recoverDraft(new Error('invalid sizing'));
@@ -125,11 +125,14 @@ test('malformed draft recovery enables export and reset without overwriting the 
 });
 test('reset after failed boot always enables persistence and export',()=>{
   const preview=fs.readFileSync(require.resolve('../template/preview.js'),'utf8'),start=preview.indexOf('  function reset(){'),end=preview.indexOf("  form.addEventListener('input'",start);
-  const bundle={disabled:true},button={disabled:true};let resets=0,applied;
-  const context={draftReady:false,form:{inert:true},byId:id=>id==='bundle'?bundle:button,uploadStorage:{reset(){resets++;}},uploadRequests:new Map(),missingUploads:new Set(['whole']),storageWarning:'failed',uploads:new Map(),cameraActive:false,cameraController:null,
-    defaults:{},normalize:value=>value,selected:null,renderGlobal(){},renderPlacement(){},renderEditor(){},apply:message=>{applied=message;}};
+  const label={textContent:""},bundle={disabled:true},button={disabled:true,querySelector(){return label;}};let resets=0,applied;
+  const OverlayEvents=require('../template/events.js'),defaults={layoutVersion:4,layoutMode:'bento'},config=OverlayEvents.switchLayoutPreset({...defaults,panelGap:48},'overlap');
+  config.panelGap=32;
+  const context={OverlayEvents,config,localized:value=>value,document:{querySelectorAll:()=>[]},draftReady:false,form:{inert:true},byId:id=>id==='bundle'?bundle:button,uploadStorage:{reset(){resets++;}},uploadRequests:new Map(),missingUploads:new Set(['whole']),storageWarning:'failed',uploads:new Map(),cameraActive:false,cameraController:null,
+    defaults,normalize:value=>structuredClone(value),selected:null,renderGlobal(){},renderPlacement(){},renderEditor(){},apply:message=>{applied=message;}};
   vm.runInNewContext(preview.slice(start,end),context);context.reset();
   assert.equal(context.draftReady,true);assert.equal(context.form.inert,false);assert.equal(bundle.disabled,false);assert.equal(button.disabled,false);assert.equal(resets,1);assert.ok(applied);
+  assert.equal(context.config.layoutMode,'overlap');assert.equal(context.config.panelGap,24);assert.equal(context.config.layoutPresets.bento.panelGap,48);
 });
 
 test('denied shared lock reports session-only persistence without an unhandled rejection',async()=>{

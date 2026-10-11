@@ -32,11 +32,36 @@
   if(Array.isArray(source.stops)){const gradient={...source,stops:source.stops.map(stop=>({...stop,opacity:100}))};if(source===part)Object.assign(result,gradient);else result.gradient=gradient;}
   return result;
  }
+ // Legacy connections are retained as data only; never load or execute these URLs.
+ function legacyConnections(input){
+  const fields=['chatUrl','translationUrl','reactiveUrl','donationChzzk','donationTwitch','donationYoutube','donationSoop','sponsor','custom1MediaUrl','custom2MediaUrl','custom3MediaUrl'],snapshot=input.legacyConnections;
+  if(snapshot!==undefined&&(!snapshot||typeof snapshot!=='object'||Array.isArray(snapshot)||snapshot.version!==1||!snapshot.inputs||typeof snapshot.inputs!=='object'||Array.isArray(snapshot.inputs)||Object.keys(snapshot).some(key=>!['version','inputs'].includes(key))||Object.entries(snapshot.inputs).some(([key,value])=>!fields.includes(key)||typeof value!=='string')))throw new Error('Invalid legacy connection data');
+  const inputs={...snapshot?.inputs};
+  for(const field of fields){const custom=/^custom([1-3])MediaUrl$/.exec(field),value=custom?input.customSlotMedia?.['custom'+custom[1]]?.url:input[field];if(!Object.prototype.hasOwnProperty.call(inputs,field)&&typeof value==='string'&&value.trim())inputs[field]=value;}
+  return Object.keys(inputs).length?{version:1,inputs}:undefined;
+ }
  // Panel JSON stores layout/content; OBS source names remain in the Lua script entry.
  function settingsEntries(input){
-  const config={...input};
+  const config=events.migrateOverlapPanels(input);
   const generic=config.layoutVersion===4;
-  const panelKeys=['game','custom1','custom2','custom3','chat','translation','hand'];
+  const panelKeys=events.allPanelKeys,activeKeys=events.activePanelKeys(config),activeSet=new Set(activeKeys);
+  if(!generic&&['layoutMode','layoutPresets','overlapPlacement','overlapSizing','overlapPositions','overlapColumnAlignment','overlapColumns','cornerRadius','cornerSmoothing','globalShadow','panelShadows'].some(key=>Object.prototype.hasOwnProperty.call(config,key)))throw new Error('Layout presets and panel appearance require layout version 4');
+  if(generic){
+   config.layoutMode=events.normalizeLayoutMode(config.layoutMode);
+   config.layoutPresets=events.normalizeLayoutPresets(config);
+   Object.assign(config,config.layoutPresets[config.layoutMode]);
+   if(config.cornerRadius===undefined)config.cornerRadius=16;
+   if(!events.cornerRadii.includes(config.cornerRadius))throw new Error('Invalid panel corner radius');
+   if(config.cornerSmoothing===undefined)config.cornerSmoothing=0;
+   if(!events.cornerSmoothings.includes(config.cornerSmoothing))throw new Error('Invalid panel corner smoothing');
+   if(config.globalShadow===undefined)config.globalShadow=0;
+   if(!events.panelShadowStrengths.includes(config.globalShadow))throw new Error('Invalid global panel shadow');
+   const shadows=config.panelShadows;
+   if(shadows!==undefined&&(!shadows||typeof shadows!=='object'||Array.isArray(shadows)||Object.keys(shadows).length>panelKeys.length||Object.keys(shadows).some(key=>!panelKeys.includes(key))))throw new Error('Invalid panel shadows');
+   config.panelShadows={};
+   for(const key of panelKeys){const value=shadows?.[key]===undefined?config.globalShadow:shadows[key];if(!events.panelShadowStrengths.includes(value))throw new Error('Invalid panel shadow: '+key);config.panelShadows[key]=value;}
+  }
+
   if(config.layoutVersion===3||generic){
    if(config.panelPlacement!==undefined)config.panelPlacement=events.normalizePlacement(config.panelPlacement);
    if(config.sidePosition!==undefined&&!['left','right'].includes(config.sidePosition))throw new Error('Invalid Side position');
@@ -44,22 +69,25 @@
    config.panelSizing=events.normalizeSizing(config.panelSizing);
    if(config.panelGap===undefined)config.panelGap=32;
    else if(!events.panelGaps.includes(config.panelGap))throw new Error('Invalid panel gap');
-   config.layout=events.autoLayout({order:config.layoutOrder,placement:config.panelPlacement,enabled:config.panelEnabled,sizing:config.panelSizing,gap:config.panelGap,sidePosition:config.sidePosition});
-   events.validateLayout(config.layout);
+   config.layout=events.resolveConfigLayout(config);
+   events.validateLayout(config.layout,{allowDecimals:config.layoutMode==='overlap'});
   }else config.layout=events.resolveLayout(config.layoutVersion===2?config.layout:undefined);
   config.layoutVersion=generic?4:config.layoutVersion===3?3:2;
   if(generic){
+   config.panelRenderEnabled=events.effectivePanelEnabled(config);
    const panelContent={};
    for(const key of panelKeys){
-    const part=config.panelContent?.[key];
+    const supplied=config.panelContent?.[key],part=supplied===undefined&&(!activeSet.has(key)||!events.bentoPanelKeys.includes(key))?{type:'none',url:''}:supplied;
     if(!part||typeof part!=='object'||Array.isArray(part)||!['none','source','web','media'].includes(part.type))throw new Error('Invalid panel content: '+key);
     const url=String(part.url||'').trim();
-    const active=config.panelEnabled?.[key]!==false;
+    const active=activeSet.has(key)&&config.panelRenderEnabled?.[key]!==false;
     if(active&&part.type==='web'&&url&&!validHttp(url))throw new Error(key+': HTTP(S) web URL required');
     if(active&&part.type==='media'&&url&&!validMedia(url))throw new Error(key+': image/video assets path or HTTP(S) media URL required');
     panelContent[key]={type:part.type,url:part.type==='web'||part.type==='media'?url:''};
    }
    config.panelContent=panelContent;
+   const retained=legacyConnections(config);
+   if(retained)config.legacyConnections=retained;else delete config.legacyConnections;
    for(const key of ['cameraMode','handcam','slotContent','customSlotMedia','custom1Source','custom2Source','custom3Source','chatUrl','translationUrl','donationChzzk','donationTwitch','donationYoutube','donationSoop','reactiveUrl','showSponsor','showSubtitles','showChat','showAlerts','sponsor','sponsorType','platforms'])delete config[key];
   }else{
    config.cameraMode=config.cameraMode??(config.handcam===true?'camera':'none');
@@ -78,10 +106,10 @@
   const color=value=>typeof value==='string'&&/^#[0-9a-f]{6}$/i.test(value);
   const image=value=>!value||validImage(value);
   const enabled={};
-  for(const key of Object.keys(events.resolveLayout()))enabled[key]=config.panelEnabled?.[key]!==false;
+  for(const key of activeKeys)enabled[key]=config.panelEnabled?.[key]!==false;
   config.panelEnabled=enabled;
   const overrides={};
-  for(const key of Object.keys(events.resolveLayout()))if(config.regionStyleOverrides?.[key]===true)overrides[key]=true;
+  for(const key of panelKeys)if(config.regionStyleOverrides?.[key]===true)overrides[key]=true;
   config.regionStyleOverrides=overrides;
   if(config.globalStyle){
    const style={...config.globalStyle};config.globalStyle=style;
@@ -102,7 +130,7 @@
   config.backgroundColor=config.backgroundColor||'#000000';config.backgroundImage=config.backgroundImage||'';
   if(Object.prototype.hasOwnProperty.call(config,'borderOpacity'))config.borderOpacity=100;
   config.regionBackgrounds=config.regionBackgrounds||{};
-  for(const key of Object.keys(events.resolveLayout())){const region={...(config.regionBackgrounds[key]||{})},glass=!!config.backgroundImage,fill=region.color||(glass?'#000000':config.panel||'#1a1a1a');const opacity=region.opacity??(glass?20:100),blurValue=region.blur??(glass?16:0);if(!color(fill)||!image(region.image)||!Number.isInteger(opacity)||opacity<0||opacity>100||!Number.isInteger(blurValue)||blurValue<0||blurValue>64||!color(region.borderColor||'#ffffff'))throw new Error('Invalid region background: '+key);for(const part of ['fill','stroke'])if(region[part]){if(!['none','solid','gradient'].includes(region[part].mode))throw new Error('Invalid region '+part+': '+key);validateGradient(region[part],'region '+key+' '+part);if(region[part].color!==undefined&&!color(region[part].color)||region[part].color2!==undefined&&!color(region[part].color2)||part==='fill'&&region[part].opacity!==undefined&&(!Number.isFinite(region[part].opacity)||region[part].opacity<0||region[part].opacity>100)||part==='fill'&&region[part].blur!==undefined&&(!Number.isFinite(region[part].blur)||region[part].blur<0||region[part].blur>64)||part==='stroke'&&region[part].width!==undefined&&(!Number.isFinite(region[part].width)||region[part].width<0||region[part].width>32))throw new Error('Invalid region '+part+': '+key);}if(region.stroke)region.stroke=opaqueStroke(region.stroke);if(Object.prototype.hasOwnProperty.call(region,'borderOpacity'))region.borderOpacity=100;config.regionBackgrounds[key]={...region,color:fill,image:region.image||'',opacity,blur:blurValue,borderColor:region.borderColor||'#ffffff',borderVisible:region.borderVisible!==false};}
+  for(const key of panelKeys){const region={...(config.regionBackgrounds[key]||{})},glass=!!config.backgroundImage,fill=region.color||(glass?'#000000':config.panel||'#1a1a1a');const opacity=region.opacity??(glass?20:100),blurValue=region.blur??(glass?16:0);if(region.imageMode!==undefined&&!['none','url','file'].includes(region.imageMode)||!image(region.imageUrl)||!image(region.imageFile))throw new Error('Invalid region image: '+key);if(!color(fill)||!image(region.image)||!Number.isInteger(opacity)||opacity<0||opacity>100||!Number.isInteger(blurValue)||blurValue<0||blurValue>64||!color(region.borderColor||'#ffffff'))throw new Error('Invalid region background: '+key);for(const part of ['fill','stroke'])if(region[part]){if(!['none','solid','gradient'].includes(region[part].mode))throw new Error('Invalid region '+part+': '+key);validateGradient(region[part],'region '+key+' '+part);if(region[part].color!==undefined&&!color(region[part].color)||region[part].color2!==undefined&&!color(region[part].color2)||part==='fill'&&region[part].opacity!==undefined&&(!Number.isFinite(region[part].opacity)||region[part].opacity<0||region[part].opacity>100)||part==='fill'&&region[part].blur!==undefined&&(!Number.isFinite(region[part].blur)||region[part].blur<0||region[part].blur>64)||part==='stroke'&&region[part].width!==undefined&&(!Number.isFinite(region[part].width)||region[part].width<0||region[part].width>32))throw new Error('Invalid region '+part+': '+key);}if(region.stroke)region.stroke=opaqueStroke(region.stroke);if(Object.prototype.hasOwnProperty.call(region,'borderOpacity'))region.borderOpacity=100;config.regionBackgrounds[key]={...region,color:fill,image:region.image||'',opacity,blur:blurValue,borderColor:region.borderColor||'#ffffff',borderVisible:region.borderVisible!==false};}
   if(!generic){
    for(const key of ['chatUrl','translationUrl','donationChzzk','donationTwitch','donationYoutube','donationSoop','reactiveUrl']){
     const value=String(config[key]||'').trim();config[key]=value;if(!value)continue;

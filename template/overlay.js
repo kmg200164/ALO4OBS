@@ -15,7 +15,7 @@
     const locale=Object.hasOwn(accessibilityLabels,language)?language:'en',text=accessibilityLabels[locale];
     if(document.documentElement)document.documentElement.lang=locale;canvas?.setAttribute?.('aria-label',text.overlay);
     for(const key of ['game','sponsor','translation','alerts','chat','hand','custom1','custom2','custom3'])panel(key)?.setAttribute?.('aria-label',text[key]);
-    if(config.layoutVersion>=4)panelKeys.forEach(key=>panel(key)?.setAttribute?.('aria-label',OverlayEvents.panelLabels[key]));
+    if(config.layoutVersion>=4)panelKeys.forEach(key=>panel(key)?.setAttribute?.('aria-label',OverlayEvents.panelLabels[key]||key));
     const sponsorImage=$('sponsor-image'),sponsorEmbed=$('sponsor-embed');if(sponsorImage)sponsorImage.alt=text.sponsor;if(sponsorEmbed)sponsorEmbed.title=text.sponsorWidget;
     for(const key of ['custom1','custom2','custom3'])panel(key)?.querySelector('iframe')?.setAttribute?.('title',text.webWidget);
   }
@@ -82,8 +82,14 @@
       if(Array.isArray(source.stops)){const gradient={...source,stops:source.stops.map(stop=>({...stop,opacity:100}))};if(source===part)Object.assign(result,gradient);else result.gradient=gradient;}
       return result;
     };
-    for(const key of ['game','custom1','custom2','custom3','chat','translation','hand']){
-      if(config.panelEnabled?.[key]===false)continue;
+    const visible=OverlayEvents.effectivePanelEnabled(config);
+    for(const key of activeKeys()){
+      if(visible[key]===false||!positions[key])continue;
+      if(window.KMGPanelShape){
+        const box=positions[key],shape=window.KMGPanelShape,geometry=shape.styleFor(config,key),tile=document.createElement('div');
+        tile.className='preview-stroke-tile shape-frame';Object.assign(tile.style,{left:box.x+'px',top:box.y+'px',width:box.width+'px',height:box.height+'px',border:'0',outline:'0',borderRadius:'0'});
+        const stroke=shape.strokeNode(box.width,box.height,geometry,document);if(stroke){tile.append(stroke);strokes.append(tile);}continue;
+      }
       const box=positions[key],override=config.regionStyleOverrides?.[key]===true;
       const local=config.regionBackgrounds?.[key]||{},regionalStroke=override?local.stroke:undefined;
       const rawStroke=regionalStroke||(!override?config.globalStyle?.stroke:null);
@@ -103,7 +109,15 @@
       strokes.append(tile);
     }
   }
-  const panelKeys=['game','custom1','custom2','custom3','chat','translation','hand'];
+  const bentoKeys=['game','custom1','custom2','custom3','chat','translation','hand'];
+  const panelKeys=OverlayEvents.allPanelKeys||bentoKeys;
+  const activeKeys=()=>OverlayEvents.activePanelKeys?.(config)||bentoKeys;
+  // Keep both presets' nodes; hiding inactive nodes preserves independent content.
+  for(const key of panelKeys){
+    if(panel(key))continue;
+    const node=document.createElement('section');node.className='panel';node.dataset.region=key;node.hidden=true;
+    node.setAttribute('aria-label',OverlayEvents.panelLabels[key]||key);canvas.append(node);
+  }
   const genericMediaKeys={};
   function genericLayer(node){
     let layer=node.querySelector('.generic-media');
@@ -119,11 +133,22 @@
   }
   function genericContent(positions){
     const preview=document.body.classList.contains('preview-mode');
+    const active=new Set(activeKeys()),visible=OverlayEvents.effectivePanelEnabled(config);
     for(const key of panelKeys){
       const node=panel(key),box=positions[key],item=config.panelContent?.[key]||{type:'none',url:''};
-      if(!node||!box)continue;
-      Object.assign(node.style,{left:box.x+'px',top:box.y+'px',width:box.width+'px',height:box.height+'px',padding:'0',visibility:config.panelEnabled?.[key]===false?'hidden':'visible'});
+      if(!node)continue;
+      if(!active.has(key)||!box||visible[key]===false){
+        node.hidden=true;
+        const layer=node.querySelector('.generic-media');
+        if(layer){
+          const video=layer.querySelector('video'),embed=layer.querySelector('iframe'),sample=layer.querySelector('.generic-sample');
+          video.pause();video.removeAttribute('src');video.load();embed.removeAttribute('src');sample.hidden=true;
+        }
+        delete genericMediaKeys[key];continue;
+      }
+      Object.assign(node.style,{left:box.x+'px',top:box.y+'px',width:box.width+'px',height:box.height+'px',padding:'0',visibility:visible[key]===false?'hidden':'visible'});
       node.hidden=false;
+      window.KMGPanelShape?.apply(node,box.width,box.height,window.KMGPanelShape.styleFor(config,key));
       const layer=genericLayer(node),image=layer.querySelector('img'),video=layer.querySelector('video'),embed=layer.querySelector('iframe'),hint=layer.querySelector('.generic-source-hint');
       const locale=Object.hasOwn(accessibilityLabels,config.uiLanguage)?config.uiLanguage:'en';
       hint.textContent=locale==='ko'?'OBS 소스는 OBS에서 확인':locale==='ja'?'OBS ソースは OBS で確認':'Check OBS sources in OBS';
@@ -141,7 +166,7 @@
     }
   }
   function showGenericSample(input){
-    if(!document.body.classList.contains('preview-mode')||!panelKeys.includes(input?.target)||config.panelEnabled?.[input.target]===false)return false;
+    if(!document.body.classList.contains('preview-mode')||!activeKeys().includes(input?.target)||OverlayEvents.effectivePanelEnabled(config)[input.target]===false)return false;
     for(const key of panelKeys){const sample=panel(key)?.querySelector('.generic-sample');if(sample)sample.hidden=true;}
     const sample=genericLayer(panel(input.target)).querySelector('.generic-sample');
     sample.replaceChildren();
@@ -152,9 +177,11 @@
   }
   function applyConfig(update = {}) {
     const source=update.layoutVersion?update:defaults;
-    const positions=source.layoutVersion>=3?OverlayEvents.validateLayout(source.layout):OverlayEvents.resolveLayout(source.layoutVersion===2?source.layout:undefined);
+    const positions=OverlayEvents.resolveConfigLayout?OverlayEvents.resolveConfigLayout(source):source.layoutVersion>=3?OverlayEvents.validateLayout(source.layout):OverlayEvents.resolveLayout(source.layoutVersion===2?source.layout:undefined);
     config = {...defaults,...update};
+    if(config.layoutVersion>=4&&OverlayEvents.migratePanelAppearance)config=OverlayEvents.migratePanelAppearance(config);
     applyAccessibilityLanguage(config.uiLanguage);
+    canvas.classList?.[config.layoutMode==='overlap'?'add':'remove']?.('overlap-layout');
     // Boxes already include the gap; the token keeps any gap-based CSS in sync.
     canvas.style?.setProperty?.('--gap',(OverlayEvents.normalizeGap?.(source.panelGap)??32)+'px');
     if(source.layoutVersion>=4){
@@ -165,6 +192,7 @@
       return;
     }
     canvas.classList?.remove?.('generic-layout');
+    for(const key of panelKeys)if(!bentoKeys.includes(key))panel(key).hidden=true;
     config.cameraMode=update.cameraMode??(Object.hasOwn(update,'handcam')?(config.handcam?'camera':'none'):defaults.cameraMode??(config.handcam?'camera':'none'));
     config.slotContent=OverlayEvents.resolveSlots(source.layoutVersion>=2?source.slotContent:undefined);
     previewLayers(positions);

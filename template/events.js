@@ -21,8 +21,11 @@
   }
   function handcamLayout() {return {handHeight:318,chatHeight:317,handY:730};}
   const panelKeys=['game','custom1','custom2','custom3','chat','translation','hand'];
+  const bentoPanelKeys=Object.freeze([...panelKeys]),overlapPanelKeys=Object.freeze(['game',...Array.from({length:5},(_,c)=>Array.from({length:3},(_,r)=>`panel${c+1}_${r+1}`)).flat()]),allPanelKeys=Object.freeze([...panelKeys,...overlapPanelKeys.slice(1)]);
+  const legacyOverlapKeys=Object.freeze({custom1:'panel2_3',custom2:'panel4_3',custom3:'panel2_1',chat:'panel4_1',translation:'panel5_2',hand:'panel1_2'});
+  function activePanelKeys(config={}){return normalizeLayoutMode(config.layoutMode)==='overlap'?overlapPanelKeys:bentoPanelKeys;}
   // Role names are product terms shared by the editor, overlay and OBS script.
-  const panelLabels={game:'Main',custom1:'Sub 1',custom2:'Sub 2',custom3:'Sub 3',chat:'Side 1',translation:'Side 2',hand:'Side 3'};
+  const panelLabels={game:'Main',custom1:'Sub 1',custom2:'Sub 2',custom3:'Sub 3',chat:'Side 1',translation:'Side 2',hand:'Side 3',...Object.fromEntries(overlapPanelKeys.slice(1).map(key=>[key,'Panel '+key.slice(5).replace('_','-')]))};
   function baseLayout() {
     return {game:{x:32,y:32,width:1384,height:778},custom1:{x:32,y:842,width:440,height:206},custom2:{x:504,y:842,width:440,height:206},custom3:{x:976,y:842,width:440,height:206},chat:{x:1448,y:32,width:440,height:317},translation:{x:1448,y:381,width:440,height:317},hand:{x:1448,y:730,width:440,height:318}};
   }
@@ -235,13 +238,253 @@
     return [[1,'1:1'],[16/9,'16:9']].map(([ratio,label])=>({label,value:Math.round(axis==='width'?other*ratio:other/ratio)}))
       .filter(stop=>stop.value>=bounds.min&&stop.value<=bounds.max);
   }
-  function validateLayout(layout) {
+  const cornerRadii=[8,16,24,32,48],cornerSmoothings=[0,.6,1],panelShadowStrengths=[0,8,16,32,48,64];
+  // Shadows share the same individual-style switch as fill and stroke.
+  // Missing local values inherit; an explicit zero disables an overridden shadow.
+  function effectivePanelShadow(config={},key){
+    if(config.layoutMode==='overlap'&&key==='game')return 0;
+    const global=panelShadowStrengths.includes(config.globalShadow)?config.globalShadow:0;
+    const local=config.regionStyleOverrides?.[key]===true?config.panelShadows?.[key]:undefined;
+    return local===undefined?global:panelShadowStrengths.includes(local)?local:global;
+  }
+  function migratePanelAppearance(config={}){
+    const result={...config};
+    if(result.globalShadow===undefined)result.globalShadow=0;
+    if(config.panelShadows)result.panelShadows={...config.panelShadows};
+    if(config.regionStyleOverrides)result.regionStyleOverrides={...config.regionStyleOverrides};
+    // Preserve dormant legacy values and explicit switches. Auto-enabling an
+    // override for an old shadow would also change/freeze its fill and stroke.
+    return result;
+  }
+  const auxiliaryKeys=overlapPanelKeys.slice(1);
+  function normalizeLayoutMode(value){if(value===undefined)return 'bento';if(!['bento','overlap'].includes(value))throw new Error('Invalid layout mode');return value;}
+  function objectFields(value,allowed,label){
+    if(!value||typeof value!=='object'||Array.isArray(value))throw new Error('Invalid '+label);
+    const names=Object.keys(value);
+    if(names.length>allowed.length||names.some(key=>!allowed.includes(key)))throw new Error('Invalid '+label+': unknown field');
+    return value;
+  }
+  const overlapSafetyGrid=Object.freeze(Array.from({length:15},(_,index)=>{
+    const column=index%5+1,row=Math.floor(index/5)+1;
+    const safety=(row===1||row===3)&&[1,3,5].includes(column)?'red':row===2?'yellow':'green';
+    return Object.freeze({column,row,safety});
+  }));
+  function defaultOverlapPlacement(){
+    return Object.fromEntries(auxiliaryKeys.map(key=>{const [column,row]=key.slice(5).split('_').map(Number);return [key,{column,row,columnSpan:1,rowSpan:1}];}));
+  }
+  function normalizeOverlapPlacement(input){
+    if(input!==undefined)objectFields(input,[...auxiliaryKeys,...Object.keys(legacyOverlapKeys)],'Overlap placement');
+    const result=defaultOverlapPlacement();
+    for(const key of auxiliaryKeys){
+      const legacy=Object.keys(legacyOverlapKeys).find(old=>legacyOverlapKeys[old]===key),supplied=input?.[key]!==undefined?input[key]:input?.[legacy];
+      if(supplied===undefined)continue;
+      objectFields(supplied,['column','row','columnSpan','rowSpan'],'Overlap placement: '+key);
+      const entry={...result[key],...supplied};
+      for(const field of ['column','row','columnSpan','rowSpan'])if(!Number.isInteger(entry[field])||entry[field]<1)throw new Error('Invalid Overlap placement: '+key);
+      if(entry.column+entry.columnSpan-1>5||entry.row+entry.rowSpan-1>3)throw new Error('Invalid Overlap placement: '+key+' exceeds grid');
+    }
+    return result;
+  }
+  // Development-era six-panel data remains available to Bento and fills only
+  // previously absent Overlap cells; an explicit new cell always wins.
+  function migrateOverlapPanels(config={}){
+    const result={...config};
+    for(const field of ['panelContent','regionBackgrounds','regionStyleOverrides','panelShadows']){
+      const value=config[field];if(value===undefined)continue;
+      objectFields(value,allPanelKeys,field);result[field]={...value};
+      for(const [old,key] of Object.entries(legacyOverlapKeys))if(!Object.prototype.hasOwnProperty.call(value,key)&&Object.prototype.hasOwnProperty.call(value,old))result[field][key]=typeof value[old]==='object'&&value[old]!==null?JSON.parse(JSON.stringify(value[old])):value[old];
+    }
+    return config.layoutVersion===4?migratePanelAppearance(result):result;
+  }
+  function normalizeOverlapEnabled(input){
+    if(input!==undefined){objectFields(input,allPanelKeys,'enabled panels');for(const [key,value] of Object.entries(input))if(typeof value!=='boolean')throw new Error('Invalid enabled panel: '+key);}
+    const result={game:true};
+    for(let column=1;column<=5;column++){
+      const keys=[1,2,3].map(row=>'panel'+column+'_'+row);
+      const count=keys.filter((key,index)=>{const legacy=Object.keys(legacyOverlapKeys).find(old=>legacyOverlapKeys[old]===key);return input?.[key]??(legacy?input?.[legacy]:undefined)??(index===0);}).length;
+      keys.forEach((key,index)=>result[key]=index<count);
+    }
+    return result;
+  }
+  function normalizeOverlapSizing(input){
+    if(input!==undefined)objectFields(input,auxiliaryKeys,'Overlap size');
+    const result={};
+    for(const key of auxiliaryKeys){
+      const supplied=input?.[key];if(supplied!==undefined)objectFields(supplied,['heightMode','height'],'Overlap size: '+key);
+      const entry={heightMode:'auto',height:328,...supplied};
+      if(!['auto','fixed'].includes(entry.heightMode)||!Number.isInteger(entry.height)||entry.height<1||entry.height>1064)throw new Error('Invalid Overlap size: '+key);
+      result[key]=entry;
+    }
+    return result;
+  }
+  function normalizeOverlapPositions(input){
+    if(input!==undefined)objectFields(input,auxiliaryKeys,'Overlap position');
+    const result={};
+    for(const key of auxiliaryKeys){
+      const supplied=input?.[key];if(supplied!==undefined)objectFields(supplied,['mode','y'],'Overlap position: '+key);
+      const entry={mode:'auto',y:0,...supplied};
+      if(!['auto','fixed'].includes(entry.mode)||!Number.isInteger(entry.y)||entry.y<0||entry.y>1079)throw new Error('Invalid Overlap position: '+key);
+      result[key]=entry;
+    }
+    return result;
+  }
+  function normalizeOverlapColumnAlignment(input){
+    if(input!==undefined)objectFields(input,['1','2','3','4','5'],'Overlap column alignment');
+    const result={};
+    for(let column=1;column<=5;column++){
+      const value=input?.[column]===undefined?'top':input[column];
+      if(!['top','center','bottom'].includes(value))throw new Error('Invalid Overlap column alignment: '+column);
+      result[column]=value;
+    }
+    return result;
+  }
+  function normalizeOverlapColumns(input,enabled){
+    if(input!==undefined)objectFields(input,['1','2','3','4','5'],'Overlap columns');
+    const flags=normalizeOverlapEnabled(enabled),result={};
+    for(let column=1;column<=5;column++){
+      const supplied=input?.[column];if(supplied!==undefined)objectFields(supplied,['enabled','widthBasis','widthMode','width'],'Overlap column: '+column);
+      const entry={enabled:[1,2,3].some(row=>flags['panel'+column+'_'+row]),widthMode:'auto',width:355,widthBasis:5,...supplied};
+      if(![3,5].includes(entry.widthBasis)||(column%2===0&&entry.widthBasis!==5)||typeof entry.enabled!=='boolean'||!['auto','fixed'].includes(entry.widthMode)||!Number.isInteger(entry.width)||entry.width<1||entry.width>1856)throw new Error('Invalid Overlap column: '+column);
+      result[column]=entry;
+    }
+    return result;
+  }
+  function effectiveOverlapColumns(input,enabled){
+    const columns=normalizeOverlapColumns(input,enabled);
+    // Keep saved enable choices; adjacent wide columns only suppress rendering.
+    for(const column of [2,4])if([column-1,column+1].some(peer=>columns[peer].enabled&&columns[peer].widthBasis===3))columns[column].enabled=false;
+    return columns;
+  }
+  function effectivePanelEnabled(config={}){
+    if(normalizeLayoutMode(config.layoutMode)!=='overlap')return {...config.panelEnabled};
+    const enabled=normalizeOverlapEnabled(config.panelEnabled),columns=effectiveOverlapColumns(config.overlapColumns,enabled);
+    for(const key of auxiliaryKeys)if(!columns[Number(key[5])].enabled)enabled[key]=false;
+    return enabled;
+  }
+  function overlapPositionBounds(config={},key){
+    if(!auxiliaryKeys.includes(key))throw new Error('Invalid Overlap panel');
+    const layout=overlapLayout({placement:config.overlapPlacement,gap:config.panelGap??24,enabled:config.panelEnabled,sizing:config.overlapSizing,positions:config.overlapPositions,columnAlignment:config.overlapColumnAlignment,columns:config.overlapColumns});
+    const enabled=effectivePanelEnabled({...config,layoutMode:'overlap'}),column=key.split('_')[0],row=Number(key.split('_')[1]);
+    const before=auxiliaryKeys.filter(peer=>enabled[peer]&&peer.split('_')[0]===column&&Number(peer.split('_')[1])<row),after=auxiliaryKeys.filter(peer=>enabled[peer]&&peer.split('_')[0]===column&&Number(peer.split('_')[1])>row),gap=config.panelGap??24;
+    return {min:before.length?Math.ceil(layout[before.at(-1)].y+layout[before.at(-1)].height+gap):gap,max:Math.floor((after.length?layout[after[0]].y-gap:1080-gap)-layout[key].height)};
+  }
+  function overlapSizingBounds(config={},key){
+    if(!auxiliaryKeys.includes(key))throw new Error('Invalid Overlap panel');
+    const gap=config.panelGap??24;if(!panelGaps.includes(gap))throw new Error('Invalid panel gap');
+    const enabled=normalizeOverlapEnabled(config.panelEnabled),sizing=normalizeOverlapSizing(config.overlapSizing),column=key.split('_')[0];
+    const peers=auxiliaryKeys.filter(peer=>peer!==key&&peer.split('_')[0]===column&&enabled[peer]);
+    const available=1080-2*gap-peers.length*gap;
+    const reserved=peers.reduce((sum,peer)=>sum+(sizing[peer].heightMode==='fixed'?Math.max(128,sizing[peer].height):128),0);
+    return {min:128,max:Math.max(128,Math.min(1064,Math.floor(available-reserved)))};
+  }
+  function overlapLayout({placement,gap=24,enabled,sizing,positions,columnAlignment,columns}={}){
+    if(!panelGaps.includes(gap))throw new Error('Invalid panel gap');
+    normalizeOverlapPlacement(placement);
+    enabled=normalizeOverlapEnabled(enabled);sizing=normalizeOverlapSizing(sizing);positions=normalizeOverlapPositions(positions);columnAlignment=normalizeOverlapColumnAlignment(columnAlignment);
+    const width=(1920-6*gap)/5,guideHeight=(1080-4*gap)/3,result={game:{x:0,y:0,width:1920,height:1080}};
+    columns=effectiveOverlapColumns(columns,enabled);
+    const columnBoxes={};
+    for(let column=1;column<=5;column++){
+      const wide=columns[column].widthBasis===3,w=wide?(1920-4*gap)/3:width;
+      const x=wide?({1:gap,3:(1920-w)/2,5:1920-gap-w}[column]):gap+(column-1)*(width+gap);
+      columnBoxes[column]={x,width:w};
+    }
+
+    // Hidden panels retain bounded guide boxes for exports; only enabled boxes are rendered.
+    for(const key of auxiliaryKeys){const [column,row]=key.slice(5).split('_').map(Number);result[key]={x:gap+(column-1)*(width+gap),y:gap+(row-1)*(guideHeight+gap),width,height:guideHeight};}
+    for(let column=1;column<=5;column++){
+      if(!columns[column].enabled)continue;
+      const keys=[1,2,3].map(row=>'panel'+column+'_'+row).filter(key=>enabled[key]);if(!keys.length)continue;
+      const available=1080-2*gap-(keys.length-1)*gap,automatic=keys.filter(key=>sizing[key].heightMode==='auto');
+      const fixed=keys.filter(key=>sizing[key].heightMode==='fixed'),heights={};
+      for(const key of fixed)heights[key]=Math.max(128,Math.min(sizing[key].height,available-(keys.length-1)*128));
+      const fixedSum=fixed.reduce((sum,key)=>sum+heights[key],0),fixedBudget=available-automatic.length*128;
+      if(fixedSum>fixedBudget){const scale=(fixedBudget-fixed.length*128)/(fixedSum-fixed.length*128);for(const key of fixed)heights[key]=128+(heights[key]-128)*scale;}
+      for(const key of fixed)heights[key]=Math.floor(heights[key]);
+      const remainder=available-fixed.reduce((sum,key)=>sum+heights[key],0);
+      automatic.forEach((key,index)=>heights[key]=Math.floor(remainder/automatic.length)+(index<remainder%automatic.length?1:0));
+      const spare=Math.max(0,available-keys.reduce((sum,key)=>sum+heights[key],0));
+      let y=gap+Math.round(spare*({top:0,center:0.5,bottom:1}[columnAlignment[column]]));for(const key of keys){result[key]={...columnBoxes[column],y,height:heights[key]};y+=heights[key]+gap;}
+    }
+    // Project requested Y positions into an ordered stack with space reserved for every peer.
+    for(let column=1;column<=5;column++){
+      if(!columns[column].enabled)continue;
+      const keys=[1,2,3].map(row=>'panel'+column+'_'+row).filter(key=>enabled[key]);
+      let floor=gap;
+      for(let index=0;index<keys.length;index++){
+        const key=keys[index],box=result[key],remaining=keys.slice(index+1).reduce((sum,peer)=>sum+result[peer].height+gap,0),ceiling=1080-gap-box.height-remaining;
+        box.y=Math.max(floor,Math.min(positions[key].mode==='fixed'?positions[key].y:box.y,ceiling));floor=box.y+box.height+gap;
+      }
+    }
+    return validateLayout(result,{allowDecimals:true});
+  }
+  function overlapCollisions(layout,enabled={}){
+    validateLayout(layout,{allowDecimals:true});
+    enabled=normalizeOverlapEnabled(enabled);
+    const collisions=[];
+    for(let index=0;index<auxiliaryKeys.length;index++)for(let peer=index+1;peer<auxiliaryKeys.length;peer++){
+      const first=auxiliaryKeys[index],second=auxiliaryKeys[peer];
+      if(enabled[first]===false||enabled[second]===false)continue;
+      const a=layout[first],b=layout[second];
+      if(a.x<b.x+b.width&&b.x<a.x+a.width&&a.y<b.y+b.height&&b.y<a.y+a.height)collisions.push([first,second]);
+    }
+    return collisions;
+  }
+  function normalizeLayoutSnapshot(input,mode){
+    if(input===undefined)input=mode==='overlap'?{
+      panelEnabled:Object.fromEntries(overlapPanelKeys.map(key=>[key,true])),
+      overlapColumns:Object.fromEntries([1,2,3,4,5].map(column=>[column,{enabled:true,widthMode:'fixed',width:column===3?356:355}])),
+      overlapSizing:Object.fromEntries(auxiliaryKeys.map(key=>[key,{heightMode:'fixed',height:328}])),
+      overlapPositions:Object.fromEntries(auxiliaryKeys.map(key=>[key,{mode:'fixed',y:24+(Number(key.split('_')[1])-1)*352}]))
+    }:{};
+    objectFields(input,['panelGap','panelEnabled','panelPlacement','panelSizing','sidePosition','overlapPlacement','overlapSizing','overlapPositions','overlapColumnAlignment','overlapColumns'],'layout preset');
+    const panelGap=input.panelGap===undefined?(mode==='overlap'?24:32):input.panelGap;
+    if(!panelGaps.includes(panelGap))throw new Error('Invalid panel gap');
+    if(input.sidePosition!==undefined&&!['left','right'].includes(input.sidePosition))throw new Error('Invalid Side position');
+    if(input.panelEnabled!==undefined){objectFields(input.panelEnabled,allPanelKeys,'enabled panels');for(const [key,value] of Object.entries(input.panelEnabled))if(typeof value!=='boolean')throw new Error('Invalid enabled panel: '+key);}
+    const panelEnabled=mode==='overlap'?normalizeOverlapEnabled(input.panelEnabled):Object.fromEntries(bentoPanelKeys.map(key=>[key,input.panelEnabled?.[key]!==false]));
+    if(input.panelPlacement!==undefined){
+      objectFields(input.panelPlacement,panelKeys,'panel placement');
+      for(const key of panelKeys){const entry=input.panelPlacement[key];if(entry===undefined)continue;objectFields(entry,['level1','level2','level3'],'panel placement: '+key);
+        // Legacy Side placement values are ignored by the canonical Bento normalizer.
+        if(!['game','custom1','custom2','custom3'].includes(key))continue;
+        if(entry.level1!==undefined&&!['left','right'].includes(entry.level1)||entry.level2!==undefined&&!['top','center','bottom'].includes(entry.level2)||entry.level3!==undefined&&!['left','center','right'].includes(entry.level3))throw new Error('Invalid panel placement: '+key);
+      }
+    }
+    if(input.panelSizing!==undefined){
+      objectFields(input.panelSizing,panelKeys,'panel size');
+      for(const key of panelKeys)if(input.panelSizing[key]!==undefined)objectFields(input.panelSizing[key],['widthMode','width','heightMode','height','aspect'],'panel size: '+key);
+    }
+    return {panelGap,panelEnabled,panelPlacement:normalizePlacement(input.panelPlacement),panelSizing:normalizeSizing(input.panelSizing),sidePosition:normalizeSidePosition(input.sidePosition),overlapPlacement:normalizeOverlapPlacement(input.overlapPlacement),overlapSizing:normalizeOverlapSizing(input.overlapSizing),overlapPositions:normalizeOverlapPositions(input.overlapPositions),overlapColumnAlignment:normalizeOverlapColumnAlignment(input.overlapColumnAlignment),overlapColumns:normalizeOverlapColumns(input.overlapColumns,panelEnabled)};
+  }
+  function activeLayoutSnapshot(config,mode,previous={}){return normalizeLayoutSnapshot({...previous,...Object.fromEntries(['panelGap','panelEnabled','panelPlacement','panelSizing','sidePosition','overlapPlacement','overlapSizing','overlapPositions','overlapColumnAlignment','overlapColumns'].filter(key=>config[key]!==undefined).map(key=>[key,config[key]]))},mode);}
+  function normalizeLayoutPresets(config={}){
+    const mode=normalizeLayoutMode(config.layoutMode),input=config.layoutPresets;
+    if(input!==undefined)objectFields(input,['bento','overlap'],'layout presets');
+    const result={bento:normalizeLayoutSnapshot(input?.bento,'bento'),overlap:normalizeLayoutSnapshot(input?.overlap,'overlap')};
+    // Active editor fields win over its last saved snapshot; inactive layouts remain intact.
+    result[mode]=activeLayoutSnapshot(config,mode,result[mode]);
+    return result;
+  }
+  function switchLayoutPreset(config,mode){
+    mode=normalizeLayoutMode(mode);
+    const layoutPresets=normalizeLayoutPresets(config);
+    return {...migrateOverlapPanels(config),...normalizeLayoutSnapshot(layoutPresets[mode],mode),layoutMode:mode,layoutPresets};
+  }
+  function resolveConfigLayout(config={}){
+    const mode=normalizeLayoutMode(config.layoutMode);
+    if(config.layoutVersion===4)config={...config,...normalizeLayoutPresets(config)[mode]};
+    if(mode==='overlap')return overlapLayout({placement:config.overlapPlacement,gap:config.panelGap,enabled:config.panelEnabled,sizing:config.overlapSizing,positions:config.overlapPositions,columnAlignment:config.overlapColumnAlignment,columns:config.overlapColumns});
+    if(config.layoutVersion===3||config.layoutVersion===4)return autoLayout({order:config.layoutOrder,placement:config.panelPlacement,enabled:config.panelEnabled,sizing:config.panelSizing,gap:config.panelGap,sidePosition:config.sidePosition});
+    return resolveLayout(config.layoutVersion===2?config.layout:undefined);
+  }
+  function validateLayout(layout,{allowDecimals=false,keys:requiredKeys}={}) {
     if(!layout || typeof layout!=='object' || Array.isArray(layout))throw new Error('Invalid layout');
-    for(const key of panelKeys){
+    const expected=requiredKeys||(Object.prototype.hasOwnProperty.call(layout,'panel1_1')?overlapPanelKeys:bentoPanelKeys);
+    for(const key of expected){
       const box=layout[key];
       if(!box || typeof box!=='object' || Array.isArray(box) ||
-         !Number.isInteger(box.x) || !Number.isInteger(box.y) ||
-         !Number.isInteger(box.width) || !Number.isInteger(box.height) ||
+         ![box.x,box.y,box.width,box.height].every(allowDecimals?Number.isFinite:Number.isInteger) ||
          box.x<0 || box.y<0 || box.width<1 || box.height<1 ||
          box.x+box.width>1920 || box.y+box.height>1080)throw new Error(key+': box must fit the 1920 × 1080 canvas');
     }
@@ -263,7 +506,7 @@
     if(mode==='user'){let hash=0;for(const c of platform+':'+nickname)hash=(Math.imul(hash,31)+c.codePointAt(0))|0;return `hsl(${(hash>>>0)%360} 72% 75%)`;}
     return {chzzk:'#00ffa3',twitch:'#bf94ff',youtube:'#ff6464',soop:'#55cfff'}[platform]||'#dddddd';
   }
-  const api = {panelLabels,panelGaps,normalizeGap,normalizeSidePosition,subWidthWarning,normalizeEvent,createEventStore,handcamLayout,resolveLayout,defaultPlacement,normalizePlacement,normalizeSizing,canResizeWidth,canResizeHeight,sizingBounds,aspectStops,autoLayout,validateLayout,resolveSlots,nicknameColor};
+  const api = {effectivePanelShadow,migratePanelAppearance,bentoPanelKeys,overlapPanelKeys,allPanelKeys,activePanelKeys,legacyOverlapKeys,migrateOverlapPanels,cornerRadii,cornerSmoothings,panelShadowStrengths,normalizeLayoutMode,overlapSafetyGrid,defaultOverlapPlacement,normalizeOverlapPlacement,normalizeOverlapEnabled,normalizeOverlapSizing,normalizeOverlapPositions,normalizeOverlapColumnAlignment,normalizeOverlapColumns,effectiveOverlapColumns,effectivePanelEnabled,overlapPositionBounds,overlapSizingBounds,overlapLayout,overlapCollisions,normalizeLayoutPresets,switchLayoutPreset,resolveConfigLayout,panelLabels,panelGaps,normalizeGap,normalizeSidePosition,subWidthWarning,normalizeEvent,createEventStore,handcamLayout,resolveLayout,defaultPlacement,normalizePlacement,normalizeSizing,canResizeWidth,canResizeHeight,sizingBounds,aspectStops,autoLayout,validateLayout,resolveSlots,nicknameColor};
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.OverlayEvents = api;
 })(typeof window !== 'undefined' ? window : globalThis);

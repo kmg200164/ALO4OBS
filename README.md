@@ -2,13 +2,9 @@
 
 Auto Layout Overlay for OBS
 
-**[Download ALO4OBS 0.9.1](https://github.com/kmg200164/ALO4OBS/raw/refs/heads/main/downloads/ALO4OBS-v0.9.1.zip)**
+**[Download ALO4OBS 0.10.0](https://github.com/kmg200164/ALO4OBS/releases/download/v0.10.0/ALO4OBS-v0.10.0.zip)** · [What's new](CHANGELOG.md)
 
-**0.9.1** is the current distribution: `ALO4OBS-v0.9.1.zip`. The original 0.9.0 archive remains available unchanged. See [CHANGELOG.md](CHANGELOG.md).
-
-An OBS overlay that auto-arranges your panels so they never overlap.
-
-## Support and feedback
+Arrange your OBS overlay in a browser, then apply it in OBS. Choose **Bento** to keep all panels separate, or **Overlap** to place auxiliary panels over a full-screen Main panel.
 
 Found it useful? [Support continued improvements](https://buymeacoffee.com/kmg200164). Found a bug? [Report it here](https://github.com/kmg200164/ALO4OBS/issues/new?template=feedback.yml).
 
@@ -18,101 +14,99 @@ Found it useful? [Support continued improvements](https://buymeacoffee.com/kmg20
   </a>
 </p>
 
-<details>
-<summary>Support and bug-report guidance</summary>
+## Two layout types
 
-ALO4OBS is free, and support is entirely optional. For bug reports, include what you tried, what happened, your ALO4OBS and OBS versions, and a screenshot if possible. Hide personal widget links and stream keys before sharing screenshots.
+| | Bento | Overlap |
+| --- | --- | --- |
+| Arrangement | All panels stay separate | Auxiliary panels sit above full-screen Main |
+| Panels | Main, up to 3 Sub and 3 Side panels | Main and up to 15 auxiliary panels across 5 columns |
+| Placement | Main/Sub row order and left/right Side position | Fixed columns, automatic stack alignment or manual vertical placement |
+| Wider panels | Bento width controls | Wider width switch on columns 1, 3 and 5 |
 
-</details>
+Switch layouts from the header. Each layout retains its panel content and settings; Main and global appearance are shared. Existing 0.9.1 configurations migrate to Bento. Curated streaming presets are planned for **0.10.1**.
 
 ## Features
 
-- Automatically calculates a 1920 × 1080 layout for Main, Sub, and Side panels.
-- Supports OBS sources, web URLs, and packaged image or video media.
-- Exports a portable `OBS-settings.zip` with settings, masks, and selected media.
-- Includes Korean, English, and Japanese settings and guides.
-- Offers ten approved UI color presets in dark and light modes: Cherry, Orange, Banana, Lime, Aloe, Cotton Candy, Blueberry, Grape, Bubblegum, and Mono. UI themes do not change broadcast colors or media.
-- Settings sections expand from the whole heading; selection arrows sit inside their fields.
-- Free MIT-licensed code with no required account or subscription.
+- Configure a **1920 × 1080** layout with a sticky preview beside the settings. Both work areas stay side by side; narrow settings use one column.
+- Select a panel directly in the preview. The panel-settings section remains visible with a selection hint until you choose one.
+- Use **OBS sources, web widgets, images or videos** as panel content.
+- Adjust panel gap, corners, fill, stroke and shadow globally or per panel. Image URL and uploaded image file are separate fill choices.
+- In Overlap, enable or hide fixed columns, choose 1–3 panels per column, and widen columns 1/3/5. Wider columns temporarily hide their occupied neighbors without erasing settings.
+- Adjust Overlap height and Y with Auto/Manual switches, numbers, sliders or vertical preview dragging. Applied geometry fits available space while preserving panel order, gaps and a **128 px minimum height**. Feasible manual positions stay fixed; requested values remain saved if rendering must clamp them.
+- Toggle the editor-only safety guide to see game-UI warning areas. It is not broadcast and does not block placement; its usefulness depends on the game.
+- Export a portable **OBS-settings.zip** containing settings, masks and selected media. Hidden panels and both layout snapshots stay saved.
+- Use **Korean, English or Japanese**, with localized guides and icon-button tooltips, dark/light modes and ten UI color themes. UI themes do not alter broadcast colors or media.
+- Free MIT-licensed code, with no required account or subscription.
 
 ## Quick start
 
 ![Setup: download, extract, open settings.html, configure panels, unpack saved settings, add the OBS script.](docs/images/setup-workflow.png)
 
-1. Install **OBS Studio 30.1 or newer** with Browser Source and **Tools → Scripts** available. The script uses the `obs_sceneitem_get_info2` / `obs_sceneitem_set_info2` APIs introduced in 30.1 ([official OBS API reference](https://docs.obsproject.com/reference-scenes#c.obs_sceneitem_get_info2)). Isolated Windows OBS 32.2.2 checks passed in the scope below; the minimum API version is not a claim that every supported version was tested.
-2. Use a **1920 × 1080 base canvas** in **Settings → Video**. If your production profile uses another canvas, create or choose a separate profile for this setup; do not overwrite your production profile arbitrarily.
-3. Extract the **entire distribution ZIP**. Open its root `settings.html`, which opens `files/settings.html`. Do not run pages inside the ZIP.
-4. Select a **Main, Sub, or Side** panel and its **Content type**: **None**, **OBS source**, **Web URL**, or **Image/video**. Main stays enabled; Sub and Side counts decide how many slots appear.
-5. For **OBS source**, create the original capture or camera source in OBS first and confirm that it works. Scenes and groups cannot be selected. For web content use the provider's OBS display URL; for media upload the file or enter its direct media URL.
-6. Set panel counts, Main/Sub row order, Side position, sizes, spacing, fill and stroke. Review the layout preview; it cannot show your real OBS capture or prove a live widget connection.
-7. Click **Save as ZIP** (Korean: **ZIP 파일로 저장**). The result is your personal **`OBS-settings.zip`**, not the distribution archive.
-8. Extract the **whole personal ZIP** into a new permanent folder. Keep `OBS-script.lua`, `obs-settings.json`/configuration, masks, assets and runtime files together. Do not move just the Lua file: it resolves files relative to its own folder.
-9. Open **Tools → Scripts → +** in OBS and select that folder's **`OBS-script.lua`**. If needed, enable **English UI (reload after changing)** and reload the script.
-10. For each panel with **OBS source** content, choose its original OBS source in the matching script selector. Use distinct sources for different panels you want to show; a blank selector can intentionally leave a panel empty. Click **Apply saved settings / Auto layout** (Korean: **저장한 설정 / 자동 배치 적용**).
-11. Open the generated **ALO4OBS** scene and check the actual capture, camera, web widgets and media in OBS before using it. The settings-page preview is a layout preview, not the OBS output.
+1. Install **OBS Studio 30.1 or newer** with Browser Source and **Tools → Scripts**. Use a **1920 × 1080 base canvas**. The minimum follows the [scene-item API requirements](https://docs.obsproject.com/reference-scenes#c.obs_sceneitem_get_info2); Windows OBS 32.2.2 is the version tested.
+2. Extract the **entire distribution ZIP** and open its root **settings.html**. Choose Bento or Overlap.
+3. Select a preview panel, choose its content and configure the layout. For OBS sources, create and verify the original capture/camera source in OBS first. For web widgets, use the provider's OBS display URL.
+4. Use the **Save as ZIP** button to create your personal **OBS-settings.zip**. Extract that entire ZIP into a permanent folder.
+5. In OBS, open **Tools → Scripts → +** and add that folder's **OBS-script.lua**. Select an original OBS source for each panel using OBS-source content, then click **Apply saved settings / Auto layout**.
+6. Open the **ALO4OBS** scene and check the actual capture, camera, widgets and media before using it on stream.
 
-Browser edits do not automatically update OBS. Save a new ZIP, extract the whole archive, register the new script path or update the existing application folder and reload its script, check the source selections, then apply again. Applying template settings intentionally restores the saved template layout; it does not start broadcasting or configure capture devices.
+Keep the Lua script, configuration, masks, assets and runtime files together. Moving only the Lua script breaks its relative paths. The browser preview shows layout and supported HTML content; actual OBS captures must be checked in OBS.
+
+Browser edits do not automatically update OBS. Save and extract a new personal ZIP, update or register its script path, reload the script, check source selections and Apply again. The included Korean, English and Japanese guides contain the full procedure.
 
 ## Update an existing installation
 
-Before updating, export your **OBS scene collection**, back up the entire old application folder, and record every panel's script source selection. Keep the old distribution and personal package intact. Work in a separate new distribution folder.
+Back up your **OBS scene collection**, the **complete old application folder** and every panel's script source selection. Keep the last working version available and use a separate folder for the new distribution.
 
-### Carry settings from an ALO4OBS installation
+1. After Apply in the old version, copy its generated **config.js** into the new distribution's **files/** folder. Copy its referenced personal **assets/...** media while keeping the same relative paths. Keep the new internal scripts, fonts and **config.public.js**. The editor reads config.js; renaming a JSON file is not an import procedure.
+2. Open the new settings editor, check the restored values and save a new personal ZIP. Extract the entire personal ZIP into a new permanent folder.
+3. Record the source mappings, remove only the old Lua registration, add the new script and **reselect the original sources before Apply**. A new script registration does not inherit old source-selector values.
+4. Apply and verify the **ALO4OBS** scene in OBS before switching to it. Unassigned legacy connection URLs remain visible for reassignment and are retained in saved exports.
 
-1. The settings editor reads **`config.js`**, not an imported `config.json` or `obs-settings.json`. After a successful old-script Apply, the old personal package has a generated `config.js`. Copy that file into the new distribution's **`files/`** folder. Copy only the personal media referenced by its `assets/...` paths, preserving those relative paths. Keep the new `config.public.js`, internal scripts and fonts.
-2. If `config.js` is absent, return to the old version and click **Apply saved settings / Auto layout** once to generate it, or manually configure the new version while retaining the old environment. Renaming a JSON file is not an import procedure. Browser drafts may survive at the same path, but a new folder does not guarantee draft recovery.
-3. Open the new root `settings.html`, check the restored values and media, and export a new `OBS-settings.zip`. Extract it into a **new permanent folder**.
-4. After recording the source mapping, remove **only the old Lua registration** from Tools → Scripts. This does not delete its scenes. Add the new folder's Lua file and **reselect the original sources before Apply**; a new script entry does not inherit the old entry's selector values from the exported JSON.
-5. Apply and check the **ALO4OBS** scene in OBS. The current apply path reuses that scene and `ALO ·` sources/groups and reapplies the template layout; it is designed to preserve original source settings/filters while intentionally resetting template scene-item transforms. Other scenes are not edited directly, but generated `ALO ·` sources/groups reused in them share content updates. Original sources from disabled groups remain as hidden root items. A reserved-name collision aborts Apply; inspect the reported item rather than blindly deleting sources. The isolated Windows OBS 32.2.2 migration/preservation checks below passed. Recovery after a real failure remains unverified; automated state checks are separate evidence.
+Apply reuses ALO4OBS and generated **ALO ·** items, and intentionally restores template scene-item transforms. Original source settings and filters are retained. Other scenes are not directly edited, but generated sources/groups reused in them share content changes. A reserved-name collision aborts Apply; inspect the reported conflict instead of blindly deleting sources.
 
-### Move from legacy OBS Streaming Template / OST
+<details>
+<summary>Recovery and legacy OBS Streaming Template migration</summary>
 
-Keep the old **OBS Streaming Template** scene, its **`OST ·`** groups, original sources and script folder. Record its source selections and back up the scene collection. Stop/remove the old script registration, preserving the Lua file and folder. Configure the new version using the same original sources, add the new Lua path, reselect sources, and apply. The new **ALO4OBS** scene is built separately. Check it before switching to it; the old scene remains available for rollback. There is no automatic OST scene migration. Do not blanket-delete old sources or groups.
+For an ALO4OBS update rollback, import the pre-update scene-collection backup into a **separate recovery collection**. Restore the matching old Lua script and **complete old application folder**, then verify original source mappings. Registering the old Lua script alone does not restore generated browser-source paths changed by an update.
 
-For an **ALO4OBS update rollback**, import the pre-update scene-collection backup into a **separate recovery collection**; do not overwrite the current collection. Restore the **matching old Lua script and complete old application folder**, then check the original source mappings. Applying the update reuses the ALO4OBS scene and changes generated browser-source `local_file` paths to the new folder, so selecting that same scene and registering the old Lua alone does not restore the old setup. Returning directly to a preserved old scene applies only to **parallel legacy OST migration**, where the OST scene remains separate. Without the previous scene-collection and complete application-folder backups, full recovery cannot be guaranteed. Recovery after a real failure remains unverified. A running script's rollback snapshot is only for that same script/version; it is not a cross-version migration backup.
+For legacy **OBS Streaming Template / OST**, preserve its scene, **OST ·** groups, original sources and complete script folder. Remove only the old script registration. The new script builds a separate ALO4OBS scene; verify it before switching. There is no automatic OST scene migration or blanket source deletion.
+
+The running script can restore its prior scene layout and config.js after a controlled Apply failure. That transaction snapshot is not a cross-version migration backup, so keep the complete backups above.
+
+</details>
+
+## Verification
+
+0.10.0 passed **305 tests over HTTP and 305 with direct file opening**, **35 Python checks**, a **96-condition language/theme/layout/width matrix**, **139 height-control UI states** and **20,000 generated geometry configurations**. An isolated Windows **OBS 32.2.2** run passed **52 Apply calls and 2,164 assertions**, including a controlled internal failure, rollback and successful reapplication. All **484 production OBS configuration file hashes** remained unchanged.
+
+These checks use synthetic OBS sources. macOS, real camera/capture devices, authenticated personal widgets and the native save-dialog flow remain unverified. The original intermittent native mutex crash has not been uniquely attributed; repeated-Apply success does not certify every plugin/device combination. See [release verification and remaining boundaries](docs/release-readiness-0.10.0.md).
 
 ## FAQ
 
 <details>
-<summary>What do Main, Sub, and Side mean?</summary>
-
-Main is the large panel. Sub panels run left to right below or above it. Side panels run top to bottom, on the right by default or on the left when selected. These English role names stay the same in every language.
-
-</details>
-
-<details>
 <summary>Do uploaded files stay after reopening?</summary>
 
-They can stay in the same browser and page origin. Clearing browser data, changing browsers, moving the file, or direct-file browser restrictions can remove access. Save `OBS-settings.zip` for a portable copy.
+They can stay in the same browser and page origin. Clearing browser data, changing browsers, moving files or direct-file restrictions can remove access. Save OBS-settings.zip for a portable copy.
 
 </details>
 
 <details>
 <summary>Can I use any web page or media URL?</summary>
 
-Use a provider's HTTP(S) widget or display URL. Management pages and watch pages do not automatically become widgets or playable media. Use only assets you have permission to share.
-
-</details>
-
-<details>
-<summary>What is not verified everywhere?</summary>
-
-Windows OBS 32.2.2 was checked in an isolated portable copy with a QA profile and scene collection: a 0.9.0 personal ZIP was applied, its generated config.js and referenced uploaded PNG were transferred into the 0.9.1 distribution, and a new personal ZIP was applied. The checks confirmed original color-source settings and a user color filter, another scene’s item position, legacy OST scene/groups, ALO4OBS scene reuse, Main source reconnection, no duplicate items on reapply, and the media source’s new local_file path. The uploaded PNG rendered as an orange region in the actual OBS view. Chrome HTTP checks also confirmed save/reopen and all ten settings groups. These checks do not verify personal web widgets, physical cameras, real captures, broadcasting, macOS, the file:// settings editor, OS file pickers, or recovery after a real failure. Browser storage quota behavior was not exhaustively tested.
+Use a provider's HTTP(S) widget/display URL or a direct media URL. Management and watch pages do not automatically become widgets or playable media. Use assets you have permission to share.
 
 </details>
 
 ## Privacy and license
 
-Keep personal `config.js`, `obs-settings.json`, and `OBS-settings.zip` private: they may contain widget tokens. Browser drafts do not update OBS; exports do.
+Keep personal **config.js**, **obs-settings.json** and **OBS-settings.zip** private: they may contain widget tokens. Hide personal widget links and stream keys in bug-report screenshots.
 
-Code: [MIT](LICENSE), copyright 2026 KMG. Inter and Lucide assets retain their own terms; see [third-party notices](template/assets/THIRD-PARTY-NOTICES.md).
+Code: [MIT](LICENSE), copyright 2026 KMG. Inter, Lucide and figma-squircle retain their own terms; see [third-party notices](template/assets/THIRD-PARTY-NOTICES.md).
 
-KMG directs the product, design, requirements, and real-use evaluation. Code was implemented with [OpenAI Codex](https://openai.com/codex/) through vibe coding.
+KMG directs the product, design, requirements and real-use evaluation. Code was implemented with [OpenAI Codex](https://openai.com/codex/) through vibe coding.
 
-[Change log](CHANGELOG.md) · [QA evidence](docs/QA.md)
-
-Before sharing screenshots, hide personal widget links and stream keys.
+Older [0.9.1](https://github.com/kmg200164/ALO4OBS/raw/refs/heads/main/downloads/ALO4OBS-v0.9.1.zip) and [0.9.0](https://github.com/kmg200164/ALO4OBS/raw/refs/heads/main/downloads/ALO4OBS-v0.9.0.zip) distribution archives remain unchanged. [Change log](CHANGELOG.md) · [Historical QA](docs/QA.md)
 
 ## Documentation language
 
-ALO4OBS project documentation must be written in English. This includes README files, changelogs, QA records, work reports, development guidance and concept-explanation comments. English is the canonical documentation language. Explicitly localized product UI and Korean/Japanese user guides remain translated and must stay consistent with the English guide.
+Project documentation, including README files, changelogs, QA records, work reports, development guidance and concept-explanation comments, is canonical in English. Localized product UI and Korean/Japanese user guides remain translated and consistent with the English guide.

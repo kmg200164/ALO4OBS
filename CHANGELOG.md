@@ -1,5 +1,39 @@
 # Changelog
 
+## 0.10.0 — 2026-10-11
+
+### Added
+
+- Add **Overlap**, with full-screen Main and up to 15 independent auxiliary panels across five fixed columns. Keep **Bento** for separate Main, Sub and Side panels.
+- Add an initial layout chooser and header **Switch layout** action. Retain each layout's panel content, dimensions, placement and hidden settings; share Main and global appearance.
+- Add Overlap column enable switches, 1–3 panel counts and a **Wider width** switch on columns 1/3/5. Use fixed five-column or three-column width bases; temporarily suppress occupied neighboring columns while retaining their saved settings.
+- Add automatic Top/Center/Bottom column-stack alignment and manual Y controls with vertical preview dragging. Fit applied height and Y to bounds, panel order, gaps and a 128 px minimum, while retaining requested values.
+- Add an editor-only game-UI safety guide with a warning-icon toggle. All five middle cells are yellow, including in-game chat and server-warning areas; warnings never reject placement.
+- Add shared panel corner smoothing and shadows, global appearance and individual overrides. Include the figma-squircle MIT notice.
+
+### Changed
+
+- Keep equal-width preview and settings work areas side by side, with a sticky preview. Use one settings column at narrower widths and retain the panel inspector/selection hint before selection.
+- Start property sections collapsed, group global controls by background, gap, corners, fill, stroke and shadow, and separate column sections without a divider below their heading.
+- Use consistent icon-only actions, switches for on/off controls, localized Korean/English/Japanese tooltips and theme-aware contrast. Put Guide in the left header group and Switch layout in the right; right-align Reset and Save actions.
+- Separate **Image URL** and **Image file** fill choices, retain dormant media, and initialize unused individual gradients from white to black.
+- Use monochrome layout thumbnails and a stronger Bento Main fill. Remove sample controls; supported HTML content renders in the preview and native sources are checked in OBS.
+- Simplify Korean, English and Japanese guides and align their instructions with the current layout and export workflow.
+
+### Fixed
+
+- Preserve all legacy connection URLs through migration, reload and re-export. Show unassigned URLs for reassignment without replacing populated panels or fetching those unassigned URLs.
+- Protect Apply mutations and config writes so false returns and thrown exceptions restore the previous layout and config.js, release held references and report recovery failures. Use throwing assertions for internal failure propagation because OBS's hosted error() only logs.
+- Retain disabled columns in their named slots and suppress inactive strokes; share geometry across preview, exports and OBS application.
+- Create transient plugin-validation probes privately to reduce immediate-release source/mixer event exposure. The exact original intermittent native mutex fault remains unconfirmed.
+
+### Verification and scope
+
+- Passed 305 HTTP and 305 direct-file Node tests, 35 Python checks, 96 browser conditions, 139 actual height UI states and 20,000 generated geometry configurations.
+- Isolated Windows OBS 32.2.2: 52 Apply calls and 2,164 assertions, including internal mutation failure, rollback and reapplication. All 484 production configuration file hashes stayed unchanged.
+- macOS, real camera/capture devices, authenticated personal widgets and the native save-dialog flow remain unverified.
+- Curated streaming presets are deferred to **0.10.1**. UI color themes remain available. Preserve the original 0.9.0 and 0.9.1 archives.
+
 ## 0.9.1 — 2026-10-08
 
 - Match regional fill-opacity, blur and stroke-width controls to the global five-step sliders; retain saved style values.

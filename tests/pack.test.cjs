@@ -20,7 +20,7 @@ test('seven generic panels export without legacy provider data',()=>{
  panelContent.translation={type:'media',url:'assets/card.png'};
  const saved=JSON.parse(new TextDecoder().decode(api.settingsEntries({layoutVersion:4,panelContent,chatUrl:'https://private.example.org/widget',slotContent:{custom1:'sponsor'},panelEnabled:{custom2:false}})[1].bytes));
  assert.equal(saved.layoutVersion,4);
- assert.deepEqual(Object.keys(saved.panelContent),keys);
+ assert.deepEqual(Object.keys(saved.panelContent),require('../template/events.js').allPanelKeys);
  assert.equal(saved.panelContent.chat.url,'https://example.org/widget');
  assert.equal(saved.panelContent.translation.url,'assets/card.png');
  assert.equal(saved.panelEnabled.custom2,false);

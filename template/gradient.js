@@ -81,6 +81,15 @@
     if(label)node.setAttribute('aria-label',label);
     return node;
   };
+  // Stock Lucide 0.468.0 action glyphs; stop selectors and handles retain their own semantics.
+  const actionIcons={
+  "rotate-ccw": "<svg class=\"button-svg lucide lucide-rotate-ccw\" data-lucide=\"rotate-ccw\" aria-hidden=\"true\" focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\" /><path d=\"M3 3v5h5\" /></svg>",
+  "rotate-cw": "<svg class=\"button-svg lucide lucide-rotate-cw\" data-lucide=\"rotate-cw\" aria-hidden=\"true\" focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8\" /><path d=\"M21 3v5h-5\" /></svg>",
+  "arrow-left-right": "<svg class=\"button-svg lucide lucide-arrow-left-right\" data-lucide=\"arrow-left-right\" aria-hidden=\"true\" focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M8 3 4 7l4 4\" /><path d=\"M4 7h16\" /><path d=\"m16 21 4-4-4-4\" /><path d=\"M20 17H4\" /></svg>",
+  "plus": "<svg class=\"button-svg lucide lucide-plus\" data-lucide=\"plus\" aria-hidden=\"true\" focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14\" /><path d=\"M12 5v14\" /></svg>",
+  "trash-2": "<svg class=\"button-svg lucide lucide-trash-2\" data-lucide=\"trash-2\" aria-hidden=\"true\" focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 6h18\" /><path d=\"M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6\" /><path d=\"M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2\" /><line x1=\"10\" x2=\"10\" y1=\"11\" y2=\"17\" /><line x1=\"14\" x2=\"14\" y1=\"11\" y2=\"17\" /></svg>"
+};
+  const iconButton=(className,icon,label)=>{const node=button(className+" kmg-gradient-action-button","",label);node.innerHTML=actionIcons[icon];return node;};
   function open(anchor,part,onChange,options={}){
     if(typeof document==='undefined'||!document.body)return null;
     const lockOpacity=options?.lockOpacity===true;
@@ -118,9 +127,9 @@
     const typeSelect=make('select','kmg-gradient-type');
     typeSelect.setAttribute('aria-label',label('그라디언트 종류','Gradient type'));
     const linear=make('option','',label('선형','Linear'));linear.value='linear';typeSelect.append(linear);
-    const rotateLeft=button('kmg-gradient-icon','−',label('반시계방향 회전','Rotate gradient counterclockwise'));
-    const rotateRight=button('kmg-gradient-icon','+',label('시계방향 회전','Rotate gradient clockwise'));
-    const reverse=button('kmg-gradient-action',label('반전','Reverse'),label('그라디언트 반전','Reverse gradient'));
+    const rotateLeft=iconButton('kmg-gradient-icon','rotate-ccw',label('반시계방향 회전','Rotate gradient counterclockwise'));
+    const rotateRight=iconButton('kmg-gradient-icon','rotate-cw',label('시계방향 회전','Rotate gradient clockwise'));
+    const reverse=iconButton('kmg-gradient-action','arrow-left-right',label('그라디언트 반전','Reverse gradient'));
     header.append(typeSelect,rotateLeft,rotateRight,reverse);
     const angleLine=make('div','kmg-gradient-angle-line');
     angleLine.append(make('span','',label('각도','Angle')));
@@ -129,7 +138,7 @@
     const track=make('div','kmg-gradient-track');track.setAttribute('role','group');track.setAttribute('aria-label',label('그라디언트 중지점. 핸들을 끌어 위치를 바꾸세요','Gradient stops; drag a handle to change its position'));
     const stopsHeading=make('div','kmg-gradient-stops-heading');
     stopsHeading.append(make('strong','',label('중지점','Stops')));
-    const add=button('kmg-gradient-add',label('+ 중지점 추가','+ Add stop'),label('중지점 추가','Add gradient stop'));
+    const add=iconButton('kmg-gradient-add','plus',label('중지점 추가','Add gradient stop'));
     stopsHeading.append(add);
     const list=make('div','kmg-gradient-list');
     const details=make('div','kmg-gradient-details');
@@ -143,7 +152,7 @@
     const opacityInput=make('input','kmg-gradient-value');opacityInput.type='number';opacityInput.min='0';opacityInput.max='100';opacityInput.step='1';opacityInput.setAttribute('aria-label',label('선택한 중지점 불투명도','Selected stop opacity percent'));opacityField.append(opacityInput,make('span','kmg-gradient-unit','%'));
     opacityField.hidden=lockOpacity;
     details.append(colorField,hexField,positionField,opacityField);
-    const remove=button('kmg-gradient-remove',label('중지점 삭제','Remove stop'),label('선택한 중지점 삭제','Remove selected stop'));
+    const remove=iconButton('kmg-gradient-remove','trash-2',label('선택한 중지점 삭제','Remove selected stop'));
     root.append(header,angleLine,track,stopsHeading,list,details,remove);
     // A modal dialog occupies the browser's top layer. Keep its editor there too.
     (anchor?.closest?.('dialog[open]')||document.body).append(root);

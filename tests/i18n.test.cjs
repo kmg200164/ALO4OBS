@@ -237,3 +237,17 @@ test('Side switch and UI preset labels translate and round trip in all languages
  }
  for(const lang of ['ko','en','ja'])assert.notEqual(i18n.localize('Invalid Side position',lang),'Invalid Side position');
 });
+
+test('mode switch accessible names round trip across all languages',()=>{
+ const {i18n}=boot();
+ for(const [ko,en,ja] of [['높이 자동/수동','Height Auto / Manual','高さ 自動 / 手動'],['너비 자동/수동','Width Auto / Manual','幅 自動 / 手動'],['세로 위치 자동/수동','Vertical position Auto / Manual','縦位置 自動 / 手動']]){
+ assert.equal(i18n.localize(ko,'en'),en);assert.equal(i18n.localize(en,'ja'),ja);assert.equal(i18n.localize(ja,'ko'),ko);
+ }
+});
+
+test('layout action names round trip across all languages',()=>{
+ const {i18n}=boot();
+ for(const [ko,en,ja] of [['레이아웃 전환','Switch layout','レイアウト切り替え'],['레이아웃 전환 · 현재 Overlap','Switch layout · Current Overlap','レイアウト切り替え · 現在 Overlap']]){
+ assert.equal(i18n.localize(ko,'en'),en);assert.equal(i18n.localize(en,'ja'),ja);assert.equal(i18n.localize(ja,'ko'),ko);
+ }
+});

@@ -5,7 +5,7 @@ const path=require('node:path');
 const vm=require('node:vm');
 const header=fs.readFileSync(path.join(__dirname,'../template/header.js'),'utf8');
 const css=fs.readFileSync(path.join(__dirname,'../template/header.css'),'utf8');
-const paletteSource=JSON.parse(fs.readFileSync(path.join(__dirname,'../docs/images/qa-0.9.0/figma-theme-tokens.json'),'utf8'));
+const paletteSource=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/figma-theme-tokens.json'),'utf8'));
 const presets=['red','orange','yellow','lime','aloe','cyan','blue','purple','pink','monochrome'];
 // Parse only the shipped primitive/semantic token rules, applying selector specificity.
 function tokens(preset,theme){
@@ -92,13 +92,14 @@ test('narrow settings keeps brand and action button dimensions',{skip:!process.e
  const {chromium}=require(process.env.KMG_PLAYWRIGHT_PATH||'C:/Users/KMG/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
  const browser=await chromium.launch({headless:true,channel:'chrome'});
  try{
-  const page=await browser.newPage();
-  await page.goto(new URL('settings.html',process.env.KMG_THEME_RENDER_URL).href);
+  const page=await browser.newPage({locale:'ko-KR'});
+  await require('./helpers/expanded-sections.cjs')(page);await page.goto(new URL('settings.html',process.env.KMG_THEME_RENDER_URL).href);
   await page.waitForSelector('html[data-i18n-ready]');
+  await page.locator('[data-layout-choice=bento]').click();
   for(const width of [1200,760,380,320]){
    await page.setViewportSize({width,height:900});
-   const size=await page.evaluate(()=>{const brand=document.querySelector('.app-header .brand h1'),button=document.querySelector('.action-button'),icon=button.querySelector('.button-svg');return {brand:getComputedStyle(brand).fontSize,button:getComputedStyle(button).fontSize,height:button.getBoundingClientRect().height,icon:icon.getBoundingClientRect().width,overflow:document.documentElement.scrollWidth>innerWidth};});
-   assert.deepEqual(size,{brand:'32px',button:'20px',height:48,icon:24,overflow:false},`viewport ${width}px`);
+   const size=await page.evaluate(()=>{const brand=document.querySelector('.app-header .brand h1'),button=document.querySelector('#fullscreen'),icon=button.querySelector('.button-svg');return {brand:getComputedStyle(brand).fontSize,button:getComputedStyle(button).fontSize,height:button.getBoundingClientRect().height,icon:icon.getBoundingClientRect().width,overflow:document.documentElement.scrollWidth>innerWidth};});
+   assert.deepEqual(size,{brand:'32px',button:'16px',height:48,icon:24,overflow:false},`viewport ${width}px`);
   }
  }finally{await browser.close();}
 });
@@ -191,7 +192,7 @@ test('the ten named choices preserve order, scrolling and stable slider/switch g
  assert.match(previewCss,/slider-runnable-track\{height:6px;border:0;outline:0;box-shadow:none/);
  assert.match(previewCss,/slider-thumb\{[^}]*width:16px;height:16px;[^}]*border:0;outline:0;box-shadow:none/);
  assert.doesNotMatch(previewCss,/translateY\(var\(--space-2\)\)|gradient-edit::before/);
- assert.match(previewCss,/input:is\(\[name=placementSwap\],\[name=sidePosition\]\)/);
+ assert.match(previewCss,/input\[role=switch\]/);
  assert.match(previewCss,/panel-hit\[aria-pressed=true\] \.panel-number::after\{content:" ✓"\}/);
 });
 test('interaction roles swap fill and ink while controls stay free of permanent outlines',()=>{
@@ -205,7 +206,8 @@ test('interaction roles swap fill and ink while controls stay free of permanent 
  const previewCss=fs.readFileSync(path.join(__dirname,'../template/preview.css'),'utf8');
  assert.match(previewCss,/input\[type=range\]\{appearance:none;[^}]*border:0;box-shadow:none/);
  assert.doesNotMatch(previewCss,/background-image:linear-gradient\(45deg/);
- assert.match(previewCss,/panel-hit\[aria-pressed=true\],\.panel-hit:hover\{outline:3px solid var\(--accent-default\);outline-offset:0/);
+ assert.match(previewCss,/\.hit-outline\{[^}]*color:var\(--accent-default\)/);
+ assert.match(previewCss,/\.panel-hit:is\(:hover,:focus-visible,\[aria-pressed=true\]\) \.hit-outline\{display:block\}/);
  const guideCss=fs.readFileSync(path.join(__dirname,'../template/guide-layout.css'),'utf8');
  assert.match(guideCss,/\.step-card \.step-content code,[^{}]*kbd[^{}]*\{background:var\(--accent-default\);color:var\(--content-on-accent\)\}/);
  assert.doesNotMatch(guideCss.replace(/\/\*[\s\S]*?\*\//g,''),/strong[^{}]*\{background:/);
@@ -216,10 +218,11 @@ test('rendered settings and three guides bind theme/preset backgrounds, inverse 
  const {chromium}=require(process.env.KMG_PLAYWRIGHT_PATH||'C:/Users/KMG/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
  const browser=await chromium.launch({headless:true,channel:'chrome'});
  try{
-  const page=await browser.newPage({viewport:{width:1440,height:900}});
+  const page=await browser.newPage({locale:'ko-KR',viewport:{width:1440,height:900}});
   const color=hex=>'rgb('+hex.slice(1).match(/../g).map(x=>parseInt(x,16)).join(', ')+')';
   for(const filename of ['settings.html','guide.html','guide-en.html','guide-ja.html']){
-   await page.goto(new URL(filename,process.env.KMG_THEME_RENDER_URL).href);await page.waitForSelector('html[data-i18n-ready]');
+   await require('./helpers/expanded-sections.cjs')(page);await page.goto(new URL(filename,process.env.KMG_THEME_RENDER_URL).href);await page.waitForSelector('html[data-i18n-ready]');
+   if(filename==='settings.html')await page.locator('[data-layout-choice=bento]').click();
    for(const preset of presets)for(const theme of ['light','dark']){
     await page.evaluate(({preset,theme})=>{document.body.dataset.uiPreset=preset;document.documentElement.dataset.uiPreset=preset;document.body.dataset.theme=theme;document.documentElement.dataset.theme=theme;for(const input of document.querySelectorAll('input[name="ui-accent-preset"]'))input.checked=input.value===preset;},{preset,theme});
     const t=tokens(preset,theme);
@@ -229,7 +232,8 @@ test('rendered settings and three guides bind theme/preset backgrounds, inverse 
      const controls=await page.evaluate(()=>{const sw=document.querySelector('input[name=placementSwap]');return {divider:getComputedStyle(document.querySelector('.divider')).display,rail:getComputedStyle(sw).backgroundColor,thumb:getComputedStyle(sw,'::before').backgroundColor,marks:getComputedStyle(document.querySelector('.size-ratio-marks')).color,gap:getComputedStyle(document.querySelector('.property-row--count .size-controls')).gap};});
      assert.deepEqual(controls,{divider:'block',rail:color(t['--content-primary']),thumb:color(t['--surface-field']),marks:color(t['--accent-default']),gap:'4px'},filename+' '+preset+'/'+theme+' borderless controls');
      const side=page.locator('.panel-hit[data-hit=translation]');await side.hover();
-     assert.deepEqual(await side.evaluate(el=>({color:getComputedStyle(el).outlineColor,offset:getComputedStyle(el).outlineOffset})),{color:color(t['--accent-default']),offset:'0px'},'Side hover outline uses preset accent outside the tile');
+     const outline=await side.evaluate(el=>{const svg=el.querySelector('.hit-outline'),path=svg.querySelector(':scope>path'),box=el.getBoundingClientRect(),ring=svg.getBoundingClientRect(),mask=svg.querySelector('mask');return {color:getComputedStyle(svg).color,display:getComputedStyle(svg).display,stroke:path.getAttribute('stroke'),width:path.getAttribute('stroke-width'),exterior:ring.left<box.left&&ring.right>box.right&&ring.top<box.top&&ring.bottom>box.bottom,interiorFill:mask.lastElementChild.getAttribute('fill')};});
+     assert.deepEqual(outline,{color:color(t['--accent-default']),display:'block',stroke:'currentColor',width:'6',exterior:true,interiorFill:'#000000'},'Side hover SVG follows preset accent outside the panel and masks its interior');
      await page.mouse.move(0,800);
     }
     const button=page.locator(filename==='settings.html'?'.action-button':'#theme-toggle').first();
@@ -291,25 +295,13 @@ test('rendered settings and three guides bind theme/preset backgrounds, inverse 
     await page.keyboard.press('Tab');
     assert.deepEqual(await page.evaluate(()=>({pointer:document.querySelector('.app-header').classList.contains('pointer-focus'),visible:document.activeElement.matches(':focus-visible'),outline:getComputedStyle(document.activeElement).outlineStyle})),{pointer:false,visible:true,outline:'solid'},'Tab restores keyboard focus box');
     await page.locator('.panel-hit[data-hit=custom2]').click();
-    const select=await page.locator('.property-row--size select[name=panelWidthMode]').evaluate(el=>{
-     const row=el.closest('.property-row'),shell=el.closest('.select-shell');
-     const arrow=shell.querySelector('svg.lucide-chevron-down');
-     const right=element=>element.getBoundingClientRect().right;
-     return {appearance:getComputedStyle(el).appearance,arrow:arrow&&{name:arrow.getAttribute('data-lucide'),path:arrow.querySelector('path')?.getAttribute('d'),rightInset:right(shell)-right(arrow)+arrow.getBoundingClientRect().width/4},pseudo:getComputedStyle(shell,'::after').content,rowInset:right(row)-right(el),shellOffset:right(shell)-right(el)};
-    });
-    assert.equal(select.appearance,'none');
-    assert.equal(select.arrow?.name,'chevron-down');
-    assert.equal(select.arrow.path,'m6 9 6 6 6-6');
-    assert.ok(select.arrow.rightInset>=16&&select.arrow.rightInset<=20,'Lucide arrow is visibly inset about 18px');
-    assert.equal(select.pseudo,'none','selector has no CSS-drawn arrow');
-    assert.ok(Math.abs(select.rowInset-8)<1,'selector retains the row’s 8px outer inset');
-    assert.ok(Math.abs(select.shellOffset)<1,'arrow wrapper does not move the selector');
-    await page.locator('[name=panelWidthMode]').selectOption('fixed');
+    const mode=page.locator('[name=panelWidthMode]');assert.equal(await mode.getAttribute('role'),'switch');assert.equal(await mode.isChecked(),false);
+    await page.locator('[name=panelWidthMode]').check();
     const snap=await page.locator('[data-fixed-size=width]').evaluate(el=>({labels:[...el.querySelectorAll('[data-ratio-marks] span')].map(node=>[node.textContent,node.style.left]),dots:el.querySelectorAll('[data-snap-points] span').length}));
     assert.ok(snap.labels.some(([label])=>label==='16:9'),'16:9 snap is in the available width range');
     assert.equal(snap.dots,0,'the slider has no white snap dots');
-    const cards=await page.locator('.settings-card').evaluateAll(els=>els.map(el=>({height:el.getBoundingClientRect().height,scroll:el.scrollHeight})));
-    assert.ok(cards[1].height<cards[2].height,'settings cards keep their own content height');
+    const cards=await page.locator('.settings-card:visible').evaluateAll(els=>els.map(el=>({height:el.getBoundingClientRect().height,scroll:el.scrollHeight})));
+    assert.ok(new Set(cards.map(card=>Math.round(card.height))).size>1,'settings cards keep their own content height');
     assert.ok(cards.every(card=>card.scroll<=card.height+1),'content is not clipped by a fixed card height');
     const globalFill=page.locator('.global-card details.property-section').filter({has:page.locator('summary').filter({hasText:'패널 채우기'})}).first();
     const heading=globalFill.locator('summary h4');

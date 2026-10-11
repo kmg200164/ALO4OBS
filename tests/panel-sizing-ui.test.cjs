@@ -49,7 +49,7 @@ test('pointer slider input snaps to recalculated aspect marks while keyboard inp
  const start=source.indexOf("  form.addEventListener('input',event=>{")+"  form.addEventListener('input',event=>{".length;
  const end=source.indexOf("    if(input.matches('[data-panel-count]'))",start);
  function slide(value,height,pointer=true){
-  const input={name:'panelWidthSlider',value:String(value),min:'220',max:'660'},number={value:'0'};
+  const input={dataset:{},name:'panelWidthSlider',value:String(value),min:'220',max:'660'},number={value:'0'};
   const context={selected:'custom1',snappingSlider:pointer?input:null,config:{layout:{custom1:{width:440,height}}},OverlayEvents:events,control:()=>number};
   vm.runInNewContext('function slide(event){'+source.slice(start,end)+'} slide(event);',{...context,event:{target:input}});
   return Number(number.value);
@@ -61,10 +61,10 @@ test('pointer slider input snaps to recalculated aspect marks while keyboard inp
 
 test('committing a size preserves the panel button receiving the next click',()=>{
  const hits={children:[],append(button){this.children.push(button);button.parent=this;},querySelector(selector){return this.children.find(button=>selector===`[data-hit="${button.dataset.hit}"]`)||null;}};
- const document={createElement(){return {dataset:{},style:{},attributes:{},setAttribute(name,value){this.attributes[name]=value;},append(child){this.firstElementChild=child;},remove(){this.parent.children=this.parent.children.filter(button=>button!==this);}};}};
+ const document={createElement(){return {dataset:{},style:{},attributes:{},setAttribute(name,value){this.attributes[name]=value;},querySelector(){return null;},append(child){this.firstElementChild=child;},remove(){this.parent.children=this.parent.children.filter(button=>button!==this);}};}};
  const config={panelEnabled:Object.fromEntries(keys.map(key=>[key,true]))};
- const context={config,keys,names:Object.fromEntries(keys.map(key=>[key,key])),selected:'custom1',window:{},document,byId:id=>id==='panel-hit-areas'?hits:null,updateCameraOverlay(){},highlight(){}};
- vm.runInNewContext(source.slice(source.indexOf('  function drawHits(layout){'),source.indexOf('  function apply(message){')),context);
+ const context={OverlayEvents:events,config,keys,names:Object.fromEntries(keys.map(key=>[key,key])),selected:'custom1',window:{},document,byId:id=>id==='panel-hit-areas'?hits:id==='overlap-safety-guide'?{hidden:true,replaceChildren(){}}:id==='preview-fullscreen'?{dataset:{}}:null,control(){return null;},updateCameraOverlay(){},highlight(){}};
+ vm.runInNewContext(source.slice(source.indexOf('  function drawHits('),source.indexOf('  function apply(message){')),context);
  const layout=events.resolveLayout();context.drawHits(layout);
  const original=[...hits.children];context.drawHits({...layout,custom1:{...layout.custom1,width:500}});
  assert.equal(hits.children.length,7);
@@ -95,18 +95,20 @@ test('placement card has no level selects and one swap toggle that flips Main an
 });
 
 test('per-panel style separates labeled Fill and Stroke groups without changing controls or override visibility',()=>{
+ const fileStart=source.indexOf('  const fileIcon='),fileEnd=source.indexOf('  const color=',fileStart);
  const sectionStart=source.indexOf('    const section=(title,html)=>'),sectionEnd=source.indexOf('    const content=',sectionStart);
  const regionStart=source.indexOf("    const regionInputs=section('영역 스타일',"),regionEnd=source.indexOf("    byId('panel-editor').innerHTML=",regionStart);
  for(const override of [false,true]){
-  const context={config:{regionStyleOverrides:{custom1:override}},key:'custom1',useRegionOverride:override,region:{},fill:{mode:'solid'},stroke:{mode:'solid'},opacityPresets:[],blurPresets:[],strokeWidthPresets:[],
+  const context={config:{regionStyleOverrides:{custom1:override}},key:'custom1',useRegionOverride:override,shadow:'<details><summary><h4>그림자</h4></summary></details>',region:{},fillChoice:'solid',fill:{mode:'solid'},stroke:{mode:'solid'},opacityPresets:[],blurPresets:[],strokeWidthPresets:[],
    propertyRow:(_label,html,name,value)=>`<input name="${name}" value="${value}">${html}`,
    color:name=>`<input name="${name}">`,gradientControl:name=>`<button data-gradient="${name}"></button>`,
-   editorToggle:(_label,name)=>`<input name="${name}">`,editorPreset:(_label,name)=>`<input name="${name}">`,fieldHtml:(_label,name)=>`<input name="${name}">`,editorFile:()=>'<input type="file" data-upload="region">'};
-  vm.runInNewContext(source.slice(sectionStart,sectionEnd)+source.slice(regionStart,regionEnd)+';this.markup=regionInputs;',context);
+   editorToggle:(_label,name)=>`<input name="${name}">`,editorPreset:(_label,name)=>`<input name="${name}">`,fieldHtml:(_label,name)=>`<input name="${name}">`};
+  vm.runInNewContext(source.slice(fileStart,fileEnd)+source.slice(sectionStart,sectionEnd)+source.slice(regionStart,regionEnd)+';this.markup=regionInputs;',context);
   const html=context.markup,fill=html.indexOf('<h4>패널 채우기</h4>'),stroke=html.indexOf('<h4>패널 테두리</h4>'),divider=html.indexOf('<div class="divider"></div>',fill);
   assert.ok(fill>=0&&fill<html.indexOf('name="regionFillMode"')&&html.indexOf('name="regionBlur"')<divider&&divider<stroke&&stroke<html.indexOf('name="regionStrokeMode"'));
-  assert.equal((html.match(/name="regionFillMode"/g)||[]).length,3);assert.equal((html.match(/name="regionStrokeMode"/g)||[]).length,3);
+  assert.equal((html.match(/name="regionFillMode"/g)||[]).length,5);assert.equal((html.match(/name="regionStrokeMode"/g)||[]).length,3);
   for(const name of ['regionOverride','regionColor','regionOpacity','regionBlur','regionBorderColor','regionStrokeWidth','regionImage'])assert.equal((html.match(new RegExp('name="'+name+'"','g'))||[]).length,1,name);
+  assert.equal((html.match(/data-upload-trigger="region"/g)||[]).length,1);assert.equal((html.match(/data-upload="region"/g)||[]).length,1);
   assert.equal(/class="property-group region-style-details" hidden/.test(html),!override);
  }
 });

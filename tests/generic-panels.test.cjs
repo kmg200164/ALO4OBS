@@ -37,7 +37,9 @@ test('version-3 URLs and media migrate to their existing panel geometry keys',()
 
 test('settings preview numbers all seven panels without adding numbers to the OBS overlay',()=>{
   const roles=['Main','Sub 1','Sub 2','Sub 3','Side 1','Side 2','Side 3'];
-  keys.forEach((key,index)=>assert.match(html,new RegExp(`<option value="${key}">${roles[index]}<\\/option>`)));
+  assert.deepEqual(keys.map(key=>require('../template/events.js').panelLabels[key]),roles);
+  assert.doesNotMatch(html,/id="event-target"/);
+  assert.match(preview,/const names=OverlayEvents\.panelLabels/);
   assert.doesNotMatch(html,/패널 [1-7]/);
   assert.match(html,/id="selected-panel-tag" class="panel-number"/);
   assert.match(css,/\.panel-number\{/);
