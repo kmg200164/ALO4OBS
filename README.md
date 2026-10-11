@@ -18,7 +18,7 @@ Found it useful? [Support continued improvements](https://buymeacoffee.com/kmg20
 <a name="quick-start"></a>
 
 <details>
-<summary><strong>How to start</strong></summary>
+<summary><h2>How to start</h2></summary>
 
 ![Setup: download, extract, open settings.html, configure panels, unpack saved settings, add the OBS script.](docs/images/setup-workflow.png)
 
@@ -39,7 +39,7 @@ Browser edits do not automatically update OBS. Save and extract a new personal Z
 <a name="update-an-existing-installation"></a>
 
 <details>
-<summary><strong>How to update</strong></summary>
+<summary><h2>How to update</h2></summary>
 
 Back up your **OBS scene collection**, the **complete old application folder** and every panel's script source selection. Keep the last working version available and use a separate folder for the new distribution.
 
@@ -66,7 +66,7 @@ The running script can restore its prior scene layout and config.js after a cont
 <a name="two-layout-types"></a>
 
 <details>
-<summary><strong>Two layout types</strong></summary>
+<summary><h2>Two layout types</h2></summary>
 
 | | Bento | Overlap |
 | --- | --- | --- |
@@ -82,7 +82,7 @@ Switch layouts from the header. Each layout retains its panel content and settin
 <a name="features"></a>
 
 <details>
-<summary><strong>Features</strong></summary>
+<summary><h2>Features</h2></summary>
 
 - Configure a **1920 × 1080** layout with a sticky preview beside the settings. Both work areas stay side by side; narrow settings use one column.
 - Select a panel directly in the preview. The panel-settings section remains visible with a selection hint until you choose one.
@@ -100,7 +100,7 @@ Switch layouts from the header. Each layout retains its panel content and settin
 <a name="verification"></a>
 
 <details>
-<summary><strong>Verification</strong></summary>
+<summary><h2>Verification</h2></summary>
 
 0.10.0 passed **305 tests over HTTP and 305 with direct file opening**, **35 Python checks**, a **96-condition language/theme/layout/width matrix**, **139 height-control UI states** and **20,000 generated geometry configurations**. An isolated Windows **OBS 32.2.2** run passed **52 Apply calls and 2,164 assertions**, including a controlled internal failure, rollback and successful reapplication. All **484 production OBS configuration file hashes** remained unchanged.
 
@@ -111,7 +111,7 @@ These checks use synthetic OBS sources. macOS, real camera/capture devices, auth
 <a name="faq"></a>
 
 <details>
-<summary><strong>FAQ</strong></summary>
+<summary><h2>FAQ</h2></summary>
 
 <details>
 <summary>Do uploaded files stay after reopening?</summary>
@@ -132,7 +132,7 @@ Use a provider's HTTP(S) widget/display URL or a direct media URL. Management an
 <a name="privacy-and-license"></a>
 
 <details>
-<summary><strong>Privacy and license</strong></summary>
+<summary><h2>Privacy and license</h2></summary>
 
 Keep personal **config.js**, **obs-settings.json** and **OBS-settings.zip** private: they may contain widget tokens. Hide personal widget links and stream keys in bug-report screenshots.
 
@@ -147,7 +147,7 @@ Older [0.9.1](https://github.com/kmg200164/ALO4OBS/raw/refs/heads/main/downloads
 <a name="documentation-language"></a>
 
 <details>
-<summary><strong>Documentation language</strong></summary>
+<summary><h2>Documentation language</h2></summary>
 
 Project documentation, including README files, changelogs, QA records, work reports, development guidance and concept-explanation comments, is canonical in English. Localized product UI and Korean/Japanese user guides remain translated and consistent with the English guide.
 
