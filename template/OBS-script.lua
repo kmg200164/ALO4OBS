@@ -14,7 +14,7 @@ local areas={{'chatUrl','OBS Template · Chat','chat','showChat'},
  {'donationSoop','OBS Template · SOOP Alerts','alerts','showAlerts'},
  {'reactiveUrl','OBS Template · Discord Reactive','hand','reactive'}}
 function script_description()
- return 'ALO4OBS: choose Bento or Overlap panels in settings.html, extract OBS-settings.zip beside this script, select a different existing OBS source for each panel that needs one, then Apply. Apply updates the ALO4OBS layout; original capture settings are preserved.'
+ return 'ALO4OBS: choose Bento or Overlap panels in settings.html, extract Settings-Bento.zip or Settings-Overlap.zip beside this script, select a different existing OBS source for each panel that needs one, then Apply. Apply updates the ALO4OBS layout; original capture settings are preserved.'
 end
 function script_defaults(settings)
  obs.obs_data_set_default_bool(settings,'english',true)

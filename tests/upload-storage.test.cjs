@@ -32,7 +32,7 @@ test('ZIP export after reopening uses restored bytes and preserves its snapshot 
   const start=preview.indexOf("  byId('bundle').onclick=async()=>{"),end=preview.indexOf("  frame.addEventListener('load'",start);
   let entries;const bundle={},status={},keys=['game','custom1','custom2','custom3','chat','translation','hand'];
   const data={...saved,layout:Object.fromEntries(keys.map(key=>[key,{}]))};
-  const context={OverlayEvents:require('../template/events.js'),showStatus:(message)=>{status.textContent=message;},uploads:restored.entries,keys,status,current:()=>structuredClone(data),byId:()=>bundle,window:{OBS_EXPORT_RUNTIME:{}},
+  const context={localized:s=>s,OverlayEvents:require('../template/events.js'),showStatus:(message)=>{status.textContent=message;},uploads:restored.entries,keys,status,current:()=>structuredClone(data),byId:()=>bundle,window:{OBS_EXPORT_RUNTIME:{}},
     alphaMask:async(_,name)=>({name,bytes:new Uint8Array([0])}),OverlayPack:{isolateRuntime:entries=>entries,settingsEntries:()=>[],zip:input=>{entries=input;return new Uint8Array([0]);}},
     Uint8Array,Blob,URL:{createObjectURL:()=> 'blob:zip',revokeObjectURL(){}},document:{createElement:()=>({click(){}})},setTimeout(){}};
   vm.runInNewContext(preview.slice(start,end),context);const exporting=bundle.onclick();restored.entries.clear();await exporting;
@@ -65,7 +65,7 @@ test('new exported source takes precedence over a durable browser draft without 
   const f=fixture(),api=controller(f);await api.save(draft(),files(),'old source');
   const saved=JSON.parse(f.local.get('obs-overlay-config')),preview=fs.readFileSync(require.resolve('../template/preview.js'),'utf8');
   const start=preview.indexOf('  function restoredSettings('),end=preview.indexOf('  function propertyRow(',start);
-  const exported={layoutVersion:4,layout:{},name:'exported'},context={defaults:{},OverlayEvents:{validateLayout(){}}};
+  const exported={layoutVersion:4,layout:{},name:'exported'},context={defaults:{},localized:s=>s,OverlayEvents:{validateLayout(){}}};
   vm.runInNewContext(preview.slice(start,end),context);
   assert.equal(context.restoredSettings(exported,saved,saved._sourceFingerprint),exported);
   assert.match(preview,/if\(restored===saved\)/);
@@ -138,4 +138,16 @@ test('reset after failed boot always enables persistence and export',()=>{
 test('denied shared lock reports session-only persistence without an unhandled rejection',async()=>{
   const f=fixture(),api=controller(f,{locks:{request(){return Promise.reject(new Error('SecurityError'));}}});
   assert.equal(await api.save(draft(),files(),'source'),false);assert.equal(f.local.size,0);assert.match(f.warnings.at(-1),/현재 창에서만/);
+});
+
+test('a moved settings path cannot reuse another path uploads and retains the saved draft',async()=>{
+ const f=fixture();await controller(f).save(draft(),files(),'source');const before=f.local.get('obs-overlay-config');
+ const restored=await controller(f,{scope:'file:///new-folder/settings.html'}).restore(JSON.parse(before));
+ assert.deepEqual(restored.missing,['whole','custom1','region-game']);assert.equal(restored.entries.size,0);
+ assert.equal(f.local.get('obs-overlay-config'),before);assert.equal(f.records.size,3);
+});
+test('unavailable file storage reports missing uploads without deleting saved settings or bytes',async()=>{
+ const f=fixture();await controller(f).save(draft(),files(),'source');const before=f.local.get('obs-overlay-config');
+ const restored=await controller(f,{assets:{...f.assets,get:async()=>{throw new Error('SecurityError');}}}).restore(JSON.parse(before));
+ assert.deepEqual(restored.missing,['whole','custom1','region-game']);assert.equal(f.local.get('obs-overlay-config'),before);assert.equal(f.records.size,3);
 });

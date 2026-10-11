@@ -200,6 +200,8 @@ const attributeOriginals=new WeakMap();
 Object.assign(translations,{"체리":"Cherry","오렌지":"Orange","바나나":"Banana","라임":"Lime","알로에":"Aloe","솜사탕":"Cotton Candy","블루베리":"Blueberry","포도":"Grape","풍선껌":"Bubblegum","모노":"Mono"});
 Object.assign(japanese,{"체리":"チェリー","오렌지":"オレンジ","바나나":"バナナ","라임":"ライム","알로에":"アロエ","솜사탕":"わたあめ","블루베리":"ブルーベリー","포도":"ぶどう","풍선껌":"バブルガム","모노":"モノ"});
 const supportedLanguages=['ko','en','ja'];
+Object.assign(translations,{'설정 ZIP 전체를 압축 해제한 뒤, 같은 폴더의 OBS-script.lua를 OBS에 추가하세요.':'Extract the entire settings ZIP, then add OBS-script.lua from that folder in OBS.'});
+Object.assign(japanese,{'설정 ZIP 전체를 압축 해제한 뒤, 같은 폴더의 OBS-script.lua를 OBS에 추가하세요.':'設定 ZIP をすべて展開し、同じフォルダの OBS-script.lua を OBS に追加してください。'});
 const guideFiles={ko:'guide.html',en:'guide-en.html',ja:'guide-ja.html'};
 Object.assign(translations,{'미리보기에서 설정할 패널을 클릭하세요.':'Click a panel in the preview to edit its settings.'});Object.assign(japanese,{'미리보기에서 설정할 패널을 클릭하세요.':'プレビューで設定するパネルをクリックしてください。'});
 translations['OBS 설정']='Settings';

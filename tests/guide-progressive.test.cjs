@@ -10,8 +10,9 @@ test('every guide starts with the shared visual workflow and keeps setup and rec
   const html=fs.readFileSync(path.join(template,name),'utf8');
   assert.ok(html.indexOf('assets/setup-workflow.png')<html.indexOf('data-guide-required'),name);
   assert.equal((html.match(/data-guide-required/g)||[]).length,6,name);
+  assert.doesNotMatch(html,/<code>ALO ·<\/code>/);
   assert.doesNotMatch(html,/<details\b[^>]*\bopen(?:[\s=>])/);
-  for(const essential of ['OBS-script.lua','OBS-settings.zip','config.public.js','local_file','OST ·','data-guide-layout'])assert.ok(html.includes(essential),`${name}: ${essential}`);
+  for(const essential of ['OBS-script.lua','Settings-Bento.zip','Settings-Overlap.zip','config.public.js','local_file','ALO4OBS · BENTO','ALO4OBS · OVERLAP','layouts/bento/','layouts/overlap/','OST ·','data-guide-layout'])assert.ok(html.includes(essential),`${name}: ${essential}`);
  }
  assert.deepEqual(fs.readFileSync(path.join(template,'assets/setup-workflow.png')),fs.readFileSync(path.join(__dirname,'../docs/images/setup-workflow.png')));
 });

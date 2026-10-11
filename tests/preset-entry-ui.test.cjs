@@ -38,9 +38,9 @@ test('saved smoothing wins over OS defaults in both directions',()=>{
 });
 test('chooser returns to each independent layout while preserving shared content and styles',()=>{
  const elements=new Map(),choices=['bento','overlap'].map(mode=>({dataset:{layoutChoice:mode}})),sections=[{hidden:true},{hidden:true}];
- const byId=id=>{if(!elements.has(id))elements.set(id,{focus(){},querySelectorAll:()=>choices,querySelector:()=>({textContent:""})});return elements.get(id);};
+ const byId=id=>{if(!elements.has(id))elements.set(id,{focus(){},addEventListener(){},querySelectorAll:()=>choices,querySelector:()=>({textContent:""})});return elements.get(id);};
  const config=events.switchLayoutPreset({layoutVersion:4,panelGap:48,panelContent:{game:{type:'source',url:''}},globalStyle:{fill:{color:'#abcdef'}}},'bento');
- const context={config,selected:'chat',draftReady:true,OverlayEvents:events,byId,reset(){},readEditor(){},readGlobal(){},renderGlobal(){},renderPlacement(){},renderEditor(){},localized:value=>value,requestAnimationFrame:fn=>fn(),syncHitAreaScale(){},apply(){},document:{querySelectorAll:()=>sections},current(){context.config.layout=events.resolveConfigLayout(context.config);context.config.layoutPresets=events.normalizeLayoutPresets(context.config);return structuredClone(context.config);}};
+ const context={window:{location:{href:'file:///settings.html'}},uploadStorage:{flush:async()=>{}},config,selected:'chat',draftReady:true,OverlayEvents:events,byId,reset(){},readEditor(){},readGlobal(){},renderGlobal(){},renderPlacement(){},renderEditor(){},localized:value=>value,requestAnimationFrame:fn=>fn(),syncHitAreaScale(){},apply(){},document:{querySelectorAll:()=>sections},current(){context.config.layout=events.resolveConfigLayout(context.config);context.config.layoutPresets=events.normalizeLayoutPresets(context.config);return structuredClone(context.config);}};
  const start=source.indexOf("  byId('reset').onclick=reset;"),end=source.indexOf("  const fullscreenButton=",start);
  vm.runInNewContext(source.slice(start,end),context);
  byId('change-layout').onclick();assert.equal(byId('layout-chooser').hidden,false);

@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.10.1 — 2026-10-11
+
+### Fixed
+
+- Name personal exports **Settings-Bento.zip** or **Settings-Overlap.zip** using the actual layout selected when export starts, including asynchronous save dialogs. Keep internal filenames and relative paths unchanged.
+- Align the guide/settings header counterpart in the shared left navigation group while retaining page-specific actions.
+- Return from the guide to the same layout editor and valid selected panel, retaining settings. Keep the initial chooser on a first visit.
+- Match Korean, English and Japanese guide instructions, packaged README and export messages to type-specific OBS scenes, source names and runtime folders.
+- Explain the old filename in the unchanged quick-start illustration. Preserve saved drafts when uploaded bytes cannot be restored; this warning can be caused by browser storage or a changed folder, rather than deleted settings.
+
+### Verification and distribution
+
+- 288 Node tests and 35 Python checks passed. A targeted 24-condition Chrome matrix covered both layouts, three languages, two themes and 768/1920 px widths; 23 broader UI tests remain skipped in the Node runner.
+- Sequential Bento → Overlap → Bento downloads matched archive names, settings, runtime paths and media; CRC checks passed. Six real Apply calls in isolated Windows OBS 32.2.2 passed geometry and counterpart-scene checks.
+- Publish a new repository-hosted **ALO4OBS-v0.10.1.zip**; retain 0.10.0 and older archives unchanged. No tag or GitHub Release. Curated streaming presets remain postponed.
+- macOS, real capture/camera devices, authenticated widgets, native save-dialog interaction and broadcasting remain unverified.
+
 ## 0.10.0 — 2026-10-11
 
 ### Added

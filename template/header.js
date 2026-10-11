@@ -63,7 +63,7 @@
   document.addEventListener('click',event=>{if(!presetMenu.contains(event.target))presetMenu.open=false;});
   const settingsLink=header.querySelector('#settings-link');
   const guideLink=header.querySelector('#guide-link');
-  header.querySelector('#header-left-links').append(guideLink);
+  header.querySelector('#header-left-links').append(guideLink,settingsLink);
   const currentPath=location.pathname.replace(/\/+$/,'')||'/';
   const guidePath=/\/guide(?:-(?:en|ja))?\.html$/i.test(currentPath);
   settingsLink.hidden=!guidePath;

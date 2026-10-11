@@ -85,3 +85,12 @@ test('header puts public links on the left and centers the brand between native 
  assert.doesNotMatch(css,/#ui-language[^\n]*stroke-width/);
  for(const svg of markup.matchAll(/<svg\b[^>]*viewBox="0 0 24 24"[^>]*>/g))assert.match(svg[0],/stroke-width="2"/);
 });
+
+test('guide/settings counterpart navigation shares the left header group',()=>{
+ const source=fs.readFileSync(path.join(__dirname,'../template/header.js'),'utf8');
+ const start=source.indexOf("  const settingsLink=header.querySelector('#settings-link');"),end=source.indexOf('  const currentPath=',start);
+ const settingsLink={id:'settings-link'},guideLink={id:'guide-link'},left=[];
+ const header={querySelector(selector){return selector==='#settings-link'?settingsLink:selector==='#guide-link'?guideLink:{append:(...buttons)=>left.push(...buttons)};}};
+ vm.runInNewContext(source.slice(start,end),{header});
+ assert.deepEqual(left,[guideLink,settingsLink]);
+});

@@ -12,17 +12,17 @@ function harness(options={}){
  const oldFile={async arrayBuffer(){return Uint8Array.from([10,20,30]).buffer;}};
  const uploads=new Map([['whole',{path:'assets/background-whole.png',file:oldFile}]]);
  const keys=['game','custom1','custom2','custom3','chat','translation','hand'];
- const data={backgroundImage:'assets/background-whole.png',layout:Object.fromEntries(keys.map(key=>[key,{}]))};
+ const data={layoutMode:options.layoutMode||'bento',backgroundImage:'assets/background-whole.png',layout:Object.fromEntries(keys.map(key=>[key,{}]))};
  if(options.restored)uploads.clear();
  const bundle={},status={};
- const context={OverlayEvents:require('../template/events.js'),showStatus:(message,error)=>{status.textContent=message;status.error=error;},fetch:options.fetch,uploads,status,keys,Uint8Array,Blob,URL:{createObjectURL:()=> 'blob:test',revokeObjectURL(){}},setTimeout(){},
+ const context={OverlayEvents:require('../template/events.js'),showStatus:(message,error)=>{status.textContent=message;status.error=error;},fetch:options.fetch,uploads,status,keys,localized:s=>s,Uint8Array,Blob,URL:{createObjectURL:()=> 'blob:test',revokeObjectURL(){}},setTimeout(){},
   byId:id=>id==='bundle'?bundle:null,current:()=>structuredClone(data),
   alphaMask:async(_,name)=>{await maskGate;return {name,bytes:new Uint8Array([1])};},
   OverlayPack:{isolateRuntime:entries=>entries,settingsEntries:input=>[{name:'obs-settings.json',bytes:new TextEncoder().encode(JSON.stringify(input))}],zip:entries=>{captured=entries;return new Uint8Array([0]);}},
   document:{createElement:()=>({click(){}})},window:{OBS_EXPORT_RUNTIME:{},showSaveFilePicker:options.showSaveFilePicker}
  };
  vm.runInNewContext(source.slice(start,end),context);
- return {uploads,bundle,status,releaseMasks,get captured(){return captured;}};
+ return {uploads,bundle,status,data,releaseMasks,get captured(){return captured;}};
 }
 
 test('reset during mask generation cannot remove assets referenced by the captured ZIP config',async()=>{
@@ -56,10 +56,24 @@ test('unreadable restored media prevents an incomplete ZIP download',async()=>{
 
 test('native save writes ZIP and closes without triggering a download',async()=>{
  let written,closed=false;
- const h=harness({showSaveFilePicker:async options=>{assert.equal(options.suggestedName,'OBS-settings.zip');return {createWritable:async()=>({write:async blob=>{written=blob;},close:async()=>{closed=true;},abort:async()=>{}})};}});
+ const h=harness({showSaveFilePicker:async options=>{assert.equal(options.suggestedName,'Settings-Bento.zip');return {createWritable:async()=>({write:async blob=>{written=blob;},close:async()=>{closed=true;},abort:async()=>{}})};}});
  h.releaseMasks();await h.bundle.onclick();assert.equal(written.type,'application/zip');assert.ok(closed);
 });
 test('canceling the save picker does not build a ZIP',async()=>{
  const h=harness({showSaveFilePicker:async()=>{throw Object.assign(new Error('cancel'),{name:'AbortError'});}});
  await h.bundle.onclick();assert.equal(h.captured,undefined);assert.equal(h.status.textContent,undefined);
+});
+
+test('Bento → Overlap → Bento export captures the type before an asynchronous save picker',async()=>{
+ for(const mode of ['bento','overlap','bento']){
+  let name;
+  const h=harness({layoutMode:mode,showSaveFilePicker:async options=>{
+   name=options.suggestedName;
+   h.data.layoutMode=mode==='bento'?'overlap':'bento';
+   return {createWritable:async()=>({write:async()=>{},close:async()=>{},abort:async()=>{}})};
+  }});
+  h.releaseMasks();await h.bundle.onclick();
+  assert.equal(name,mode==='bento'?'Settings-Bento.zip':'Settings-Overlap.zip');
+  assert.equal(JSON.parse(new TextDecoder().decode(h.captured[0].bytes)).layoutMode,mode);
+ }
 });

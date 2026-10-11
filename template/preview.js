@@ -810,9 +810,19 @@
   byId('reset').onclick=reset;
   const chooser=byId('layout-chooser');
   function showChooser(){readEditor();readGlobal();for(const section of document.querySelectorAll('.editor-workspace,.preview-section,.settings-section'))section.hidden=true;chooser.hidden=false;byId('layout-question').focus({preventScroll:true});}
+  function showEditor(){chooser.hidden=true;for(const section of document.querySelectorAll('.editor-workspace,.preview-section,.settings-section'))section.hidden=false;byId('change-layout').querySelector('[data-layout-label]').textContent=localized('레이아웃 전환 · 현재 '+(config.layoutMode==='overlap'?'Overlap':'Bento'));}
+  const guideReturnKey='obs-overlay-guide-return',pagePath=window.location.href.split(/[?#]/)[0];
+  byId('guide-link').addEventListener('click',async event=>{
+    if(event.button!==0||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;
+    event.preventDefault();
+    if(draftReady&&!chooser.hidden)apply();
+    await uploadStorage.flush();
+    try{if(draftReady&&chooser.hidden)sessionStorage.setItem(guideReturnKey,JSON.stringify({path:pagePath,source:sourceFingerprint,selected}));else sessionStorage.removeItem(guideReturnKey);}catch{}
+    window.location.assign(byId('guide-link').href);
+  });
   byId('change-layout').onclick=showChooser;
   byId('safety-guide-toggle').onclick=()=>{showSafetyGuide=!showSafetyGuide;const button=byId('safety-guide-toggle');button.setAttribute('aria-pressed',String(showSafetyGuide));button.setAttribute('aria-label',localized(showSafetyGuide?'안전영역 끄기':'안전영역 켜기'));button.querySelector('span').textContent=localized(showSafetyGuide?'안전영역 끄기':'안전영역 켜기');drawHits(config.layout);};
-  for(const choice of chooser.querySelectorAll('[data-layout-choice]'))choice.onclick=()=>{if(!draftReady)return;current();config=OverlayEvents.switchLayoutPreset(config,choice.dataset.layoutChoice);selected=null;renderGlobal();renderPlacement();renderEditor();chooser.hidden=true;for(const section of document.querySelectorAll('.editor-workspace,.preview-section,.settings-section'))section.hidden=false;byId('change-layout').querySelector('[data-layout-label]').textContent=localized('레이아웃 전환 · 현재 '+(config.layoutMode==='overlap'?'Overlap':'Bento'));requestAnimationFrame(()=>{syncHitAreaScale();apply();});byId('change-layout').focus({preventScroll:true});};
+  for(const choice of chooser.querySelectorAll('[data-layout-choice]'))choice.onclick=()=>{if(!draftReady)return;current();config=OverlayEvents.switchLayoutPreset(config,choice.dataset.layoutChoice);selected=null;renderGlobal();renderPlacement();renderEditor();showEditor();requestAnimationFrame(()=>{syncHitAreaScale();apply();});byId('change-layout').focus({preventScroll:true});};
   const fullscreenButton=byId('fullscreen'),fullscreenLabel=fullscreenButton.querySelector('[data-fullscreen-label]'),fullscreenMessage=byId('fullscreen-message');
   const fullscreenSurface=byId('preview-fullscreen'),fullscreenToolbar=fullscreenSurface.querySelector('.fullscreen-toolbar'),returnToSettings=byId('return-to-settings');
   let fullscreenTimer=null;
@@ -889,7 +899,8 @@
     try{
       const data=current(),uploadSnapshot=Array.from(uploads,([key,entry])=>[key,{...entry}]),entries=OverlayPack.settingsEntries(data);
       if(!window.OBS_EXPORT_RUNTIME)throw new Error('Open settings from the downloaded template package before saving.');
-      const saveHandle=window.showSaveFilePicker?await window.showSaveFilePicker({suggestedName:'OBS-settings.zip',types:[{description:'ZIP archive',accept:{'application/zip':['.zip']}}]}):null;
+      const archiveName=data.layoutMode==='overlap'?'Settings-Overlap.zip':'Settings-Bento.zip';
+      const saveHandle=window.showSaveFilePicker?await window.showSaveFilePicker({suggestedName:archiveName,types:[{description:'ZIP archive',accept:{'application/zip':['.zip']}}]}):null;
       for(const [name,encoded] of Object.entries(window.OBS_EXPORT_RUNTIME))entries.push({name,bytes:Uint8Array.from(atob(encoded),c=>c.charCodeAt(0))});
       for(const key of OverlayEvents.activePanelKeys(data))entries.push(await alphaMask(data.layout[key],'assets/'+key+'-alpha-mask.png',data));
       for(const [key,entry] of uploadSnapshot){const selectedPath=key==='whole'?data.backgroundImage:key==='sponsor'?data.sponsor:key.startsWith('region-')?(data.regionBackgrounds[key.slice(7)]?.imageFile||data.regionBackgrounds[key.slice(7)]?.image):data.panelContent[key]?.url;if(selectedPath===entry.path)entries.push({name:entry.path,bytes:new Uint8Array(await entry.file.arrayBuffer())});}
@@ -905,8 +916,8 @@
       OverlayPack.isolateRuntime(entries,data.layoutMode||'bento');
       const blob=new Blob([OverlayPack.zip(entries)],{type:'application/zip'});
       if(saveHandle){const writable=await saveHandle.createWritable();try{await writable.write(blob);await writable.close();}catch(error){await writable.abort().catch(()=>{});throw error;}}
-      else{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='OBS-settings.zip';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-      status.textContent='Extract OBS-settings.zip, then select OBS-script.lua from that folder in OBS.';
+      else{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=archiveName;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+      status.textContent=localized('설정 ZIP 전체를 압축 해제한 뒤, 같은 폴더의 OBS-script.lua를 OBS에 추가하세요.');
     }catch(error){if(error.name==='AbortError')return;showStatus(error.message,true);}
   };
   frame.addEventListener('load',()=>{syncHitAreaScale();if(draftReady)send(frame,'apply',liveConfig(current()));});
@@ -932,6 +943,8 @@
     }
     draftReady=true;form.inert=false;byId('bundle').disabled=false;byId('reset').disabled=false;
     for(const choice of document.querySelectorAll('[data-layout-choice]'))choice.disabled=false;
+    let returnContext;try{returnContext=JSON.parse(sessionStorage.getItem(guideReturnKey));sessionStorage.removeItem(guideReturnKey);}catch{}
+    if(returnContext?.path===pagePath&&returnContext.source===sourceFingerprint){selected=OverlayEvents.activePanelKeys(config).includes(returnContext.selected)?returnContext.selected:null;showEditor();}
     renderGlobal();renderPlacement();renderEditor();apply();
   }
   function recoverDraft(error){
