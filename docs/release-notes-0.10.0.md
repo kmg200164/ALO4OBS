@@ -23,9 +23,9 @@ Switch layout from the header. Each layout retains its content and settings; Mai
 
 ## Install or update
 
-Download **ALO4OBS-v0.10.0.zip** and extract the entire archive. Open **settings.html**, configure panels and save **OBS-settings.zip**. Extract that entire personal ZIP into a permanent folder, add its **OBS-script.lua** in OBS, select your sources and Apply.
+Download **[ALO4OBS-v0.10.0.zip](https://github.com/kmg200164/ALO4OBS/raw/refs/heads/main/downloads/ALO4OBS-v0.10.0.zip)** and extract the entire archive. Open **settings.html**, configure panels and save **OBS-settings.zip**. Extract that entire personal ZIP into a permanent folder, add its **OBS-script.lua** in OBS, select your sources and Apply.
 
-For updates, back up the complete old application folder, OBS scene collection and source mappings first. Follow the [README update procedure](https://github.com/kmg200164/ALO4OBS#update-an-existing-installation); moving only the Lua script is insufficient.
+For updates, back up the complete old application folder, OBS scene collection and source mappings first. Follow the [README update procedure](https://github.com/kmg200164/ALO4OBS#how-to-update); moving only the Lua script is insufficient.
 
 ## Tested scope
 
