@@ -2,7 +2,9 @@
 
 Auto Layout Overlay for OBS
 
-**[Download ALO4OBS 0.10.0](https://github.com/kmg200164/ALO4OBS/releases/download/v0.10.0/ALO4OBS-v0.10.0.zip)** · [What's new](CHANGELOG.md)
+**[Download ALO4OBS 0.9.1](https://github.com/kmg200164/ALO4OBS/raw/refs/heads/main/downloads/ALO4OBS-v0.9.1.zip)** · [What's new](CHANGELOG.md)
+
+Version 0.10.0 source is available on main; its installation ZIP has not been published. The download above is version 0.9.1.
 
 Arrange your OBS overlay in a browser, then apply it in OBS. Choose **Bento** to keep all panels separate, or **Overlap** to place auxiliary panels over a full-screen Main panel.
 
