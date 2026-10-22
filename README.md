@@ -1,6 +1,6 @@
 # ALO4OBS
 
-Auto Layout Overlay for OBS
+Auto Layout Overlay for Open Broadcaster Software
 
 **[Download ALO4OBS 0.10.3](https://github.com/kmg200164/ALO4OBS/raw/refs/heads/main/downloads/ALO4OBS-v0.10.3.zip)** · [What's new](CHANGELOG.md)
 
