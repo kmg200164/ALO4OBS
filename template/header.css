@@ -126,3 +126,10 @@ html[lang=ko] button{font-weight:600}
 .icon-tooltip{position:fixed;z-index:10001;pointer-events:none;max-width:calc(100vw - 16px);padding:8px 12px;border-radius:8px;background:#fff;color:#000;font-size:14px;line-height:1.4;overflow-wrap:anywhere;box-shadow:0 2px 8px #0003}
 html[data-theme="light"] .icon-tooltip{background:#000;color:#fff}
 .icon-tooltip[hidden]{display:none}
+
+#first-guide-note{margin:.25rem 1rem 1rem auto;padding:.5rem .75rem;max-width:28rem;text-align:right;color:var(--palette-ink);font-size:.9rem}
+
+/* Keep shared navigation geometry stable across short and scrolling pages. */
+html{scrollbar-gutter:stable}
+.app-header #change-layout{width:var(--header-control-size);height:var(--header-control-size);padding:16px;border-radius:0}
+.app-header #change-layout>span{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}

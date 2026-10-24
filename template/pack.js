@@ -84,6 +84,7 @@
     if(active&&part.type==='web'&&url&&!validHttp(url))throw new Error(key+': HTTP(S) web URL required');
     if(active&&part.type==='media'&&url&&!validMedia(url))throw new Error(key+': image/video assets path or HTTP(S) media URL required');
     panelContent[key]={type:part.type,url:part.type==='web'||part.type==='media'?url:''};
+   if(part.type==='source'&&part.sourceView!==undefined)panelContent[key].sourceView=events.normalizeSourceView(part.sourceView);
    }
    config.panelContent=panelContent;
    const retained=legacyConnections(config);
@@ -141,17 +142,20 @@
   const json=JSON.stringify(config,null,2),bytes=value=>new TextEncoder().encode(value);
   return [{name:'config.json',bytes:bytes(json)},{name:'obs-settings.json',bytes:bytes(json)}];
  }
+ // One OBS script name per layout lets both scripts sit in the same OBS Scripts list without confusion.
+ const scriptNames={bento:'script-bento.lua',overlap:'script-overlap.lua'};
  function isolateRuntime(entries,mode){
   if(mode!=='bento'&&mode!=='overlap')throw new Error('Invalid layout type');
-  const directory='layouts/'+mode+'/';
+  const directory='files/'+mode+'/';
   const script=entries.find(entry=>entry.name==='OBS-script.lua');
   if(!script)throw new Error('Missing OBS script');
-  // Keep root assets for editor compatibility; OBS uses only its type's snapshot.
+  // Keep only the layout script at the root; every runtime file belongs to its settings folder.
   const scoped=entries.filter(entry=>entry!==script).map(entry=>({...entry,name:directory+entry.name}));
   const bootstrap="local export_root=script_path()\nfunction script_path() return export_root..'"+directory+"' end\n";
+  script.name=scriptNames[mode];
   script.bytes=new TextEncoder().encode(bootstrap+new TextDecoder().decode(script.bytes));
-  entries.push(...scoped);
+  entries.splice(0,entries.length,script,...scoped);
   return entries;
  }
- const api={zip,settingsEntries,isolateRuntime};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.OverlayPack=api;
+ const api={zip,settingsEntries,isolateRuntime,scriptNames};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.OverlayPack=api;
 })(typeof window!=='undefined'?window:globalThis);

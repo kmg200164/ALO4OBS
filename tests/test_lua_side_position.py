@@ -68,6 +68,8 @@ function obs.obs_source_get_filter_by_name() return nil end
 function obs.obs_source_filter_add() end
 function obs.obs_scene_enum_items() return {} end
 function obs.sceneitem_list_release() end
+function obs.obs_sceneitem_crop() return {} end
+function obs.obs_sceneitem_set_crop(i,crop) i.crop=crop end
 function obs.vec2() return {} end
 function obs.obs_sceneitem_set_alignment() end
 function obs.obs_sceneitem_set_bounds_type() end

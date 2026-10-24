@@ -11,10 +11,10 @@
 .demo #sponsor-image{object-position:center 20%}
 /* One composited document for the settings preview: wallpaper, fill, content, stroke. */
 #preview-wallpaper,#canvas,#preview-strokes{display:none}
-.preview-mode #preview-wallpaper{display:block;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+.preview-mode #preview-wallpaper{display:block;position:absolute;left:0;top:50%;transform:translateY(-50%);width:100%;height:auto;z-index:0}
 .preview-mode #canvas{display:block;position:absolute;inset:0;width:1920px;height:1080px;z-index:1;pointer-events:none}
 .preview-mode #canvas .tile{position:absolute;border-radius:16px;overflow:hidden}
-.preview-mode #canvas .backdrop{position:absolute;width:1920px;height:1080px;object-fit:cover;pointer-events:none}
+.preview-mode #canvas .backdrop{position:absolute;width:1920px;height:auto;pointer-events:none}
 .preview-mode #canvas .surface{position:absolute;inset:0;background:#1a1a1a}
 .preview-mode #canvas .panel-image{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover}
 

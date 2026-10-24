@@ -40,7 +40,7 @@
    const opacity=Number.isFinite(Number(setting.opacity))?Math.max(0,Math.min(100,Number(setting.opacity))):(hasBackdrop?20:100);
    const blur=Number.isFinite(Number(setting.blur))?Math.max(0,Math.min(64,Number(setting.blur))):(hasBackdrop?16:0);
    Object.assign(tile.style,{left:box.x+'px',top:box.y+'px',width:box.width+'px',height:box.height+'px'});
-   Object.assign(glass.style,{left:-box.x+'px',top:-box.y+'px',filter:`blur(${blur}px)`,display:hasBackdrop?'block':'none',backgroundImage:gradientBackdrop?gradient(style.background):'none'});
+   Object.assign(glass.style,{left:-box.x+'px',top:((gradientBackdrop?0:540)-box.y)+'px',height:gradientBackdrop?'1080px':'auto',transform:gradientBackdrop?'none':'translateY(-50%)',filter:`blur(${blur}px)`,display:hasBackdrop?'block':'none',backgroundImage:gradientBackdrop?gradient(style.background):'none',backgroundRepeat:'no-repeat',backgroundSize:'100% 100%'});
    glass.src=gradientBackdrop?transparentPixel:backdrop;
    const local=override?setting.fill:undefined,panel=local||(!override?style.fill:undefined);
    const panelColor=panel?.mode==='solid'&&hex(panel.color)?panel.color:fill;

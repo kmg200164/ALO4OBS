@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.10.4 — 2026-10-24
+
+- Distinguish personal export scripts as script-bento.lua and script-overlap.lua; keep only the Lua at the export root and preserve scoped files/bento or files/overlap paths.
+- Keep Bento panel blur tied to its configured full-canvas background image/color, independent of Main. Overlap uses the live Main source; preserve static background blur while game capture is unavailable and restore live blur on capture availability. Preserve fill-none choices and original source filters.
+- Persist per-panel media fit/crop in the HTML editor and exported settings.
+- Add resumable first-use guide onboarding; align shared guide/settings headers with a disabled layout button on guides; unify guide symbols, file highlights and interaction colors.
+- Fit background images to canvas width without distorting aspect ratio or repeating; retain centered clipping and the selected background color.
+- Bundle pinned official Composite Blur 1.6.0 binaries/packages, matching source and GPL notices. Helpers select OBS 30–32 Legacy or OBS 33 modern. Actual plugin installation is verified on Windows OBS 32 only; macOS/Linux installation remains unverified. Flatpak offline installation is not bundled. No security prompt approval or policy bypass.
+- Keep settings.html + files distribution structure.
+
 ## 0.10.3 — 2026-10-12
 
 - Restore retained image and video uploads after moving or renaming the editor folder within the same browser origin.

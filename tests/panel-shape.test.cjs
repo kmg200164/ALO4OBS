@@ -225,17 +225,17 @@ test('direct-file settings expands default columns to 16 hit surfaces and preser
    assert.equal(await page.locator('[name=cornerSmoothing]').inputValue(),'2','saved smoothing wins over OS default');
    if(await page.evaluate(()=>!!window.OBS_EXPORT_RUNTIME)){
     const downloaded=page.waitForEvent('download',{timeout:10000});await page.locator('#bundle').click();
-    const download=await downloaded;assert.equal(download.suggestedFilename(),'OBS-settings.zip');
+    const download=await downloaded;assert.equal(download.suggestedFilename(),'Settings-Overlap.zip');
     const bytes=fs.readFileSync(await download.path()),entries=new Map();
     for(let offset=0;offset+30<bytes.length&&bytes.readUInt32LE(offset)===0x04034b50;){
      const size=bytes.readUInt32LE(offset+18),nameSize=bytes.readUInt16LE(offset+26),extraSize=bytes.readUInt16LE(offset+28),start=offset+30+nameSize+extraSize;
      const name=bytes.toString('utf8',offset+30,offset+30+nameSize);entries.set(name,bytes.subarray(start,start+size));offset=start+size;
     }
     assert.equal([...entries.keys()].filter(name=>name.endsWith('-alpha-mask.png')).length,16);
-    for(const key of events.overlapPanelKeys)assert.ok(entries.has('assets/'+key+'-alpha-mask.png'));
-    const exported=JSON.parse(entries.get('config.json').toString('utf8'));
+    for(const key of events.overlapPanelKeys)assert.ok(entries.has('files/overlap/assets/'+key+'-alpha-mask.png'));
+    const exported=JSON.parse(entries.get('files/overlap/config.json').toString('utf8'));
     assert.equal(Object.keys(exported.layout).length,16);assert.equal(Object.keys(exported.panelContent).length,22);
-    assert.ok(entries.has('OBS-script.lua'));assert.match(entries.get('OBS-script.lua').toString('utf8'),/internal\/panel-shape\.js/,'Lua installs the bundled shared geometry runtime');
+    assert.ok(entries.has('script-overlap.lua'));assert.ok(!entries.has('OBS-script.lua'));assert.match(entries.get('script-overlap.lua').toString('utf8'),/internal\/panel-shape\.js/,'Lua installs the bundled shared geometry runtime');
    }
    assert.deepEqual(errors,[],'direct-file iframe access must not raise origin or stale-layout errors');
    await context.close();

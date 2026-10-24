@@ -37,6 +37,35 @@ class BuildTests(unittest.TestCase):
         self.assertIn("internal/panel-media.js", lua)
         self.assertIn('window.OVERLAY_CONFIG', lua)
 
+    def test_personal_zip_scripts_embed_live_blur_for_both_layouts(self):
+        import base64, io, json, subprocess
+        runtime=json.loads(builder.entries['internal/export-runtime.js'].decode()
+                           .removeprefix('window.OBS_EXPORT_RUNTIME = ').strip().removesuffix(';'))
+        program=r"""
+const fs=require('node:fs'),pack=require('./template/pack.js'),events=require('./template/events.js');
+const runtime=JSON.parse(fs.readFileSync(0,'utf8')),result={};
+for(const mode of ['bento','overlap']){
+ const config={layoutVersion:4,layoutMode:mode,panelContent:Object.fromEntries(events.allPanelKeys.map(key=>[key,{type:key==='game'?'source':'none',url:''}]))};
+ const entries=pack.settingsEntries(config);
+ for(const [name,data] of Object.entries(runtime))entries.push({name,bytes:Buffer.from(data,'base64')});
+ result[mode]=Buffer.from(pack.zip(pack.isolateRuntime(entries,mode))).toString('base64');
+}
+process.stdout.write(JSON.stringify(result));
+"""
+        exports=json.loads(subprocess.check_output(['node','-e',program],input=json.dumps(runtime).encode(),cwd=builder.repository))
+        for mode,title in [('bento','Bento'),('overlap','Overlap')]:
+            with self.subTest(mode=mode), ZipFile(io.BytesIO(base64.b64decode(exports[mode]))) as archive:
+                self.assertIsNone(archive.testzip())
+                script_name=f'script-{mode}.lua'
+                self.assertEqual([name for name in archive.namelist() if '/' not in name],[script_name])
+                self.assertTrue(all(name==script_name or name.startswith(f'files/{mode}/') for name in archive.namelist()))
+                lua=archive.read(script_name).decode()
+                self.assertIn(f"function script_path() return export_root..'files/{mode}/' end",lua)
+                self.assertIn('local function plan_live_blur(',lua)
+                self.assertIn("'obs_composite_blur'",lua)
+                self.assertIn("'alo4obs_live_blur_enabled'",lua)
+                self.assertEqual(json.loads(archive.read(f'files/{mode}/obs-settings.json'))['layoutMode'],mode)
+
     def test_setup_infographic_is_distributed_without_bloating_obs_runtime(self):
         import json
         self.assertEqual(builder.entries['assets/setup-workflow.png'],

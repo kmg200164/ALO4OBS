@@ -37,7 +37,7 @@ test('v4 creates ALO names and migrates only exact old template items after succ
 test('v4 media panels use independent local browser sources in clipped groups',()=>{
  assert.match(generic,/panel\.kind=='media' and panel\.url~='' and name\.\.' Media'/);
  assert.match(generic,/panel\.kind=='media' and script_path\(\)\.\.'panel-media-'\.\.key\.\.'\.html'/);
- assert.match(generic,/clip\(scene,group,selected,[^\n]+panel\.kind=='media',retained_sources,pending_removals\)/);
+ assert.match(generic,/clip\(scene,group,selected,[^\n]+panel\.kind=='media',retained_sources,pending_removals,nil,panel\.source_view\)/);
  assert.match(source,/browser\(nested,selected,url,url_file==true,unpack\(box\)\)/);
  assert.match(generic,/elseif media_index then[\s\S]*local_file_matches\(occupied,'panel-media-'\.\.key\.\.'\.html'\)[\s\S]*known_group\(panel_names\[media_index\]\)/);
  assert.match(generic,/if needs_media then[\s\S]*panel-media\.js/);
@@ -137,4 +137,8 @@ test('populated apply snapshots before mutation and restores on failure before r
  assert.ok(restore>firstClip&&release>restore);
  assert.match(generic.slice(firstClip,restore),/end,debug\.traceback\)[\s\S]*if not result then/);
  assert.doesNotMatch(generic,/for _,name in ipairs\(new_groups\)/);
+});
+
+test('static guard: the script does not depend on its own filename, which differs per layout',()=>{
+ assert.doesNotMatch(source,/OBS-script/);
 });

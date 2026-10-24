@@ -23,13 +23,86 @@ function script_update(settings)
  if cfg~=nil then obs.obs_data_release(cfg) end
  cfg=settings;obs.obs_data_addref(cfg)
 end
-local function panel_backdrop(visible,prefix)
+local live_refresh_prefix=nil
+local live_refresh_elapsed=0
+local function live_input_ready(name)
+ if name==nil or name=='' then return false end
+ local source=obs.obs_get_source_by_name(name)
+ if source==nil then return false end
+ if obs.obs_source_removed~=nil and obs.obs_source_removed(source) then obs.obs_source_release(source);return false end
+ local ready=false
+ if obs.obs_source_get_width~=nil and obs.obs_source_get_height~=nil then
+  ready=obs.obs_source_get_width(source)>0 and obs.obs_source_get_height(source)>0
+ end
+ -- Game capture keeps old dimensions after its target disappears. Its own
+ -- capture-session state, rather than geometry, decides whether to use it.
+ if ready and obs.obs_source_get_id(source)=='game_capture' then
+  ready=false
+  local handler=obs.obs_source_get_proc_handler(source)
+  if handler~=nil then
+   local data=obs.calldata_create()
+   if obs.proc_handler_call(handler,'get_hooked',data) then ready=obs.calldata_bool(data,'hooked') end
+   obs.calldata_destroy(data)
+  end
+ end
+ obs.obs_source_release(source)
+ return ready
+end
+local function panel_backdrop(visible,prefix,live,input)
  local source=obs.obs_get_source_by_name((prefix or 'OBS Template · ')..'Panel Fill')
  if source==nil then return end
  local data=obs.obs_source_get_settings(source)
- obs.obs_data_set_string(data,'css',browser_css..(visible and '' or '.backdrop{display:none!important;}'))
+ if live~=nil then obs.obs_data_set_bool(data,'alo4obs_live_fill',live) end
+ if input~=nil then obs.obs_data_set_string(data,'alo4obs_live_source',input) end
+ local live_fill=obs.obs_data_get_bool(data,'alo4obs_live_fill')
+ local css=(live_fill or not visible) and '.backdrop{display:none!important;}' or ''
+ if live_fill then css=css..'.tile[data-region="game"]{display:none!important;}' end
+ obs.obs_data_set_string(data,'css',browser_css..css)
  obs.obs_source_update(source,data)
  obs.obs_data_release(data);obs.obs_source_release(source)
+end
+local function sync_live_blur_visibility(prefix,visible,available)
+ local source=obs.obs_get_source_by_name(prefix:sub(1,#prefix-#' · '))
+ if source==nil then return end
+ local target_scene=obs.obs_scene_from_source(source)
+ local items=target_scene~=nil and obs.obs_scene_enum_items(target_scene) or nil
+ if items~=nil then
+  for _,item in ipairs(items) do
+   local private=obs.obs_sceneitem_get_private_settings(item)
+   if private~=nil then
+    if obs.obs_data_get_bool(private,'alo4obs_live_blur') then
+     obs.obs_sceneitem_set_visible(item,visible and available~=false and obs.obs_data_get_bool(private,'alo4obs_live_blur_enabled'))
+    end
+    obs.obs_data_release(private)
+   end
+  end
+  obs.sceneitem_list_release(items)
+ end
+ obs.obs_source_release(source)
+end
+local function refresh_live_blur(prefix)
+ local fill=obs.obs_get_source_by_name(prefix..'Panel Fill')
+ if fill==nil then return end
+ local data=obs.obs_source_get_settings(fill)
+ local input=obs.obs_data_get_string(data,'alo4obs_live_source')
+ local previous=obs.obs_data_get_bool(data,'alo4obs_live_fill')
+ obs.obs_data_release(data);obs.obs_source_release(fill)
+ if input=='' then return end
+ local ready=not prefix:find('BENTO',1,true) and live_input_ready(input)
+ local source=obs.obs_get_source_by_name(prefix:sub(1,#prefix-#' · '))
+ if source==nil then return end
+ local scene=obs.obs_scene_from_source(source)
+ local fill_item=scene and obs.obs_scene_find_source(scene,prefix..'Panel Fill') or nil
+ local background=scene and obs.obs_scene_find_source(scene,prefix..'Background') or nil
+ if ready~=previous then panel_backdrop(background==nil or obs.obs_sceneitem_visible(background),prefix,ready) end
+ if fill_item~=nil then sync_live_blur_visibility(prefix,obs.obs_sceneitem_visible(fill_item),ready) end
+ obs.obs_source_release(source)
+end
+function script_tick(seconds)
+ live_refresh_elapsed=live_refresh_elapsed+seconds
+ if live_refresh_elapsed<0.25 then return end
+ live_refresh_elapsed=0
+ if live_refresh_prefix~=nil then refresh_live_blur(live_refresh_prefix) end
 end
 local function sync_panel_fill(calldata)
  local item=obs.calldata_sceneitem(calldata,'item')
@@ -37,6 +110,8 @@ local function sync_panel_fill(calldata)
  local name=obs.obs_source_get_name(obs.obs_sceneitem_get_source(item))
  local prefix=name:match('^(ALO4OBS · BENTO · )Background$') or name:match('^(ALO4OBS · OVERLAP · )Background$') or name:match('^(ALO · )Background$') or name:match('^(OBS Template · )Background$')
  if prefix~=nil then panel_backdrop(obs.obs_sceneitem_visible(item),prefix) end
+ local fill_prefix=name:match('^(ALO4OBS · BENTO · )Panel Fill$') or name:match('^(ALO4OBS · OVERLAP · )Panel Fill$')
+ if fill_prefix~=nil then refresh_live_blur(fill_prefix) end
 end
 local function connect_panel_signal(target_scene)
  local name=target_scene or scene_name
@@ -136,7 +211,16 @@ local function browser(scene,name,url,file,x,y,w,h,css,bottom)
  if not ok then assert(false,result) end
  return result
 end
-local function clip(scene,name,selected,mask_path,box,url,internal_prefix,url_file,retained_sources,pending_removals)
+local function apply_source_view(item,view)
+ local crop=obs.obs_sceneitem_crop()
+ local values=view and view.crop or {}
+ crop.left=values.left or 0;crop.top=values.top or 0;crop.right=values.right or 0;crop.bottom=values.bottom or 0
+ obs.obs_sceneitem_set_crop(item,crop)
+ local fit=view and view.fit or 'contain'
+ local bounds=fit=='cover' and obs.OBS_BOUNDS_SCALE_OUTER or fit=='stretch' and obs.OBS_BOUNDS_STRETCH or obs.OBS_BOUNDS_SCALE_INNER
+ obs.obs_sceneitem_set_bounds_type(item,bounds)
+end
+local function clip(scene,name,selected,mask_path,box,url,internal_prefix,url_file,retained_sources,pending_removals,blur_radius,source_view)
  internal_prefix=internal_prefix or 'OBS Template · '
  local existing=obs.obs_scene_get_group(scene,name)
  if selected=='' then
@@ -154,6 +238,7 @@ local function clip(scene,name,selected,mask_path,box,url,internal_prefix,url_fi
   private=obs.obs_sceneitem_get_private_settings(group)
   if private~=nil then
    obs.obs_data_set_bool(private,'collapsed',true)
+   if blur_radius~=nil then obs.obs_data_set_bool(private,'alo4obs_live_blur',true) end
    obs.obs_data_release(private);private=nil
   end
  end
@@ -189,6 +274,21 @@ local function clip(scene,name,selected,mask_path,box,url,internal_prefix,url_fi
   local capture_placed=place(nested,capture,unpack(box))
   obs.obs_source_release(capture);capture=nil
   if not capture_placed then return fail_group() end
+  apply_source_view(assert(obs.obs_scene_find_source(nested,selected)),source_view)
+ end
+ if blur_radius~=nil then
+  data=obs.obs_data_create()
+  obs.obs_data_set_int(data,'blur_algorithm',1)
+  obs.obs_data_set_int(data,'blur_type',1)
+  obs.obs_data_set_double(data,'radius',blur_radius)
+  filter=obs.obs_source_get_filter_by_name(clip_source,internal_prefix..'Live Blur')
+  if filter==nil then
+   filter=obs.obs_source_create('obs_composite_blur',internal_prefix..'Live Blur',data,nil)
+   if filter~=nil then obs.obs_source_filter_add(clip_source,filter) end
+  else obs.obs_source_update(filter,data) end
+  obs.obs_data_release(data);data=nil
+  if filter==nil then return fail_group() end
+  obs.obs_source_release(filter);filter=nil
  end
  data=obs.obs_data_create()
  obs.obs_data_set_string(data,'type','mask_alpha_filter.effect')
@@ -280,8 +380,10 @@ local function snapshot_layout(scene)
     obs.obs_sceneitem_addref(item)
     local private=obs.obs_sceneitem_get_private_settings(item)
     local collapsed=private~=nil and obs.obs_data_get_bool(private,'collapsed') or false
+    local live_blur=private~=nil and obs.obs_data_get_bool(private,'alo4obs_live_blur') or false
+    local live_blur_enabled=private~=nil and obs.obs_data_get_bool(private,'alo4obs_live_blur_enabled') or false
     if private~=nil then obs.obs_data_release(private) end
-    state.items[#state.items+1]={item=item,source=source,name=name,info=info,crop=crop,visible=obs.obs_sceneitem_visible(item),locked=obs.obs_sceneitem_locked(item),collapsed=collapsed,index=index-1}
+    state.items[#state.items+1]={item=item,source=source,name=name,info=info,crop=crop,visible=obs.obs_sceneitem_visible(item),locked=obs.obs_sceneitem_locked(item),collapsed=collapsed,live_blur=live_blur,live_blur_enabled=live_blur_enabled,index=index-1}
     if obs.obs_sceneitem_is_group(item) then capture(obs.obs_sceneitem_group_get_scene(item)) end
    end
    obs.sceneitem_list_release(items)
@@ -312,7 +414,11 @@ local function restore_layout(snapshot)
     obs.obs_sceneitem_set_visible(item,saved.visible);obs.obs_sceneitem_set_locked(item,saved.locked)
     obs.obs_sceneitem_set_order_position(item,saved.index)
     local private=obs.obs_sceneitem_get_private_settings(item)
-    if private~=nil then obs.obs_data_set_bool(private,'collapsed',saved.collapsed);obs.obs_data_release(private) end
+    if private~=nil then
+     obs.obs_data_set_bool(private,'collapsed',saved.collapsed)
+     if saved.live_blur then obs.obs_data_set_bool(private,'alo4obs_live_blur_enabled',saved.live_blur_enabled) end
+     obs.obs_data_release(private)
+    end
    end
   end
  end
@@ -348,6 +454,70 @@ local function release_layout(snapshot)
   release(obs.obs_source_release,saved.source)
  end
  if failed then assert(false,'Layout snapshot release failed.') end
+end
+-- Live panel blur uses a separate reference; original capture filters stay untouched.
+local function read_source_view(data)
+ local fit=obs.obs_data_get_string(data,'fit');if fit=='' then fit='contain' end
+ if not ({contain=true,cover=true,stretch=true})[fit] then return nil,'Invalid source fit.' end
+ local input=obs.obs_data_get_obj(data,'crop');local crop={};local message=nil
+ for _,edge in ipairs({'left','top','right','bottom'}) do
+  local value=input~=nil and obs.obs_data_get_double(input,edge) or 0
+  if value~=value or value<0 or value>8192 or value%1~=0 then message='Source crop must use whole pixels from 0 to 8192.' end
+  crop[edge]=value
+ end
+ if input~=nil then obs.obs_data_release(input) end
+ if message~=nil then return nil,message end
+ return {fit=fit,crop=crop}
+end
+local function plan_live_blur(settings,panels,keys)
+ local plan={radii={}}
+ -- Bento composites its independent wallpaper/color; only Overlap follows Main.
+ if obs.obs_data_get_string(settings,'layoutMode')~='overlap' then return plan end
+ local main=panels.game
+ if main and main.active and main.kind=='source' and main.source~='' then plan.input=main.source;plan.source_view=main.source_view end
+ local style=obs.obs_data_get_obj(settings,'globalStyle')
+ local global_fill=style~=nil and obs.obs_data_get_obj(style,'fill') or nil
+ local regions=obs.obs_data_get_obj(settings,'regionBackgrounds')
+ local overrides=obs.obs_data_get_obj(settings,'regionStyleOverrides')
+ for _,key in ipairs(keys) do
+  if key~='game' and panels[key].active then
+   local region=regions~=nil and obs.obs_data_get_obj(regions,key) or nil
+   local override=overrides~=nil and obs.obs_data_get_bool(overrides,key)
+   local local_fill=override and region~=nil and obs.obs_data_get_obj(region,'fill') or nil
+   local fill=override and local_fill or (not override and global_fill or nil)
+   local radius=region~=nil and obs.obs_data_get_double(region,'blur') or 0
+   if fill~=nil and obs.obs_data_has_user_value(fill,'blur') then radius=obs.obs_data_get_double(fill,'blur') end
+   if fill~=nil and obs.obs_data_get_string(fill,'mode')=='none' then radius=0 end
+   if radius==radius and radius>0 then plan.radii[key]=math.min(radius,64) end
+   if local_fill~=nil then obs.obs_data_release(local_fill) end
+   if region~=nil then obs.obs_data_release(region) end
+  end
+ end
+ if global_fill~=nil then obs.obs_data_release(global_fill) end
+ if style~=nil then obs.obs_data_release(style) end
+ if regions~=nil then obs.obs_data_release(regions) end
+ if overrides~=nil then obs.obs_data_release(overrides) end
+ if next(plan.radii)~=nil and plan.input==nil then
+  return nil,'Live panel blur needs an active Main OBS source. Select one, or set panel blur to 0. Existing scene settings were not applied.'
+ end
+ return plan
+end
+local function check_live_blur(plan)
+ local _,radius=next(plan.radii)
+ if radius==nil then return true end
+ local data=obs.obs_data_create()
+ obs.obs_data_set_int(data,'blur_algorithm',1);obs.obs_data_set_int(data,'blur_type',1)
+ obs.obs_data_set_double(data,'radius',radius)
+ local filter=obs.obs_source_create_private('obs_composite_blur','ALO4OBS Live Blur Probe',data)
+ obs.obs_data_release(data)
+ if filter==nil then
+  return false,'Live panel blur requires Composite Blur. For the Windows OBS 30-33 bundle, close OBS and run files/composite-blur-install.cmd from the original distribution, then reopen OBS; or set panel blur to 0. No scene changes were applied.'
+ end
+ obs.obs_source_release(filter)
+ return true
+end
+local function place_live_blur(scene,prefix,label,key,input,radius,retained_sources,pending_removals,source_view)
+ return clip(scene,prefix..label..' Live Blur',input,script_path()..'assets/'..key..'-alpha-mask.png',{0,0,1920,1080},nil,prefix,false,retained_sources,pending_removals,radius,source_view)
 end
 -- ALO names identify generated items; original inputs are reused without changing their settings.
 local function apply_generic(settings)
@@ -404,12 +574,16 @@ local function apply_generic(settings)
   end
   local kind=obs.obs_data_get_string(part,'type')
   local url=obs.obs_data_get_string(part,'url')
+  local source_view,view_error=nil,nil
+  local view=kind=='source' and obs.obs_data_get_obj(part,'sourceView') or nil
+  if view~=nil then source_view,view_error=read_source_view(view);obs.obs_data_release(view) end
   local active=enabled==nil or not obs.obs_data_has_user_value(enabled,key) or obs.obs_data_get_bool(enabled,key)
   local x=obs.obs_data_get_double(position,'x')
   local y=obs.obs_data_get_double(position,'y')
   local w=obs.obs_data_get_double(position,'width')
   local h=obs.obs_data_get_double(position,'height')
   obs.obs_data_release(part);obs.obs_data_release(position)
+  if view_error~=nil then error_message=panel_names[index]..': '..view_error;break end
   if not ({none=true,source=true,web=true,media=true})[kind] then error_message='Invalid '..panel_names[index]..' content.';break end
   if not finite(x) or not finite(y) or not finite(w) or not finite(h) or x<0 or y<0 or w<=0 or h<=0 or x+w>1920+0.000001 or y+h>1080+0.000001 then error_message='Invalid '..panel_names[index]..' position.';break end
   if layout_mode=='overlap' and active and key~='game' and h<128-0.000001 then error_message='Panel height must be at least 128 px: '..panel_names[index];break end
@@ -421,6 +595,12 @@ local function apply_generic(settings)
    if chosen==nil or obs.obs_scene_from_source(chosen)~=nil or obs.obs_source_is_group(chosen) or template_owned(selected) or math.floor(obs.obs_source_get_output_flags(chosen)/obs.OBS_SOURCE_VIDEO)%2==0 then
     if chosen~=nil then obs.obs_source_release(chosen) end
     error_message='Select an existing non-template OBS source for '..panel_names[index]..'.';break
+   end
+   if source_view~=nil then
+    local c=source_view.crop
+    if (c.left+c.right>0 or c.top+c.bottom>0) and (c.left+c.right>=obs.obs_source_get_width(chosen) or c.top+c.bottom>=obs.obs_source_get_height(chosen)) then
+     obs.obs_source_release(chosen);error_message='Source crop removes all of '..panel_names[index]..'. Reduce the saved margins or check that the source is ready.';break
+    end
    end
    obs.obs_source_release(chosen)
   end
@@ -435,7 +615,7 @@ local function apply_generic(settings)
    if mask==nil then error_message='Export and extract a fresh settings ZIP for the '..panel_names[index]..' mask.';break end
    mask:close()
   end
-  panels[key]={index=index,name=panel_names[index],kind=kind,url=url,active=active,source=selected,box={x,y,w,h}}
+  panels[key]={index=index,name=panel_names[index],kind=kind,url=url,active=active,source=selected,box={x,y,w,h},source_view=source_view}
  end
  obs.obs_data_release(content);obs.obs_data_release(layout)
  if enabled~=nil then obs.obs_data_release(enabled) end
@@ -459,8 +639,17 @@ local function apply_generic(settings)
  end
  for _,name in ipairs({'overlay.html','background.html','frame.html','wallpaper.html'}) do
   local file=io.open(script_path()..name,'r')
-  if file==nil then return fail('Keep '..name..' beside OBS-script.lua.') end
+  if file==nil then return fail('Keep '..name..' in the extracted runtime folder.') end
   file:close()
+ end
+ local live_plan,live_error=plan_live_blur(settings,panels,panel_keys)
+ if live_plan==nil then return fail(live_error) end
+ local live_ready,live_dependency=check_live_blur(live_plan)
+ if not live_ready then return fail(live_dependency) end
+ for key in pairs(live_plan.radii) do
+  local mask=io.open(script_path()..'assets/'..key..'-alpha-mask.png','rb')
+  if mask==nil then return fail('Export and extract a fresh settings ZIP for the '..panels[key].name..' live blur mask.') end
+  mask:close()
  end
  local needs_media=false
  for _,key in ipairs(panel_keys) do
@@ -468,7 +657,7 @@ local function apply_generic(settings)
   if panel.active and panel.kind=='media' and panel.url~='' then
    needs_media=true
    local entry=io.open(script_path()..'panel-media-'..key..'.html','r')
-   if entry==nil then return fail('Keep panel-media-'..key..'.html beside OBS-script.lua.') end
+   if entry==nil then return fail('Keep panel-media-'..key..'.html in the extracted runtime folder.') end
    entry:close()
    if panel.url:match('^assets/') then
     local asset=io.open(script_path()..panel.url,'rb')
@@ -591,6 +780,21 @@ local function apply_generic(settings)
    end
   end
  end
+ for _,label in ipairs(all_panel_names) do
+  local name=prefix..label..' Live Blur'
+  local occupied=obs.obs_get_source_by_name(name)
+  if occupied~=nil then
+   local item=obs.obs_scene_get_group(scene,name)
+   local private=item~=nil and obs.obs_sceneitem_get_private_settings(item) or nil
+   local owned=private~=nil and obs.obs_data_get_bool(private,'alo4obs_live_blur')
+   if private~=nil then obs.obs_data_release(private) end
+   obs.obs_source_release(occupied)
+   if not owned then
+    if created then obs.obs_scene_release(scene) else obs.obs_source_release(source) end
+    return fail('A live blur name is occupied by another source: '..name)
+   end
+  end
+ end
  local existing_panels=obs.obs_scene_find_source(scene,prefix..'Panel Stroke') or obs.obs_scene_find_source(scene,'OBS Template · Panel Stroke') or obs.obs_scene_find_source(scene,'OBS Template · Panels')
  local panels_visible=existing_panels==nil or obs.obs_sceneitem_visible(existing_panels)
  local existing_fill=obs.obs_scene_find_source(scene,prefix..'Panel Fill') or obs.obs_scene_find_source(scene,'OBS Template · Panel Fill')
@@ -616,7 +820,7 @@ local function apply_generic(settings)
    if item~=nil then obs.obs_sceneitem_set_visible(item,false) end
   elseif selected=='' then unused_groups[#unused_groups+1]=group
   else
-   if not clip(scene,group,selected,script_path()..'assets/'..key..'-alpha-mask.png',panel.box,url,prefix,panel.kind=='media',retained_sources,pending_removals) then
+   if not clip(scene,group,selected,script_path()..'assets/'..key..'-alpha-mask.png',panel.box,url,prefix,panel.kind=='media',retained_sources,pending_removals,nil,panel.source_view) then
     obs.script_log(obs.LOG_WARNING,'Could not mask '..panel.name..'. Check Browser Source and mask files.')
     result=false;break
    end
@@ -629,13 +833,23 @@ local function apply_generic(settings)
    and browser(scene,prefix..'Panel Stroke',script_path()..'frame.html',true,0,0,1920,1080)
   if not result then obs.script_log(obs.LOG_WARNING,'Could not create a required template browser source.') end
  end
+ if result then
+  for _,key in ipairs(panel_keys) do
+   local radius=live_plan.radii[key]
+   if radius~=nil and not place_live_blur(scene,prefix,panels[key].name,key,live_plan.input,radius,retained_sources,pending_removals,live_plan.source_view) then
+    result=false;break
+   end
+  end
+ end
  -- Overlap fills and shadows sit above Main and below the auxiliary content.
- if result and layout_mode=='overlap' then
+ if result and (layout_mode=='overlap' or live_plan.input~=nil) then
   local function raise(name)
    local item=obs.obs_scene_find_source(scene,name)
    if item~=nil then obs.obs_sceneitem_set_order(item,obs.OBS_ORDER_MOVE_TOP) end
   end
-  raise(prefix..'Main Group');raise(prefix..'Panel Fill')
+  raise(prefix..'Main Group')
+  for index=2,#panel_keys do raise(prefix..panels[panel_keys[index]].name..' Live Blur') end
+  raise(prefix..'Panel Fill')
   for index=2,#panel_keys do raise(prefix..panels[panel_keys[index]].name..' Group') end
   raise(prefix..'Overlay');raise(prefix..'Panel Stroke')
  end
@@ -674,7 +888,20 @@ local function apply_generic(settings)
   obs.obs_sceneitem_set_visible(obs.obs_scene_find_source(scene,prefix..'Panel Stroke'),panels_visible)
   obs.obs_sceneitem_set_visible(obs.obs_scene_find_source(scene,prefix..'Panel Fill'),fill_visible)
   obs.obs_sceneitem_set_visible(obs.obs_scene_find_source(scene,prefix..'Background'),background_visible)
-  panel_backdrop(background_visible,prefix)
+  for index,key in ipairs(all_panel_keys) do
+   local item=obs.obs_scene_get_group(scene,prefix..all_panel_names[index]..' Live Blur')
+   if item~=nil then
+    local private=obs.obs_sceneitem_get_private_settings(item)
+    if private~=nil then
+     obs.obs_data_set_bool(private,'alo4obs_live_blur_enabled',live_plan.radii[key]~=nil)
+     obs.obs_data_release(private)
+    end
+   end
+  end
+  local ready=live_input_ready(live_plan.input)
+  sync_live_blur_visibility(prefix,fill_visible,ready)
+  panel_backdrop(background_visible,prefix,ready,live_plan.input or '')
+  live_refresh_prefix=prefix
   connect_panel_signal(scene_name)
   obs.obs_frontend_set_current_scene(source)
   obs.script_log(obs.LOG_INFO,scene_name..' applied. No links are logged.')
@@ -992,6 +1219,21 @@ function script_properties()
    obs.source_list_release(sources)
   end
  end
+ if generic then obs.obs_properties_add_text(p,'live_blur_info',en and 'Bento blurs its configured background image/color. Overlap live panel blur needs a Main OBS source and Composite Blur. The Windows OBS 30-33 distribution includes files/composite-blur-install.cmd; close OBS and run it once. Set blur to 0 to use OBS without the plugin. The browser preview cannot show live OBS video.' or 'Bento는 지정한 배경 이미지·색상을 사용합니다. Overlap 라이브 블러에는 Main OBS 소스와 Composite Blur가 필요합니다. Windows OBS 30-33 배포 ZIP의 files/composite-blur-install.cmd를 OBS 종료 후 한 번 실행하세요. 플러그인 없이 사용하려면 블러를 0으로 설정하세요. 브라우저 미리보기에는 실제 OBS 영상이 나오지 않습니다.',obs.OBS_TEXT_INFO) end
  obs.obs_properties_add_button(p,'apply',en and 'Apply saved settings / Auto layout' or '저장한 설정 / 자동 배치 적용',apply)
  return p
+end
+
+function script_load()
+ local file=io.open(script_path()..'obs-settings.json','r')
+ if file==nil then return end
+ local data=obs.obs_data_create_from_json(file:read('*a'));file:close()
+ if data~=nil then
+  if obs.obs_data_get_int(data,'layoutVersion')==4 then
+   local mode=obs.obs_data_get_string(data,'layoutMode')
+   live_refresh_prefix=mode=='overlap' and 'ALO4OBS · OVERLAP · ' or 'ALO4OBS · BENTO · '
+   connect_panel_signal(live_refresh_prefix:sub(1,#live_refresh_prefix-#' · '))
+  end
+  obs.obs_data_release(data)
+ end
 end

@@ -115,7 +115,7 @@ test('empty selected upload is rejected before reading or replacing a valid file
   assert.equal(reads,0);assert.equal(uploads.get('whole'),existing);assert.equal(warning.error,true);assert.match(warning.message,/빈 파일/);
 });
 test('malformed draft recovery enables export and reset without overwriting the stored draft',()=>{
-  const preview=fs.readFileSync(require.resolve('../template/preview.js'),'utf8'),start=preview.indexOf('  function recoverDraft('),end=preview.indexOf('  void restoreDraft()',start);
+  const preview=fs.readFileSync(require.resolve('../template/preview.js'),'utf8'),start=preview.indexOf('  function recoverDraft('),end=preview.indexOf('  const firstUse=',start);
   const bundle={disabled:true},reset={disabled:true},form={inert:true},oldFile={path:'bad'},uploads=new Map([['whole',oldFile]]),missingUploads=new Set(['whole']);let writes=0,status;
   const context={document:{querySelectorAll:()=>[]},config:{invalid:true},selected:'game',defaults:{layout:{game:{}}},normalize:value=>structuredClone(value),uploads,missingUploads,draftReady:false,form,
     byId:id=>id==='bundle'?bundle:reset,renderGlobal(){},renderPlacement(){},renderEditor(){},drawHits(){},send(){},frame:{},liveConfig:value=>value,

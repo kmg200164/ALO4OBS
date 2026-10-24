@@ -258,6 +258,8 @@ function obs.obs_source_get_filter_by_name(s) return s.filter end
 function obs.obs_source_filter_add(s,filter) s.filter=filter end
 function obs.obs_scene_enum_items() return {} end
 function obs.sceneitem_list_release() end
+function obs.obs_sceneitem_crop() return {} end
+function obs.obs_sceneitem_set_crop(i,crop) i.crop=crop end
 function obs.vec2() return {} end
 function obs.obs_sceneitem_set_alignment() end
 function obs.obs_sceneitem_set_bounds_type() end
@@ -395,6 +397,7 @@ local saved={layoutVersion=4,layoutMode='overlap'}
 function obslua.obs_data_create_from_json() return saved end
 function obslua.obs_properties_create() return {lists={}} end
 function obslua.obs_properties_add_bool() end
+function obslua.obs_properties_add_text(p,key,text) p[key]=text end
 function obslua.obs_properties_add_list(p,key,label) local list={key=key,label=label};p.lists[#p.lists+1]=list;return list end
 function obslua.obs_property_list_add_string() end
 function obslua.obs_enum_sources() return {} end
@@ -408,6 +411,7 @@ local selection={english=true,panelSource_custom1='Keep Bento Camera',panelSourc
 script_update(selection)
 local props=script_properties()
 assert(#props.lists==16)
+assert(props.live_blur_info:find('Composite Blur',1,true) and props.live_blur_info:find('blur to 0',1,true))
 assert(props.lists[1].key=='panelSource_game' and props.lists[1].label=='Main OBS source')
 for column=1,5 do for row=1,3 do local index=2+(column-1)*3+row-1
  assert(props.lists[index].key=='panelSource_panel'..column..'_'..row)

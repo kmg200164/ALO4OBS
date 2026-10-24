@@ -21,11 +21,11 @@ body{--guide-frame-canvas:var(--surface-field);--guide-frame-parent:var(--guide-
 body[data-theme=light]{--guide-frame-child:var(--neutral-white);--guide-frame-text:var(--neutral-black)}
 
 /* Literal controls and file names are highlights; ordinary strong text stays ordinary text. */
-.step-card .step-content code,.faq-item .faq-body code,.step-card kbd,.faq-item kbd,.step-card .control-label{background:var(--accent-default);color:var(--content-on-accent)}
+.page-layout .step-content code,.page-layout .faq-body code,.page-layout .page-heading code,.page-layout>p code,.step-card kbd,.faq-item kbd,.step-card .control-label{background:var(--accent-default);color:var(--content-on-accent)}
 .step-card kbd,.faq-item kbd{padding:2px 6px;border-radius:4px;font:inherit;font-weight:600}
-.faq-item:hover,.faq-item:has(summary:focus-visible){background:var(--accent-default);color:var(--content-on-accent);cursor:pointer}
-.faq-item:hover .faq-body p,.faq-item:hover .faq-body strong,.faq-item:hover .faq-body a,.faq-item:has(summary:focus-visible) .faq-body p,.faq-item:has(summary:focus-visible) .faq-body strong,.faq-item:has(summary:focus-visible) .faq-body a{color:var(--content-on-accent)}
-.faq-item:hover summary::after,.faq-item:has(summary:focus-visible) summary::after{color:currentColor}
+.faq-item:hover,.faq-item:has(:focus-visible){background:var(--accent-default);color:var(--content-on-accent);cursor:pointer}
+.faq-item:hover .faq-body p,.faq-item:hover .faq-body strong,.faq-item:hover .faq-body a,.faq-item:has(:focus-visible) .faq-body p,.faq-item:has(:focus-visible) .faq-body strong,.faq-item:has(:focus-visible) .faq-body a{color:var(--content-on-accent)}
+.faq-item:hover summary::after,.faq-item:has(:focus-visible) summary::after{color:currentColor}
 .faq-item summary:focus-visible{outline-color:var(--content-on-accent);outline-offset:-3px}
 
 /* Keep the first view short; detailed setup and recovery stay behind native details. */
@@ -42,4 +42,24 @@ body[data-theme=light]{--guide-frame-child:var(--neutral-white);--guide-frame-te
 @media(max-width:760px){.faq-item{padding:0}.guide-process-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px}}
 @media(prefers-reduced-motion:reduce){.guide-chevron{transition:none}}
 
-.faq-item:is(:hover,:has(summary:focus-visible)) :is(code,kbd,.control-label){background:var(--content-on-accent);color:var(--accent-default)}
+.faq-item:is(:hover,:has(:focus-visible)) :is(code,kbd,.control-label){background:var(--content-on-accent);color:var(--accent-default)}
+
+/* Use the shared spacing scale to separate headings, actions and explanations. */
+.page-heading{display:flex;flex-direction:column;gap:var(--space-2);margin-bottom:var(--space-3)}
+.page-heading p{margin-top:0}
+.page-heading strong{color:var(--text);font-weight:600}
+.guide-intro{margin-block:var(--space-3)}
+.step-card,.step-content,.faq-item .faq-body{gap:var(--space-2)}
+.faq-list{gap:var(--space-2)}
+.faq-title{margin-bottom:var(--space-2)}
+.guide-workflow figcaption{margin-top:var(--space-2)}
+.guide-workflow .editor-help{margin-top:var(--space-2)}
+
+.page-layout code{padding:2px 6px;border-radius:4px;font:inherit;font-weight:600;overflow-wrap:anywhere;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.page-layout>.editor-help{margin-block:var(--space-3)}
+.step-content>h2{margin-bottom:var(--space-1)}
+
+/* Symbols track the same foreground as their surrounding text. */
+.page-layout .faq-item li::marker,.page-layout .step-content li::marker{color:currentColor}
+.faq-item:is(:hover,:has(:focus-visible)) :is(p,strong,a,li,.level-chip b,.guide-process-number){color:inherit}
+.faq-item:is(:hover,:has(:focus-visible)) .privacy-note{border-left-color:currentColor}

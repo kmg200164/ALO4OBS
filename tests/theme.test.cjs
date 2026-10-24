@@ -209,7 +209,7 @@ test('interaction roles swap fill and ink while controls stay free of permanent 
  assert.match(previewCss,/\.hit-outline\{[^}]*color:var\(--accent-default\)/);
  assert.match(previewCss,/\.panel-hit:is\(:hover,:focus-visible,\[aria-pressed=true\]\) \.hit-outline\{display:block\}/);
  const guideCss=fs.readFileSync(path.join(__dirname,'../template/guide-layout.css'),'utf8');
- assert.match(guideCss,/\.step-card \.step-content code,[^{}]*kbd[^{}]*\{background:var\(--accent-default\);color:var\(--content-on-accent\)\}/);
+ assert.match(guideCss,/\.page-layout \.step-content code,[^{}]*kbd[^{}]*\{background:var\(--accent-default\);color:var\(--content-on-accent\)\}/);
  assert.doesNotMatch(guideCss.replace(/\/\*[\s\S]*?\*\//g,''),/strong[^{}]*\{background:/);
 });
 

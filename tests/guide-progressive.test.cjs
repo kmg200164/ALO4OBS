@@ -12,7 +12,7 @@ test('every guide starts with the shared visual workflow and keeps setup and rec
   assert.equal((html.match(/data-guide-required/g)||[]).length,6,name);
   assert.doesNotMatch(html,/<code>ALO ·<\/code>/);
   assert.doesNotMatch(html,/<details\b[^>]*\bopen(?:[\s=>])/);
-  for(const essential of ['OBS-script.lua','Settings-Bento.zip','Settings-Overlap.zip','config.public.js','local_file','ALO4OBS · BENTO','ALO4OBS · OVERLAP','layouts/bento/','layouts/overlap/','OST ·','data-guide-layout'])assert.ok(html.includes(essential),`${name}: ${essential}`);
+  for(const essential of ['script-bento.lua','script-overlap.lua','Settings-Bento.zip','Settings-Overlap.zip','config.public.js','local_file','ALO4OBS · BENTO','ALO4OBS · OVERLAP','files/bento/','files/overlap/','OST ·','data-guide-layout'])assert.ok(html.includes(essential),`${name}: ${essential}`);
  }
  assert.deepEqual(fs.readFileSync(path.join(template,'assets/setup-workflow.png')),fs.readFileSync(path.join(__dirname,'../docs/images/setup-workflow.png')));
 });
@@ -21,7 +21,7 @@ test('whole-card toggling leaves native summaries and links interactive',()=>{
  let click;
  const card={open:false,addEventListener:(type,handler)=>{assert.equal(type,'click');click=handler;}};
  const document={documentElement:{lang:'en'},querySelectorAll:selector=>selector==='.faq-item'?[card]:[]};
- vm.runInNewContext(fs.readFileSync(path.join(template,'guide-layout.js'),'utf8'),{document});
+ vm.runInNewContext(fs.readFileSync(path.join(template,'guide-layout.js'),'utf8'),{document,location:{hash:''}});
  click({target:{closest:()=>null}});assert.equal(card.open,true);
  for(const interactive of ['summary','a','button','input','select','textarea']){
   click({target:{closest:selector=>{assert.ok(selector.split(',').includes(interactive));return {};}}});

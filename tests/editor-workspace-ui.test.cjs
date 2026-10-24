@@ -4,7 +4,7 @@ test('equal workspace keeps sticky preview, inline actions and a full-width cont
  const browser=await chromium.launch({channel:'chrome',headless:true});
  try{
   const page=await browser.newPage({locale:'ko-KR',viewport:{width:1440,height:1000}}),errors=[];
-  page.on('pageerror',e=>errors.push(e.message));await page.goto(new URL('settings.html',process.env.KMG_THEME_RENDER_URL).href);await page.locator('[data-layout-choice=overlap]').click();
+  page.on('pageerror',e=>errors.push(e.message));await require('./helpers/existing-entry.cjs')(page);await page.goto(new URL('settings.html',process.env.KMG_THEME_RENDER_URL).href);await page.locator('[data-layout-choice=overlap]').click();
   assert.equal(await page.locator('#send,#clear,#event-target,.sample-card').count(),0);assert.equal(await page.locator('.panel-card').isVisible(),true);assert.equal(await page.locator('#panel-selection-hint').isVisible(),true);assert.equal(await page.locator('#panel-editor').isVisible(),false);
   assert.equal(await page.locator('[name=overlapColumn2Wide],[name=overlapColumn4Wide]').count(),0);
   for(const width of [1920,1440,1401,1400,1100,760,390,320]){

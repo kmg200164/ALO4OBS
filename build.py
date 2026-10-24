@@ -110,7 +110,7 @@ def verify_entries(package):
                         raise ValueError(f'Missing runtime asset: {name} -> {target}')
 
 
-def build(destination=output):
+def build_editor(destination=output):
     verify_entries(entries)
     destination = Path(destination)
     destination.parent.mkdir(exist_ok=True)
@@ -136,6 +136,121 @@ def build(destination=output):
         if temporary is not None:
             temporary.unlink(missing_ok=True)
     print(f'Built and verified {destination} v{version} ({len(entries)} files; neutral prerelease package)')
+
+
+def build_windows(destination, plugin_archive, source_archive):
+    """Create an offline Windows OBS 32 candidate; never install or publish it."""
+    import hashlib
+    import io
+    lock = {
+        'plugin_version': '1.6.0',
+        'supported_obs_major': 32,
+        'plugin_url': 'https://github.com/FiniteSingularity/obs-composite-blur/releases/download/v1.6.0/obs-composite-blur-1.6.0-windows-portable-legacy-x64.zip',
+        'plugin_sha256': '8279b2ddc73947d7a864102b55eaf406443846267eb24ea0cdafb2f3dda9e4da',
+        'source_commit': '0783c13660a939143bb2d0c3b1f69310f413348a',
+        'source_url': 'https://codeload.github.com/FiniteSingularity/obs-composite-blur/zip/0783c13660a939143bb2d0c3b1f69310f413348a',
+        'source_sha256': 'aa944119e4db957f5b2ed86d6511e453367d6f21a7fd06782e0f0cdb63dda2ed',
+    }
+    payload = {}
+    for path, key in [(plugin_archive, 'plugin'), (source_archive, 'source')]:
+        blob = Path(path).read_bytes()
+        if hashlib.sha256(blob).hexdigest() != lock[key + '_sha256']:
+            raise ValueError('Pinned ' + key + ' checksum mismatch')
+        payload[key] = blob
+    added = {}
+    hashes = {}
+    with ZipFile(io.BytesIO(payload['plugin'])) as archive:
+        if archive.testzip() is not None:
+            raise ValueError('Plugin archive CRC mismatch')
+        for name in archive.namelist():
+            if name.endswith('/'):
+                continue
+            if name.startswith('obs-plugins/64bit/obs-composite-blur.'):
+                relative = 'bin/64bit/' + name.split('/')[-1]
+            elif name.startswith('data/obs-plugins/obs-composite-blur/'):
+                relative = 'data/' + name.removeprefix('data/obs-plugins/obs-composite-blur/')
+            else:
+                raise ValueError('Unexpected plugin member')
+            if '..' in Path(relative).parts or relative.startswith('/'):
+                raise ValueError('Unsafe plugin member')
+            blob = archive.read(name)
+            added['files/plugin/payload/' + relative] = blob
+            hashes[relative] = hashlib.sha256(blob).hexdigest()
+    with ZipFile(io.BytesIO(payload['source'])) as archive:
+        if archive.testzip() is not None:
+            raise ValueError('Source archive CRC mismatch')
+        prefix = 'obs-composite-blur-' + lock['source_commit'] + '/'
+        for name in ['LICENSE', 'CMakeLists.txt', 'src/obs-composite-blur-plugin.c']:
+            archive.read(prefix + name)
+        added['files/plugin/LICENSE.txt'] = archive.read(prefix + 'LICENSE')
+    added['files/plugin/source.zip'] = payload['source']
+    lock['files'] = hashes
+    added['files/plugin/manifest.json'] = json.dumps(lock, indent=2).encode()
+    added['files/plugin/NOTICE.txt'] = (
+        'Composite Blur 1.6.0 by FiniteSingularity. Unmodified official release binaries and packages.\n'
+        'Redistributed under GNU GPL version 2; see LICENSE.txt and complete corresponding source.zip.\n'
+        'The source archive retains upstream copyright, warranty and build notices.\n'
+        'This is aggregation with ALO4OBS; the plugin is independently licensed.\n'
+        'Windows x64 OBS 30-32 Legacy / OBS 33 modern; macOS universal PKG; Linux amd64 native DEB. Flatpak offline extension pending.\n'
+        'Close OBS, then run files/composite-blur-install.cmd once. No website or manual copying required.\n'
+        'No UAC auto-accept, execution-policy change, OBS termination or profile modification.\n'
+    ).encode()
+    added['files/composite-blur-install.cmd'] = (source / 'composite-blur-install.cmd').read_bytes()
+    # Additional official platforms are pinned and kept offline alongside the same GPL source.
+    vendor = repository / 'vendor' / 'obs-composite-blur-1.6.0'
+    packages = json.loads((vendor / 'packages.json').read_text())
+    for name, digest in packages['sha256'].items():
+        blob = (vendor / name).read_bytes()
+        if hashlib.sha256(blob).hexdigest() != digest:
+            raise ValueError('Pinned platform package checksum mismatch: ' + name)
+        added['files/plugin/packages/' + name] = blob
+    modern_files = {}
+    with ZipFile(vendor / 'obs-composite-blur-1.6.0-windows-x64.zip') as archive:
+        for name in archive.namelist():
+            if name.endswith('/'): continue
+            if name.startswith('data/'):
+                relative = name
+            elif name in {'obs-composite-blur.dll', 'obs-composite-blur.pdb'}:
+                relative = 'bin/64bit/' + name
+            else: raise ValueError('Unexpected modern Windows member')
+            if '..' in Path(relative).parts: raise ValueError('Unsafe platform member')
+            blob = archive.read(name)
+            added['files/plugin/payload-modern/' + relative] = blob
+            modern_files[relative] = hashlib.sha256(blob).hexdigest()
+    modern_lock = dict(lock, files=modern_files, supported_obs_major=33, minimum_obs_major=33, supported_obs_majors=[33], plugin_url=packages['release'].replace('/tag/', '/download/') + '/obs-composite-blur-1.6.0-windows-x64.zip', plugin_sha256=packages['sha256']['obs-composite-blur-1.6.0-windows-x64.zip'])
+    added['files/plugin/manifest-modern.json'] = json.dumps(modern_lock, indent=2).encode()
+    lock['supported_obs_majors'] = [30, 31, 32]
+    added['files/plugin/manifest.json'] = json.dumps(lock, indent=2).encode()
+    added['files/plugin/packages.json'] = json.dumps(packages, indent=2).encode()
+    for helper in ['composite-blur-install.command', 'composite-blur-install.sh']:
+        added['files/' + helper] = (source / helper).read_bytes()
+    # Keep the root entry and all existing editor files byte-for-byte intact.
+    with tempfile.TemporaryDirectory() as temporary:
+        neutral = Path(temporary) / 'neutral.zip'
+        build_editor(neutral)
+        with ZipFile(neutral) as archive:
+            combined = {name: archive.read(name) for name in archive.namelist()}
+        combined.update(added)
+        destination = Path(destination)
+        with ZipFile(destination, 'w', ZIP_DEFLATED) as archive:
+            for name, blob in combined.items():
+                if name.endswith(('.command', '.sh')):
+                    from zipfile import ZipInfo
+                    info = ZipInfo(name)
+                    info.create_system = 3
+                    info.external_attr = 0o100755 << 16
+                    archive.writestr(info, blob, compress_type=ZIP_DEFLATED)
+                else:
+                    archive.writestr(name, blob)
+        with ZipFile(destination) as archive:
+            if archive.testzip() is not None or [n for n in archive.namelist() if '/' not in n] != ['settings.html']:
+                raise ValueError('Windows bundle verification failed')
+    print('Verified offline Windows candidate: ' + str(destination))
+
+
+def build(destination=output):
+    dependency = repository / 'vendor' / 'obs-composite-blur-1.6.0'
+    return build_windows(destination, dependency / 'windows-legacy-x64.zip', dependency / 'source.zip')
 
 
 if __name__ == '__main__':

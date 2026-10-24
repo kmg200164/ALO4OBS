@@ -18,7 +18,7 @@ function harness(options={}){
  const context={OverlayEvents:require('../template/events.js'),showStatus:(message,error)=>{status.textContent=message;status.error=error;},fetch:options.fetch,uploads,status,keys,localized:s=>s,Uint8Array,Blob,URL:{createObjectURL:()=> 'blob:test',revokeObjectURL(){}},setTimeout(){},
   byId:id=>id==='bundle'?bundle:null,current:()=>structuredClone(data),
   alphaMask:async(_,name)=>{await maskGate;return {name,bytes:new Uint8Array([1])};},
-  OverlayPack:{isolateRuntime:entries=>entries,settingsEntries:input=>[{name:'obs-settings.json',bytes:new TextEncoder().encode(JSON.stringify(input))}],zip:entries=>{captured=entries;return new Uint8Array([0]);}},
+  OverlayPack:{scriptNames:require('../template/pack.js').scriptNames,isolateRuntime:entries=>entries,settingsEntries:input=>[{name:'obs-settings.json',bytes:new TextEncoder().encode(JSON.stringify(input))}],zip:entries=>{captured=entries;return new Uint8Array([0]);}},
   document:{createElement:()=>({click(){downloadName=this.download;}})},window:{OBS_EXPORT_RUNTIME:{},showSaveFilePicker:options.showSaveFilePicker}
  };
  vm.runInNewContext(source.slice(start,end),context);
@@ -76,5 +76,12 @@ test('Bento to Overlap to Bento export captures the type before asynchronous ZIP
   h.releaseMasks();await exporting;
   assert.equal(h.downloadName,mode==='bento'?'Settings-Bento.zip':'Settings-Overlap.zip');
   assert.equal(JSON.parse(new TextDecoder().decode(h.captured[0].bytes)).layoutMode,mode);
+ }
+});
+
+test('completion message names the layout-specific OBS script',async()=>{
+ for(const [mode,script] of [['bento','script-bento.lua'],['overlap','script-overlap.lua']]){
+  const h=harness({layoutMode:mode});h.releaseMasks();await h.bundle.onclick();
+  assert.ok(h.status.textContent.includes(script),mode);assert.ok(!h.status.textContent.includes('OBS-script.lua'),mode);
  }
 });

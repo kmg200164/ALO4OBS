@@ -39,8 +39,9 @@ test('header navigation offers only the other page at the same icon position',()
  const source=fs.readFileSync(path.join(__dirname,'../template/header.js'),'utf8');
  const navigation=source.slice(source.indexOf('  const currentPath='),source.indexOf("  try{localStorage.removeItem"));
  for(const pathname of ['/settings.html','/guide.html','/guide-en.html','/guide-ja.html']){
-  const context={location:{pathname},settingsLink:{},guideLink:{}};
+  const layoutButton={};const context={location:{pathname},settingsLink:{},guideLink:{},header:{querySelector:s=>s==='#change-layout'?layoutButton:{insertAdjacentHTML(){}}}};
   vm.runInNewContext(navigation,context);
+  assert.equal(layoutButton.disabled,pathname!=='/settings.html');
   assert.equal(context.settingsLink.hidden,pathname==='/settings.html');
   assert.equal(context.guideLink.hidden,pathname!=='/settings.html');
  }

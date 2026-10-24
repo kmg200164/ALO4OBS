@@ -1,0 +1,10 @@
+{
+  "version": "1.6.0",
+  "release": "https://github.com/FiniteSingularity/obs-composite-blur/releases/tag/v1.6.0",
+  "sha256": {
+    "obs-composite-blur-1.6.0-windows-x64.zip": "38a1e544ebffa5ec96823274a662454833147b523173d688a0337139748fc70e",
+    "obs-composite-blur-1.6.0-macos-universal.pkg": "11b9e3f781c5ee196987bdaa6cd6d19795d8f2a19d1352a5745ba8f19fa2ad6c",
+    "obs-composite-blur-1.6.0-x86_64-linux-gnu-legacy.deb": "a7aa448476b1fd95011a793517db2ff02701b705c02a0a0d801794cfa8714496",
+    "obs-composite-blur-1.6.0-x86_64-linux-gnu.deb": "e3d07db0fa245063927f2e0dbe9e091cabfa5c91ff492d2d7f9b22a835e681c6"
+  }
+}

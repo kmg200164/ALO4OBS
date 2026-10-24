@@ -3,8 +3,14 @@ const enabled=process.env.KMG_RUN_OVERLAP_COLUMN_UI==='1';
 const playwright=()=>require(process.env.KMG_PLAYWRIGHT_PATH||'C:/Users/KMG/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 async function geometry(page,label){
  // Parent draft and child rectangles remain separate across opaque file origins.
- await page.waitForFunction(()=>!!localStorage.getItem('obs-overlay-config'));
- const config=await page.evaluate(()=>JSON.parse(localStorage.getItem('obs-overlay-config')));
+ // Rendering is synchronous but draft persistence waits for the storage lock queue.
+ // Take one snapshot only after the saved layout matches the current parent hit areas.
+ const snapshot=await page.waitForFunction(()=>{
+  const config=JSON.parse(localStorage.getItem('obs-overlay-config')||'null');if(!config?.layout)return false;
+  const hits=[...document.querySelectorAll('[data-hit]')];if(!hits.length)return false;
+  return hits.every(el=>{const b=config.layout[el.dataset.hit];return b&&Math.abs(parseFloat(el.style.top)*1080/100-b.y)<.01&&Math.abs(parseFloat(el.style.height)*1080/100-b.height)<.01;})?config:false;
+ },null,{timeout:3000});
+ const config=await snapshot.jsonValue();await snapshot.dispose();
  const child=await (await page.locator('#preview').elementHandle()).contentFrame();
  await child.waitForFunction(layout=>[...document.querySelectorAll('section[data-region]')].filter(e=>!e.hidden).every(e=>{const b=layout[e.dataset.region];return b&&Math.abs(parseFloat(e.style.height)-b.height)<.01&&Math.abs(parseFloat(e.style.top)-b.y)<.01;}),config.layout,{timeout:3000});
  assert.equal(await page.locator('#status').getAttribute('role'),'status',label+' apply succeeds');
@@ -17,7 +23,7 @@ async function geometry(page,label){
 async function slider(page,key,mode){
  const slider=page.locator('[name=panelHeightSlider]');await slider.press(mode==='min'?'Home':'End');
  if(mode==='middle'){const track=await slider.boundingBox();await page.mouse.click(track.x+track.width/2,track.y+track.height/2);}
- await page.waitForTimeout(30);await geometry(page,key+' slider '+mode);
+ await geometry(page,key+' slider '+mode);
 }
 test('every panel height mode and slider keeps actual rendered panels separate',{skip:!enabled},async()=>{
  const browser=await playwright().chromium.launch({headless:true,channel:'chrome'});let steps=0;

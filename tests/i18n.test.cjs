@@ -23,7 +23,7 @@ function boot(pathname='/settings.html',savedLanguage='ko',navigatorLanguages){
   querySelectorAll(){return attributes;},querySelector(){return null;}
  };
  const local={value:savedLanguage,getItem(){return this.value;},setItem(_key,value){this.value=value;}};
- const location={pathname,href:''};
+ const location={pathname,href:'',hash:''};
  const languageEvents=[],window={dispatchEvent:event=>languageEvents.push(event)};
  const context={window,document,location,localStorage:local,NodeFilter:{SHOW_TEXT:4},CustomEvent:class{constructor(type,init){this.type=type;this.detail=init?.detail;}},MutationObserver:class{observe(){}disconnect(){}}};
  if(navigatorLanguages)context.navigator={languages:navigatorLanguages};
@@ -103,7 +103,7 @@ test('guide links follow the selected language and guide pages route on language
 
 test('English guide retains product spelling and valid upstream link paths',()=>{
  const guide=fs.readFileSync(path.join(__dirname,'../template/guide-en.html'),'utf8');
- assert.ok(guide.includes('<h1>Configure and connect OBS</h1>'));
+ assert.ok(guide.includes('<h1>Configure and apply in OBS</h1>'));
  assert.ok(guide.includes('Click <strong>Apply saved settings / Auto layout</strong>'));
  assert.doesNotMatch(guide,/WEFLAB|Speech Translator|optional examples/);
  assert.doesNotMatch(guide,/honfigure|hlick|WEFLpB|hSS|hHpNGELOG/);
@@ -249,5 +249,15 @@ test('layout action names round trip across all languages',()=>{
  const {i18n}=boot();
  for(const [ko,en,ja] of [['레이아웃 전환','Switch layout','レイアウト切り替え'],['레이아웃 전환 · 현재 Overlap','Switch layout · Current Overlap','レイアウト切り替え · 現在 Overlap']]){
  assert.equal(i18n.localize(ko,'en'),en);assert.equal(i18n.localize(en,'ja'),ja);assert.equal(i18n.localize(ja,'ko'),ko);
+ }
+});
+
+test('export completion message is translated for each layout-specific OBS script',()=>{
+ const {i18n}=boot();
+ for(const name of ['Bento','Overlap']){
+  const ko=`설정 ZIP 전체를 압축 해제한 뒤, 같은 폴더의 script-${name.toLowerCase()}.lua를 OBS에 추가하세요.`;
+  assert.equal(i18n.localize(ko,'en'),`Extract the entire settings ZIP, then add script-${name.toLowerCase()}.lua from that folder in OBS.`);
+  assert.match(i18n.localize(ko,'ja'),new RegExp(`script-${name.toLowerCase()}\.lua`));
+  assert.notEqual(i18n.localize(ko,'ja'),ko);
  }
 });

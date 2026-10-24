@@ -64,13 +64,13 @@ local root={items={}};local nested={items={}}
 local capture={name='User Capture',settings={device='keep'},filters={},refs=0}
 local mask={name='ALO Mask',settings={path='old-mask'},enabled=false,refs=0}
 local group={name='ALO Group',settings={value='old'},filters={mask},nested=nested,refs=0}
-local item=obs.obs_scene_add(root,group);item.info={x=10,crop_to_bounds=true};item.crop={left=2};item.locked=true;item.visible=false;item.private.collapsed=true
+local item=obs.obs_scene_add(root,group);item.info={x=10,crop_to_bounds=true};item.crop={left=2};item.locked=true;item.visible=false;item.private.collapsed=true;item.private.alo4obs_live_blur=true;item.private.alo4obs_live_blur_enabled=true
 local original=obs.obs_scene_add(nested,capture);original.info={x=20};original.crop={left=3};original.locked=true
 -- Original deletion is deferred until commit, keeping IDs and extra state.
 local duplicate=obs.obs_scene_add(nested,capture);duplicate.info={x=30};duplicate.crop={left=4};duplicate.locked=false
 local baseline=snapshot_layout(root)
 -- Model a successful first panel mutation followed by another panel failure.
-item.info.x=99;item.visible=true;item.private.collapsed=false
+item.info.x=99;item.visible=true;item.private.collapsed=false;item.private.alo4obs_live_blur_enabled=false
 original.scale_filter=3;original.blend_mode=2;original.blend_method=1;original.selected=true;original.hotkey=42
 obs.obs_scene_add(nested,{name='ALO New Media',settings={},filters={}})
 obs.obs_scene_add(root,capture) -- temporary hidden retention item
@@ -80,6 +80,7 @@ obs.obs_source_filter_add(group,{name='ALO New Filter',settings={},enabled=true}
 restore_layout(baseline)
 assert(#root.items==1 and root.items[1].source==group)
 assert(item.info.x==10 and item.crop.left==2 and item.locked and not item.visible and item.private.collapsed)
+assert(item.private.alo4obs_live_blur_enabled,'live blur visibility intent was not restored')
 assert(#nested.items==2 and nested.items[1]==original and nested.items[2]==duplicate)
 assert(duplicate.info.x==30 and duplicate.crop.left==4 and not duplicate.locked)
 assert(original.scale_filter==3 and original.blend_mode==2 and original.blend_method==1 and original.selected and original.hotkey==42)

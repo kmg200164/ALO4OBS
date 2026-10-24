@@ -5,7 +5,7 @@ test('sections start collapsed and column 5 alone keeps its place with no hidden
  const browser=await chromium.launch({channel:'chrome',headless:true});
  try{
   const page=await browser.newPage({locale:'ko-KR',viewport:{width:1440,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto(new URL('settings.html',process.env.KMG_THEME_RENDER_URL).href);await page.waitForFunction(()=>!document.querySelector('[data-layout-choice=overlap]').disabled);await page.locator('[data-layout-choice=overlap]').click();await page.waitForFunction(()=>document.querySelector('[data-layout-label]').textContent.includes('Overlap'));
+  await require('./helpers/existing-entry.cjs')(page);await page.goto(new URL('settings.html',process.env.KMG_THEME_RENDER_URL).href);await page.waitForFunction(()=>!document.querySelector('[data-layout-choice=overlap]').disabled);await page.locator('[data-layout-choice=overlap]').click();await page.waitForFunction(()=>document.querySelector('[data-layout-label]').textContent.includes('Overlap'));
   const saved=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('obs-overlay-config')));
   assert.equal(await page.locator('details.property-section[open]').count(),0);
   assert.equal(await page.locator('#change-layout [data-layout-label]').textContent(),'레이아웃 전환 · 현재 Overlap');

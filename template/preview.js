@@ -108,7 +108,9 @@
     if(input?.layoutVersion>=4&&direct){
       return Object.fromEntries(keys.map(key=>{
         const item=direct[key]||{},type=['none','source','web','media'].includes(item.type)?item.type:'none';
-        return [key,{type,url:['web','media'].includes(type)&&typeof item.url==='string'?item.url:''}];
+        const part={type,url:['web','media'].includes(type)&&typeof item.url==='string'?item.url:''};
+        if(type==='source'&&item.sourceView!==undefined){try{part.sourceView=OverlayEvents.normalizeSourceView(item.sourceView);}catch{}}
+        return [key,part];
       }));
     }
     const migrated=Object.fromEntries(keys.map(key=>[key,{type:'none',url:''}]));
@@ -499,7 +501,12 @@
     if(!selected)return;
     const item=config.panelContent[selected]||{type:'none',url:''},type=control('panelContentType').value;
     const root=byId('panel-content-extra');let html='';
-    if(type==='source')html='<p class="editor-help">OBS에서 이 패널에 사용할 기존 소스를 선택하세요. 한 소스는 한 패널에만 지정할 수 있습니다.</p>';
+    if(type==='source'){
+      const view=OverlayEvents.normalizeSourceView(item.sourceView);
+      html='<p class="editor-help">OBS에서 이 패널에 사용할 기존 소스를 선택하세요. 한 소스는 한 패널에만 지정할 수 있습니다.</p>'+editorSelect('콘텐츠 맞춤','panelSourceFit',[['contain','전체 보기'],['cover','빈틈없이 채우기'],['stretch','패널에 늘이기']],view.fit);
+      html+='<p class="editor-help">원본 소스의 투명 여백을 잘라냅니다. 원본 소스와 다른 장면은 바뀌지 않습니다.</p>';
+      for(const [edge,label] of [['left','왼쪽 여백'],['top','위쪽 여백'],['right','오른쪽 여백'],['bottom','아래쪽 여백']])html+=editorRow(label,`<input name="panelSourceCrop${edge}" type="number" min="0" max="8192" step="1" value="${view.crop[edge]}" aria-label="${label} (px)">`);
+    }
     if(type==='web')html=urlField('표시용 웹 주소','panelContentUrl');
     if(type==='media')html=urlField('이미지/영상 경로 또는 URL','panelContentUrl')+editorFile('이미지/영상 파일','panel','image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm');
     root.innerHTML=html;
@@ -569,6 +576,11 @@
     config.regionBackgrounds[key]=r;config.regionStyleOverrides[key]=control('regionOverride').checked;
     const type=control('panelContentType').value;
     config.panelContent[key]={type,url:['web','media'].includes(type)?(control('panelContentUrl')?.value.trim()||''):''};
+    if(type==='source'){
+      const fit=control('panelSourceFit')?.value||'contain',crop={};
+      for(const edge of ['left','top','right','bottom'])crop[edge]=Math.max(0,Math.min(8192,Math.round(Number(control('panelSourceCrop'+edge)?.value)||0)));
+      if(fit!=='contain'||Object.values(crop).some(Boolean))config.panelContent[key].sourceView={fit,crop};
+    }
   }
   function readGlobal(){
     const b=config.globalStyle.background,f=config.globalStyle.fill,t=config.globalStyle.stroke;
@@ -916,7 +928,7 @@
       const blob=new Blob([OverlayPack.zip(entries)],{type:'application/zip'});
       // Native save pickers can leave a zero-byte file if later ZIP creation or writing fails.
       const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=archiveName;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
-      status.textContent=localized('설정 ZIP 전체를 압축 해제한 뒤, 같은 폴더의 OBS-script.lua를 OBS에 추가하세요.');
+      status.textContent=localized('설정 ZIP 전체를 압축 해제한 뒤, 같은 폴더의 '+OverlayPack.scriptNames[data.layoutMode||'bento']+'를 OBS에 추가하세요.');
     }catch(error){if(error.name==='AbortError')return;showStatus(error.message,true);}
   };
   frame.addEventListener('load',()=>{syncHitAreaScale();if(draftReady)send(frame,'apply',liveConfig(current()));});
@@ -954,5 +966,21 @@
     // Preserve the failed draft until an explicit user edit or reset replaces it.
     showStatus(error.message,true);
   }
-  void restoreDraft().catch(recoverDraft);
+  const firstUse=byId('first-use'),firstUseKey='obs-overlay-first-use';
+  function rememberFirstUse(state){try{localStorage.setItem(firstUseKey,state);}catch{try{sessionStorage.setItem(firstUseKey,state);}catch{}}}
+  function enterSettings(){rememberFirstUse('done');firstUse.close();showEditor();byId('change-layout').focus({preventScroll:true});}
+  function enterFirstGuide(){rememberFirstUse('guide');const guide=new URL(byId('guide-link').href);guide.hash='first-use';window.location.assign(guide.href);}
+  byId('first-use-no').onclick=enterSettings;
+  byId('first-use-yes').onclick=enterFirstGuide;
+  firstUse.addEventListener('cancel',event=>{event.preventDefault();enterSettings();});
+  function offerFirstUse(){
+    let state;try{state=localStorage.getItem(firstUseKey);}catch{}
+    try{state=state||sessionStorage.getItem(firstUseKey);}catch{}
+    if(window.location.hash==='#from-first-guide'){
+      rememberFirstUse('done');history.replaceState(null,'',window.location.pathname+window.location.search);showEditor();byId('change-layout').focus({preventScroll:true});
+    }else if(state==='guide')enterFirstGuide();
+    else if(state==='done')showEditor();
+    else{firstUse.showModal();byId('first-use-yes').focus();}
+  }
+  void restoreDraft().catch(recoverDraft).then(offerFirstUse);
 })();

@@ -199,9 +199,13 @@ const selector=document.getElementById('ui-language');
 const attributeOriginals=new WeakMap();
 Object.assign(translations,{"체리":"Cherry","오렌지":"Orange","바나나":"Banana","라임":"Lime","알로에":"Aloe","솜사탕":"Cotton Candy","블루베리":"Blueberry","포도":"Grape","풍선껌":"Bubblegum","모노":"Mono"});
 Object.assign(japanese,{"체리":"チェリー","오렌지":"オレンジ","바나나":"バナナ","라임":"ライム","알로에":"アロエ","솜사탕":"わたあめ","블루베리":"ブルーベリー","포도":"ぶどう","풍선껌":"バブルガム","모노":"モノ"});
+Object.assign(translations,{"콘텐츠 맞춤": "Content fit", "전체 보기": "Contain", "빈틈없이 채우기": "Cover", "패널에 늘이기": "Stretch", "왼쪽 여백": "Crop left", "위쪽 여백": "Crop top", "오른쪽 여백": "Crop right", "아래쪽 여백": "Crop bottom", "원본 소스의 투명 여백을 잘라냅니다. 원본 소스와 다른 장면은 바뀌지 않습니다.": "Crop transparent source margins in source pixels. The original source and other scenes stay unchanged."});
+Object.assign(japanese,{"콘텐츠 맞춤": "コンテンツの合わせ方", "전체 보기": "全体を表示", "빈틈없이 채우기": "隙間なく表示", "패널에 늘이기": "パネルに引き伸ばす", "왼쪽 여백": "左を切り抜く", "위쪽 여백": "上を切り抜く", "오른쪽 여백": "右を切り抜く", "아래쪽 여백": "下を切り抜く", "원본 소스의 투명 여백을 잘라냅니다. 원본 소스와 다른 장면은 바뀌지 않습니다.": "元ソースのピクセル単位で透明な余白を切り抜きます。元ソースと他のシーンは変更しません。"});
+Object.assign(translations,{'처음 사용하시나요?':'Is this your first time?','네':'Yes','아니요':'No'});
+Object.assign(japanese,{'처음 사용하시나요?':'初めてお使いですか？','네':'はい','아니요':'いいえ'});
 const supportedLanguages=['ko','en','ja'];
-Object.assign(translations,{'설정 ZIP 전체를 압축 해제한 뒤, 같은 폴더의 OBS-script.lua를 OBS에 추가하세요.':'Extract the entire settings ZIP, then add OBS-script.lua from that folder in OBS.'});
-Object.assign(japanese,{'설정 ZIP 전체를 압축 해제한 뒤, 같은 폴더의 OBS-script.lua를 OBS에 추가하세요.':'設定 ZIP をすべて展開し、同じフォルダの OBS-script.lua を OBS に追加してください。'});
+Object.assign(translations,{'설정 ZIP 전체를 압축 해제한 뒤, 같은 폴더의 script-bento.lua를 OBS에 추가하세요.':'Extract the entire settings ZIP, then add script-bento.lua from that folder in OBS.','설정 ZIP 전체를 압축 해제한 뒤, 같은 폴더의 script-overlap.lua를 OBS에 추가하세요.':'Extract the entire settings ZIP, then add script-overlap.lua from that folder in OBS.'});
+Object.assign(japanese,{'설정 ZIP 전체를 압축 해제한 뒤, 같은 폴더의 script-bento.lua를 OBS에 추가하세요.':'設定 ZIP をすべて展開し、同じフォルダの script-bento.lua を OBS に追加してください。','설정 ZIP 전체를 압축 해제한 뒤, 같은 폴더의 script-overlap.lua를 OBS에 추가하세요.':'設定 ZIP をすべて展開し、同じフォルダの script-overlap.lua を OBS に追加してください。'});
 const guideFiles={ko:'guide.html',en:'guide-en.html',ja:'guide-ja.html'};
 Object.assign(translations,{'미리보기에서 설정할 패널을 클릭하세요.':'Click a panel in the preview to edit its settings.'});Object.assign(japanese,{'미리보기에서 설정할 패널을 클릭하세요.':'プレビューで設定するパネルをクリックしてください。'});
 translations['OBS 설정']='Settings';
@@ -329,7 +333,7 @@ function translate(){
 function set(value,persist=true){language=supportedLanguages.includes(value)?value:'en';if(persist){try{localStorage.setItem('overlay-ui-language',language)}catch{}}
  const currentFile=location.pathname.split(/[\\/]/).pop();
  const currentGuide=Object.entries(guideFiles).find(([,file])=>file===currentFile)?.[0];
- if(currentGuide&&currentGuide!==language){location.href=guideFiles[language];return;}
+ if(currentGuide&&currentGuide!==language){location.href=guideFiles[language]+location.hash;return;}
  if(selector)selector.value=language;
  translate();window.dispatchEvent?.(new CustomEvent('kmg-language-change',{detail:{language}}));}
 // Pick the shown language without writing to storage unless it's the user's own saved

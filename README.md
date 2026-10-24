@@ -1,8 +1,8 @@
 # ALO4OBS
 
-Auto Layout Overlay for OBS
+Auto Layout Overlay for Open Broadcaster Software
 
-**[Download ALO4OBS 0.10.3](https://github.com/kmg200164/ALO4OBS/raw/refs/heads/main/downloads/ALO4OBS-v0.10.3.zip)** · [What's new](CHANGELOG.md)
+**[Download ALO4OBS 0.10.4](https://github.com/kmg200164/ALO4OBS/raw/refs/heads/main/downloads/ALO4OBS-v0.10.4.zip)** · [What's new](CHANGELOG.md)
 
 Arrange your OBS overlay in a browser, then apply it in OBS. Choose **Bento** to keep all panels separate, or **Overlap** to place auxiliary panels over a full-screen Main panel.
 
@@ -26,10 +26,12 @@ Found it useful? [Support continued improvements](https://buymeacoffee.com/kmg20
 2. Extract the **entire distribution ZIP** and open its root **settings.html**. Choose Bento or Overlap.
 3. Select a preview panel, choose its content and configure the layout. For OBS sources, create and verify the original capture/camera source in OBS first. For web widgets, use the provider's OBS display URL.
 4. Use the **Save as ZIP** button to create your personal **Settings-Bento.zip** or **Settings-Overlap.zip**. The browser download settings determine its destination. Extract that entire ZIP into a permanent folder.
-5. In OBS, open **Tools → Scripts → +** and add that folder's **OBS-script.lua**. Select an original OBS source for each panel using OBS-source content, then click **Apply saved settings / Auto layout**.
+5. In OBS, open **Tools → Scripts → +** and add that folder's **script-bento.lua** or **script-overlap.lua**, matching your layout. If you use both layouts, add both; their names keep them apart in the Scripts list. Select an original OBS source for each panel using OBS-source content, then click **Apply saved settings / Auto layout**.
 6. Open the **ALO4OBS · BENTO** or **ALO4OBS · OVERLAP** scene and check the actual capture, camera, widgets and media before using it on stream.
 
-Keep the Lua script, configuration, masks, assets and runtime files together. Moving only the Lua script breaks its relative paths. The browser preview shows layout and supported HTML content; actual OBS captures must be checked in OBS.
+**Bento** blurs its separately configured full-canvas background image or color behind panels. It never uses Main as the panel backdrop. **Overlap** blurs the selected **Main OBS source** and retains the static backdrop while that capture is unavailable. Original capture filters stay unchanged. Only Overlap live blur needs Composite Blur; setting blur to **0** removes that dependency. The HTML preview cannot show live OBS captures.
+
+The personal ZIP contains only `script-bento.lua` or `script-overlap.lua` at its root. Runtime files are grouped under `files/bento/` or `files/overlap/`. Keep the script and its `files/` folder together. Earlier packages using root files or `layouts/` continue to use their original scripts and paths. Keep the Lua script, configuration, masks, assets and runtime files together. Moving only the Lua script breaks its relative paths. The browser preview shows layout and supported HTML content; actual OBS captures must be checked in OBS.
 
 Browser edits do not automatically update OBS. Save and extract a new personal ZIP, update or register its script path, reload the script, check source selections and Apply again. The included Korean, English and Japanese guides contain the full procedure.
 
@@ -46,7 +48,7 @@ Applying an exported layout creates or updates its own OBS scene: `ALO4OBS · BE
 
 Back up your **OBS scene collection**, the **complete old application folder** and every panel's script source selection. Keep the last working version available and use a separate folder for the new distribution.
 
-1. After Apply in the old version, copy its generated **config.js** (from **layouts/bento/** or **layouts/overlap/** in type-specific packages) into the new distribution's **files/** folder. Copy its referenced personal **assets/...** media from that same runtime folder while keeping the same relative paths. Keep the new internal scripts, fonts and **config.public.js**. The editor reads config.js; renaming a JSON file is not an import procedure.
+1. After Apply in the old version, copy its generated **config.js** (from **files/bento/** or **files/overlap/** in type-specific packages) into the new distribution's **files/** folder. Copy its referenced personal **assets/...** media from that same runtime folder while keeping the same relative paths. Keep the new internal scripts, fonts and **config.public.js**. The editor reads config.js; renaming a JSON file is not an import procedure.
 2. Open the new settings editor, check the restored values and save a new personal ZIP. Extract the entire personal ZIP into a new permanent folder.
 3. Record the source mappings, remove only the old Lua registration, add the new script and **reselect the original sources before Apply**. A new script registration does not inherit old source-selector values.
 4. Apply and verify the **ALO4OBS · BENTO** or **ALO4OBS · OVERLAP** scene in OBS before switching to it. Unassigned legacy connection URLs remain visible for reassignment and are retained in saved exports.
@@ -161,3 +163,18 @@ Project documentation, including README files, changelogs, QA records, work repo
 </details>
 
 0.10.3 restores retained uploaded media after moving the editor folder within the same browser origin. Missing or browser-deleted file bytes still require selecting the file again; saved settings are preserved.
+
+### Bundled Composite Blur installation
+
+The distribution ZIP includes [official Composite Blur](https://github.com/FiniteSingularity/obs-composite-blur/releases), installation helpers, matching source and license notices under `files/plugin/`. Bento uses its separate background image/color without this plugin; Overlap live blur uses Composite Blur.
+
+1. Extract the entire distribution ZIP.
+2. Close OBS.
+3. On Windows, run `files/composite-blur-install.cmd` once.
+4. Reopen OBS.
+
+The Windows helper installs the plugin and opens the HTML editor. You do not need to run it every time OBS starts. Configuring the HTML layout, saving/extracting a personal ZIP, registering its Lua and clicking Apply are separate steps; installing the plugin does not configure the layout.
+
+The implemented helpers select official packages for OBS 30–33: Windows x64 uses Legacy for 30–32 and modern for 33. The bundled macOS universal helper is `files/composite-blur-install.command`; the native Debian/Ubuntu amd64 helper is `files/composite-blur-install.sh`. macOS and Linux helpers open their OS installer for user review of permissions and dependencies. They do not automatically approve prompts or change security settings.
+
+Actual installation was verified on Windows OBS 32. Windows OBS 30/31/33 selection and macOS/Linux helper behavior were tested with command stubs, not installations on those systems. OBS 33 portable installation and Flatpak offline installation are not supported by these helpers. See [plugin support and verification](docs/PLUGIN-SUPPORT.md). Installer scope is separate from HTML/Lua compatibility.

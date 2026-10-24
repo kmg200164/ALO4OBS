@@ -37,8 +37,9 @@ test('every UI icon retains its pinned Lucide stock glyph and common stroke with
  const gradientIcons=JSON.parse(gradientSource.match(/const actionIcons=(\{[\s\S]*?\});/)[1]);
  const previewSource=fs.readFileSync(path.join(__dirname,'../template/preview.js'),'utf8');
  const fileIcon=JSON.parse(previewSource.match(/const fileIcon=("[^\r\n]*");/)[1]);
+ const sharedLayoutButton=JSON.parse(headerSource.match(/insertAdjacentHTML\('afterbegin',([^\r\n]+)\);/)[1]);
  const found=new Set();let count=0;
- for(const [markup,size] of [[header,32],[settings,24],[Object.values(gradientIcons).join(''),24],[fileIcon,24]])for(const icon of markup.matchAll(/<svg\b([^>]*)>([\s\S]*?)<\/svg>/g)){
+ for(const [markup,size] of [[header,32],[sharedLayoutButton,24],[settings,24],[Object.values(gradientIcons).join(''),24],[fileIcon,24]])for(const icon of markup.matchAll(/<svg\b([^>]*)>([\s\S]*?)<\/svg>/g)){
   const name=icon[1].match(/data-lucide="([^"]+)"/)?.[1];
   assert.ok(stockHashes[name],`untracked UI icon ${name}`);
   const glyph=icon[2].replace(/>\s+</g,'><').trim();

@@ -506,7 +506,20 @@
     if(mode==='user'){let hash=0;for(const c of platform+':'+nickname)hash=(Math.imul(hash,31)+c.codePointAt(0))|0;return `hsl(${(hash>>>0)%360} 72% 75%)`;}
     return {chzzk:'#00ffa3',twitch:'#bf94ff',youtube:'#ff6464',soop:'#55cfff'}[platform]||'#dddddd';
   }
-  const api = {effectivePanelShadow,migratePanelAppearance,bentoPanelKeys,overlapPanelKeys,allPanelKeys,activePanelKeys,legacyOverlapKeys,migrateOverlapPanels,cornerRadii,cornerSmoothings,panelShadowStrengths,normalizeLayoutMode,overlapSafetyGrid,defaultOverlapPlacement,normalizeOverlapPlacement,normalizeOverlapEnabled,normalizeOverlapSizing,normalizeOverlapPositions,normalizeOverlapColumnAlignment,normalizeOverlapColumns,effectiveOverlapColumns,effectivePanelEnabled,overlapPositionBounds,overlapSizingBounds,overlapLayout,overlapCollisions,normalizeLayoutPresets,switchLayoutPreset,resolveConfigLayout,panelLabels,panelGaps,normalizeGap,normalizeSidePosition,subWidthWarning,normalizeEvent,createEventStore,handcamLayout,resolveLayout,defaultPlacement,normalizePlacement,normalizeSizing,canResizeWidth,canResizeHeight,sizingBounds,aspectStops,autoLayout,validateLayout,resolveSlots,nicknameColor};
+  function normalizeSourceView(value){
+    if(value===undefined)value={};
+    if(!value||typeof value!=='object'||Array.isArray(value))throw new Error('Invalid source view');
+    const fit=value.fit??'contain',input=value.crop??{};
+    if(!['contain','cover','stretch'].includes(fit)||!input||typeof input!=='object'||Array.isArray(input))throw new Error('Invalid source view');
+    const crop={};
+    for(const edge of ['left','top','right','bottom']){
+      const pixels=input[edge]??0;
+      if(!Number.isInteger(pixels)||pixels<0||pixels>8192)throw new Error('Invalid source crop: '+edge);
+      crop[edge]=pixels;
+    }
+    return {fit,crop};
+  }
+  const api = {normalizeSourceView,effectivePanelShadow,migratePanelAppearance,bentoPanelKeys,overlapPanelKeys,allPanelKeys,activePanelKeys,legacyOverlapKeys,migrateOverlapPanels,cornerRadii,cornerSmoothings,panelShadowStrengths,normalizeLayoutMode,overlapSafetyGrid,defaultOverlapPlacement,normalizeOverlapPlacement,normalizeOverlapEnabled,normalizeOverlapSizing,normalizeOverlapPositions,normalizeOverlapColumnAlignment,normalizeOverlapColumns,effectiveOverlapColumns,effectivePanelEnabled,overlapPositionBounds,overlapSizingBounds,overlapLayout,overlapCollisions,normalizeLayoutPresets,switchLayoutPreset,resolveConfigLayout,panelLabels,panelGaps,normalizeGap,normalizeSidePosition,subWidthWarning,normalizeEvent,createEventStore,handcamLayout,resolveLayout,defaultPlacement,normalizePlacement,normalizeSizing,canResizeWidth,canResizeHeight,sizingBounds,aspectStops,autoLayout,validateLayout,resolveSlots,nicknameColor};
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.OverlayEvents = api;
 })(typeof window !== 'undefined' ? window : globalThis);

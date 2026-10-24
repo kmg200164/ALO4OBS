@@ -66,6 +66,8 @@
   header.querySelector('#header-left-links').append(guideLink,settingsLink);
   const currentPath=location.pathname.replace(/\/+$/,'')||'/';
   const guidePath=/\/guide(?:-(?:en|ja))?\.html$/i.test(currentPath);
+  header.querySelector('#header-right-tools').insertAdjacentHTML('afterbegin',"<button id=\"change-layout\" class=\"action-button icon-button\" aria-label=\"레이아웃 전환\" type=\"button\"><svg class=\"button-svg lucide lucide-arrow-left-right\" data-lucide=\"arrow-left-right\" aria-hidden=\"true\" focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M8 3 4 7l4 4\" /><path d=\"M4 7h16\" /><path d=\"m16 21 4-4-4-4\" /><path d=\"M20 17H4\" /></svg><span data-layout-label>레이아웃 전환</span></button>");
+  header.querySelector('#change-layout').disabled=guidePath;
   settingsLink.hidden=!guidePath;
   guideLink.hidden=guidePath;
   try{localStorage.removeItem('overlay-ui-page-background');}catch{}
@@ -96,7 +98,7 @@
  const show=event=>{
   const button=event.target.closest?.('.app-header .icon-button,.app-header #ui-language,.editor-workspace .section-bar .action-button,.kmg-gradient-action-button,.mini-action[data-upload-trigger]');
   if(!button||button.disabled||button===owner)return;
-  if(button.matches('.action-button')&&getComputedStyle(button.querySelector('span')).display!=='none')return;
+  if(button.matches('.action-button')&&!button.closest('.app-header')&&getComputedStyle(button.querySelector('span')).display!=='none')return;
   hide();owner=button;savedTitle=button.getAttribute('title');
   tip.textContent=button.id==='change-layout'?button.textContent.trim():button.getAttribute('aria-label')||button.getAttribute('title')||button.textContent.trim();
   if(!tip.textContent){hide();return;}button.removeAttribute('title');tip.hidden=false;
