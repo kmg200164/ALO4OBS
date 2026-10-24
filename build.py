@@ -192,10 +192,10 @@ def build_windows(destination, plugin_archive, source_archive):
         'The source archive retains upstream copyright, warranty and build notices.\n'
         'This is aggregation with ALO4OBS; the plugin is independently licensed.\n'
         'Windows x64 OBS 30-32 Legacy / OBS 33 modern; macOS universal PKG; Linux amd64 native DEB. Flatpak offline extension pending.\n'
-        'Close OBS, then run files/composite-blur-install.cmd once. No website or manual copying required.\n'
+        'Close OBS, then run composite-blur-install.cmd once. No website or manual copying required.\n'
         'No UAC auto-accept, execution-policy change, OBS termination or profile modification.\n'
     ).encode()
-    added['files/composite-blur-install.cmd'] = (source / 'composite-blur-install.cmd').read_bytes()
+    added['composite-blur-install.cmd'] = (source / 'composite-blur-install.cmd').read_bytes()
     # Additional official platforms are pinned and kept offline alongside the same GPL source.
     vendor = repository / 'vendor' / 'obs-composite-blur-1.6.0'
     packages = json.loads((vendor / 'packages.json').read_text())
@@ -223,7 +223,7 @@ def build_windows(destination, plugin_archive, source_archive):
     added['files/plugin/manifest.json'] = json.dumps(lock, indent=2).encode()
     added['files/plugin/packages.json'] = json.dumps(packages, indent=2).encode()
     for helper in ['composite-blur-install.command', 'composite-blur-install.sh']:
-        added['files/' + helper] = (source / helper).read_bytes()
+        added[helper] = (source / helper).read_bytes()
     # Keep the root entry and all existing editor files byte-for-byte intact.
     with tempfile.TemporaryDirectory() as temporary:
         neutral = Path(temporary) / 'neutral.zip'
@@ -243,7 +243,7 @@ def build_windows(destination, plugin_archive, source_archive):
                 else:
                     archive.writestr(name, blob)
         with ZipFile(destination) as archive:
-            if archive.testzip() is not None or [n for n in archive.namelist() if '/' not in n] != ['settings.html']:
+            if archive.testzip() is not None or set(n for n in archive.namelist() if '/' not in n) != {'settings.html','composite-blur-install.cmd','composite-blur-install.command','composite-blur-install.sh'}:
                 raise ValueError('Windows bundle verification failed')
     print('Verified offline Windows candidate: ' + str(destination))
 

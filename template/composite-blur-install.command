@@ -3,7 +3,7 @@ set -eu
 fail(){ printf '%s\n' "$1" >&2; exit 1; }
 [ "$(uname -s)" = Darwin ] || fail 'This helper requires macOS.'
 case "$(uname -m)" in x86_64|arm64) ;; *) fail 'Unsupported architecture.';; esac
-root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+root=$(CDPATH= cd -- "$(dirname -- "$0")/files" && pwd)
 app=/Applications/OBS.app
 [ -d "$app" ] || fail 'Standard /Applications/OBS.app not found; custom installs require verification.'
 version=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Contents/Info.plist")

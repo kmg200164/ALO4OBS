@@ -32,7 +32,7 @@ class WindowsBundleTest(unittest.TestCase):
             build.build(output)
             with ZipFile(output) as archive:
                 self.assertIsNone(archive.testzip())
-                self.assertEqual([n for n in archive.namelist() if '/' not in n], ['settings.html'])
+                self.assertEqual(set(n for n in archive.namelist() if '/' not in n), {'settings.html','composite-blur-install.cmd','composite-blur-install.command','composite-blur-install.sh'})
                 manifest = json.loads(archive.read('files/plugin/manifest.json'))
                 self.assertEqual(manifest['supported_obs_major'], 32)
                 self.assertEqual(hashlib.sha256(archive.read('files/plugin/source.zip')).hexdigest(), manifest['source_sha256'])
@@ -61,7 +61,7 @@ class PlatformBundleTest(unittest.TestCase):
                 self.assertEqual(modern['plugin_sha256'],pins['sha256']['obs-composite-blur-1.6.0-windows-x64.zip'])
                 self.assertEqual(json.loads(z.read('files/plugin/manifest.json'))['supported_obs_majors'],[30,31,32])
                 for ext in ['command','sh']:
-                    self.assertTrue((z.getinfo('files/composite-blur-install.'+ext).external_attr>>16)&0o111)
+                    self.assertTrue((z.getinfo('composite-blur-install.'+ext).external_attr>>16)&0o111)
                 self.assertIn('files/plugin/source.zip',z.namelist())
 
     def test_other_os_helpers_fail_closed_and_leave_authorization_to_os(self):

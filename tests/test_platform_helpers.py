@@ -8,7 +8,7 @@ ROOT=Path(__file__).resolve().parents[1]
 class PlatformHelpers(unittest.TestCase):
  def run_helper(self,platform,case):
   with tempfile.TemporaryDirectory() as folder:
-   root=Path(folder);stubs=root/'stubs';stubs.mkdir();app=root/'OBS.app';app.mkdir()
+   root=Path(folder);(root/'files').mkdir();stubs=root/'stubs';stubs.mkdir();app=root/'OBS.app';app.mkdir()
    helper=(ROOT/'template'/('composite-blur-install.command' if platform=='mac' else 'composite-blur-install.sh')).read_text()
    # Only the test copy redirects absolute OS commands and app/plugin paths.
    helper=helper.replace('$HOME/Library/Application Support/obs-studio/plugins',(root/'user-plugins').as_posix())
@@ -62,9 +62,9 @@ class WindowsHelperStubs(unittest.TestCase):
    root=Path(folder); bundle=root/'bundle';bundle.mkdir();program=root/'program';exe=program/'obs-studio/bin/64bit/obs64.exe';exe.parent.mkdir(parents=True);pe=bytearray(256);pe[60:64]=(128).to_bytes(4,'little');pe[128:132]=b'PE\0\0';pe[132:134]=(0xAA64 if case.get('TEST_EXE_ARM') else 0x8664).to_bytes(2,'little');exe.write_bytes(pe)
    data=root/'data';target=data/'obs-studio/plugins/obs-composite-blur/bin/64bit/obs-composite-blur.dll'
    for kind,blob in [('payload',b'legacy fixture'),('payload-modern',b'modern fixture')]:
-    dll=bundle/'plugin'/kind/'bin/64bit/obs-composite-blur.dll';dll.parent.mkdir(parents=True);dll.write_bytes(blob)
+    dll=bundle/'files/plugin'/kind/'bin/64bit/obs-composite-blur.dll';dll.parent.mkdir(parents=True);dll.write_bytes(blob)
     manifest={'files':{'bin/64bit/obs-composite-blur.dll':hashlib.sha256(blob).hexdigest()}}
-    (bundle/'plugin'/('manifest.json' if kind=='payload' else 'manifest-modern.json')).write_text(json.dumps(manifest))
+    (bundle/'files/plugin'/('manifest.json' if kind=='payload' else 'manifest-modern.json')).write_text(json.dumps(manifest))
    if case.get('TEST_EXISTING'):
     target.parent.mkdir(parents=True);target.write_bytes(b'preserve my plugin')
    cmd=(ROOT/'template/composite-blur-install.cmd').read_text()

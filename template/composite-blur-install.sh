@@ -3,7 +3,7 @@ set -eu
 fail(){ printf '%s\n' "$1" >&2; exit 1; }
 [ "$(uname -s)" = Linux ] || fail 'This helper requires Linux.'
 [ "$(uname -m)" = x86_64 ] || fail 'Official native package requires x86_64.'
-root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+root=$(CDPATH= cd -- "$(dirname -- "$0")/files" && pwd)
 # Native Debian packages cannot be placed in the Flatpak sandbox.
 if [ "${1:-}" = --flatpak ]; then fail 'Flatpak needs its signed CompositeBlur extension. An offline extension is not bundled yet; no native files were copied.'; fi
 command -v dpkg-query >/dev/null || fail 'Only native Debian/Ubuntu packaging is verified by this helper.'

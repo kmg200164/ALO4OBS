@@ -511,7 +511,7 @@ local function check_live_blur(plan)
  local filter=obs.obs_source_create_private('obs_composite_blur','ALO4OBS Live Blur Probe',data)
  obs.obs_data_release(data)
  if filter==nil then
-  return false,'Live panel blur requires Composite Blur. For the Windows OBS 30-33 bundle, close OBS and run files/composite-blur-install.cmd from the original distribution, then reopen OBS; or set panel blur to 0. No scene changes were applied.'
+  return false,'Live panel blur requires Composite Blur. For the Windows OBS 30-33 bundle, close OBS and run composite-blur-install.cmd from the original distribution, then reopen OBS; or set panel blur to 0. No scene changes were applied.'
  end
  obs.obs_source_release(filter)
  return true
@@ -1219,7 +1219,7 @@ function script_properties()
    obs.source_list_release(sources)
   end
  end
- if generic then obs.obs_properties_add_text(p,'live_blur_info',en and 'Bento blurs its configured background image/color. Overlap live panel blur needs a Main OBS source and Composite Blur. The Windows OBS 30-33 distribution includes files/composite-blur-install.cmd; close OBS and run it once. Set blur to 0 to use OBS without the plugin. The browser preview cannot show live OBS video.' or 'Bento는 지정한 배경 이미지·색상을 사용합니다. Overlap 라이브 블러에는 Main OBS 소스와 Composite Blur가 필요합니다. Windows OBS 30-33 배포 ZIP의 files/composite-blur-install.cmd를 OBS 종료 후 한 번 실행하세요. 플러그인 없이 사용하려면 블러를 0으로 설정하세요. 브라우저 미리보기에는 실제 OBS 영상이 나오지 않습니다.',obs.OBS_TEXT_INFO) end
+ if generic then obs.obs_properties_add_text(p,'live_blur_info',en and 'Bento blurs its configured background image/color. Overlap live panel blur needs a Main OBS source and Composite Blur. The Windows OBS 30-33 distribution includes composite-blur-install.cmd; close OBS and run it once. Set blur to 0 to use OBS without the plugin. The browser preview cannot show live OBS video.' or 'Bento는 지정한 배경 이미지·색상을 사용합니다. Overlap 라이브 블러에는 Main OBS 소스와 Composite Blur가 필요합니다. Windows OBS 30-33 배포 ZIP의 composite-blur-install.cmd를 OBS 종료 후 한 번 실행하세요. 플러그인 없이 사용하려면 블러를 0으로 설정하세요. 브라우저 미리보기에는 실제 OBS 영상이 나오지 않습니다.',obs.OBS_TEXT_INFO) end
  obs.obs_properties_add_button(p,'apply',en and 'Apply saved settings / Auto layout' or '저장한 설정 / 자동 배치 적용',apply)
  return p
 end

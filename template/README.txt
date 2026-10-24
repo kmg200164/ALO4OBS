@@ -48,15 +48,15 @@ PERSONAL ZIP FOLDERS
 Only script-bento.lua or script-overlap.lua is at the root. Keep the files/bento/ or files/overlap/ runtime folder with it. Both ZIPs can share one extraction folder. Earlier root-file or layouts/ packages still use their original scripts and paths.
 
 BUNDLED COMPOSITE BLUR INSTALLATION
-The distribution ZIP includes [official Composite Blur](https://github.com/FiniteSingularity/obs-composite-blur/releases), installation helpers, matching source and license notices under `files/plugin/`. Bento uses its separate background image/color without this plugin; Overlap live blur uses Composite Blur.
+The three installation helpers are beside settings.html at the top level of the extracted ZIP. Official Composite Blur packages, matching source and license notices remain under `files/plugin/`. Bento uses its separate background image/color without this plugin; Overlap live blur uses Composite Blur.
 
 1. Extract the entire distribution ZIP.
 2. Close OBS.
-3. On Windows, run `files/composite-blur-install.cmd` once.
+3. On Windows, run `composite-blur-install.cmd` once.
 4. Reopen OBS.
 
 The Windows helper installs the plugin and opens the HTML editor. You do not need to run it every time OBS starts. Configuring the HTML layout, saving/extracting a personal ZIP, registering its Lua and clicking Apply are separate steps; installing the plugin does not configure the layout.
 
-The implemented helpers select official packages for OBS 30–33: Windows x64 uses Legacy for 30–32 and modern for 33. The bundled macOS universal helper is `files/composite-blur-install.command`; the native Debian/Ubuntu amd64 helper is `files/composite-blur-install.sh`. macOS and Linux helpers open their OS installer for user review of permissions and dependencies. They do not automatically approve prompts or change security settings.
+The implemented helpers select official packages for OBS 30–33: Windows x64 uses Legacy for 30–32 and modern for 33. The bundled macOS universal helper is `composite-blur-install.command`; the native Debian/Ubuntu amd64 helper is `composite-blur-install.sh`. macOS and Linux helpers open their OS installer for user review of permissions and dependencies. They do not automatically approve prompts or change security settings.
 
 Actual installation was verified on Windows OBS 32. Windows OBS 30/31/33 selection and macOS/Linux helper behavior were tested with command stubs, not installations on those systems. OBS 33 portable installation and Flatpak offline installation are not supported by these helpers. See [plugin support and verification](docs/PLUGIN-SUPPORT.md). Installer scope is separate from HTML/Lua compatibility.

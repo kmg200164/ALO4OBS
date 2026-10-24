@@ -2,6 +2,8 @@
 
 ## 0.10.4 — 2026-10-24
 
+- Packaging hotfix: expose Windows/macOS/Linux installation helpers beside settings.html at the ZIP root; keep plugin packages/source under files and update helper/documentation paths. Explicitly load the built-in Windows PowerShell signature module.
+
 - Distinguish personal export scripts as script-bento.lua and script-overlap.lua; keep only the Lua at the export root and preserve scoped files/bento or files/overlap paths.
 - Keep Bento panel blur tied to its configured full-canvas background image/color, independent of Main. Overlap uses the live Main source; preserve static background blur while game capture is unavailable and restore live blur on capture availability. Preserve fill-none choices and original source filters.
 - Persist per-panel media fit/crop in the HTML editor and exported settings.

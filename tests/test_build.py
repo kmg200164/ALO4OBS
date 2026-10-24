@@ -98,7 +98,7 @@ process.stdout.write(JSON.stringify(result));
                 self.assertNotIn('files/LICENSE', archive.namelist())
                 self.assertEqual(archive.read('files/VERSION').decode().strip(), builder.version)
                 names = set(archive.namelist())
-                self.assertEqual({name.split('/')[0] for name in names}, {'settings.html', 'files'})
+                self.assertEqual({name.split('/')[0] for name in names}, {'settings.html', 'files', 'composite-blur-install.cmd', 'composite-blur-install.command', 'composite-blur-install.sh'})
                 self.assertIn('files/settings.html', archive.read('settings.html').decode())
                 private_assets = {
                     'sample-handcam-topview.png', 'sample-mission-widget.png', 'season-11-lobby.png',
