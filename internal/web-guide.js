@@ -1,6 +1,6 @@
 (() => {
  const copy={
-  ko:{title:'브라우저에서 배치하고, Lua 하나로 적용하세요',open:'설정 열기',steps:[
+  ko:{title:'브라우저에서 배치하고, Lua 하나로 적용하세요',steps:[
    ['1. 배치 선택','Bento 또는 Overlap을 고르고 미리보기에서 패널을 선택하세요. 기본 프리셋으로 시작하거나 크기·간격·색상을 직접 바꿀 수 있습니다. OBS 원본 소스는 OBS에서 연결합니다.'],
    ['2. Lua 다운로드','다운로드 버튼으로 script-bento.lua 또는 script-overlap.lua 한 개를 받습니다. 압축을 풀거나 settings.html을 다운로드할 필요가 없습니다.'],
    ['3. OBS에 적용','OBS 도구 → 스크립트 → +에서 Lua를 추가하세요. 패널별 원본 소스를 선택하고 저장한 설정 / 자동 배치 적용을 누르세요. 로컬 이미지·영상을 썼다면 Lua의 로컬 파일 항목에서 원본 파일을 선택합니다. Lua에 영상·이미지 원본은 들어가지 않습니다.'],
@@ -12,7 +12,7 @@
    '브라우저 저장소를 지우거나 브라우저를 바꾸면 자동 복원되지 않습니다. 다운로드한 Lua를 보관하세요. OBS의 원본 소스 선택과 로컬 파일 경로는 OBS 스크립트 항목이 보관하므로 다른 컴퓨터에서는 다시 선택합니다.',
    '위젯 URL이 포함된 개인 Lua는 비공개로 보관하세요. Lua 불러오기는 파일의 설정 데이터만 읽으며 코드를 실행하거나 파일을 서버에 올리지 않습니다.'
   ]},
-  en:{title:'Arrange in your browser. Apply one Lua in OBS.',open:'Open settings',steps:[
+  en:{title:'Arrange in your browser. Apply one Lua in OBS.',steps:[
    ['1. Choose a layout','Choose Bento or Overlap, then select a panel in the preview. Start with a built-in preset or edit size, spacing and colors. Connect original OBS sources in OBS.'],
    ['2. Download Lua','The download button saves one script-bento.lua or script-overlap.lua. No ZIP extraction or settings.html download is needed.'],
    ['3. Apply in OBS','Open OBS Tools → Scripts → + and add the Lua. Select each original source and press Apply saved settings / Auto layout. If your layout uses local images or videos, select their original files in the script’s Local file fields. Original media bytes are not included in Lua.'],
@@ -24,7 +24,7 @@
    'Cleared browser storage or a different browser cannot restore automatically. Keep your downloaded Lua. OBS retains original-source selections and local file paths in its script entry; select them again on another computer.',
    'Keep personal Lua files private if they contain widget URLs. Import Lua reads settings data only; it never executes imported code or uploads the file to a server.'
   ]},
-  ja:{title:'ブラウザーで配置して、Lua ひとつで OBS に適用',open:'設定を開く',steps:[
+  ja:{title:'ブラウザーで配置して、Lua ひとつで OBS に適用',steps:[
    ['1. 配置を選択','Bento または Overlap を選び、プレビューのパネルを選択します。基本プリセットから始めるか、サイズ・間隔・色を編集してください。元の OBS ソースは OBS で接続します。'],
    ['2. Lua をダウンロード','ダウンロードボタンで script-bento.lua または script-overlap.lua をひとつ保存します。ZIP の展開や settings.html のダウンロードは不要です。'],
    ['3. OBS に適用','OBS ツール → スクリプト → + で Lua を追加します。元のソースを選び、保存した設定 / 自動配置の適用を押してください。ローカル画像・動画を使う場合はスクリプトのローカルファイル欄で元のファイルを選択します。Lua に元のメディアは含まれません。'],
@@ -38,8 +38,8 @@
   ]}
  };
  const content=copy[document.documentElement.lang]||copy.en,mount=document.getElementById('web-guide');
- const title=document.createElement('h1');title.textContent=content.title;mount.replaceChildren(title);
- const link=document.createElement('a');link.className='primary-link';link.href='settings.html';link.textContent=content.open;mount.append(link);
- for(const [heading,text] of content.steps){const section=document.createElement('section'),h=document.createElement('h2'),p=document.createElement('p');h.textContent=heading;p.textContent=text;section.append(h,p);mount.append(section);}
- const details=document.createElement('section'),heading=document.createElement('h2'),list=document.createElement('ul');heading.textContent=content.details;for(const note of content.notes){const li=document.createElement('li');li.textContent=note;list.append(li);}details.append(heading,list);mount.append(details);
+ const title=document.createElement('h1'),pageHeading=document.createElement('div');title.textContent=content.title;pageHeading.className='page-heading';pageHeading.append(title);mount.replaceChildren(pageHeading);
+ const steps=document.createElement('section');steps.className='steps';mount.append(steps);
+ for(const [heading,text] of content.steps){const section=document.createElement('article'),body=document.createElement('div'),h=document.createElement('h2'),p=document.createElement('p');section.className='step-card';body.className='step-content';h.textContent=heading;p.textContent=text;body.append(h,p);section.append(body);steps.append(section);}
+ const faq=document.createElement('section'),details=document.createElement('details'),summary=document.createElement('summary'),body=document.createElement('div'),list=document.createElement('ul'),faqList=document.createElement('div');faq.className='faq';faq.setAttribute('aria-label',content.details);faqList.className='faq-list';details.className='faq-item';summary.textContent=content.details;body.className='faq-body';for(const note of content.notes){const li=document.createElement('li');li.textContent=note;list.append(li);}body.append(list);details.append(summary,body);faqList.append(details);faq.append(faqList);mount.append(faq);
 })();

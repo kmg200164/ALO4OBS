@@ -67,16 +67,16 @@
       "sha256": "ecd3d3c409a6cb9e205cfa14770f012e34cca5231e2c0b037e3e2ed4b96f8974"
     },
     "guide-en.html": {
-      "bytes": 1394,
-      "sha256": "8594bae6a832522993ec08f8fc4772b8c1870fbf1bb4a07d7eb420bde33f10ef"
+      "bytes": 912,
+      "sha256": "8ce5e9e9f538b06263c46cf89bda0738ce8e9122933087ad58a1c8d658612e8f"
     },
     "guide-ja.html": {
-      "bytes": 1394,
-      "sha256": "047718721a25e757cd1a1cc6201a0c32d5b3cc63609ef879a2495b83a72227d0"
+      "bytes": 912,
+      "sha256": "1b3be751fadf42e82f21f988d8eff2035554fc2e548dd315913d9c9e28227a9c"
     },
     "guide.html": {
-      "bytes": 1394,
-      "sha256": "a94673631522c10579a509b0acb9e6bf1bb1abd883a661524cfbac4aac06c249"
+      "bytes": 912,
+      "sha256": "5aa3a2ea95bb155e8f0d3f504e35a54aae9f882019ab01fa58cd98a57ffe40e3"
     },
     "index.html": {
       "bytes": 193,
@@ -103,8 +103,8 @@
       "sha256": "a4f90c1b628e585c6882f5b0087d85b8461290cf889d25daf990caf68c02922e"
     },
     "internal/export-runtime.js": {
-      "bytes": 990935,
-      "sha256": "3966c3f930346981fd71e8532d11eea3acdf88014361295280b3e122e7ea2de6"
+      "bytes": 995930,
+      "sha256": "a15ea2d3b19f8a3e0f2112b0f203aee63177d9642773fa4cc14ee72e015e0849"
     },
     "internal/gradient.css": {
       "bytes": 5795,
@@ -113,6 +113,10 @@
     "internal/gradient.js": {
       "bytes": 22126,
       "sha256": "22fff6229b73b90cbb6c19592c8405b50d8b2cae86601595e7a3d687d3579b44"
+    },
+    "internal/guide-base.css": {
+      "bytes": 3601,
+      "sha256": "5b41ebfd8587c55fcf1ac2137e529fc480a3cca7d6b28785f080c7d6e60e6b00"
     },
     "internal/guide-layout.css": {
       "bytes": 5755,
@@ -123,16 +127,16 @@
       "sha256": "16d29f137f913f81502026665d93c666f588e35ad418bff200aadf607190c522"
     },
     "internal/header.css": {
-      "bytes": 19419,
-      "sha256": "e7657c0d3d97cbc0a4ae5f92671baa9bafcd4baa55b4dd70216999341c15bde2"
+      "bytes": 19473,
+      "sha256": "4ebf74f4238d5808b6019430f7004e789e2a607f763d79f9439d1a402c4de7bc"
     },
     "internal/header.js": {
-      "bytes": 19517,
-      "sha256": "66f9bce41b5be324890c193336a4eb2cf803af43c4c13c0e4ebb855b5b39183f"
+      "bytes": 19531,
+      "sha256": "8ad791e05daeddb47e832f9b9910ffd19ad807ec188d46d95fbf6967a4e92703"
     },
     "internal/i18n.js": {
-      "bytes": 91056,
-      "sha256": "0f9b1008e0b7bff070a2b8a6336849631a4eb4f95a9e64be166a45584448bb2c"
+      "bytes": 91108,
+      "sha256": "3e3e3f2062ccfa4c41917055f602c5bd33f432c353198532847641bf86cfd0b7"
     },
     "internal/lua-preset.js": {
       "bytes": 25257,
@@ -163,8 +167,8 @@
       "sha256": "410a10733b8a707be18dd3043f870b31750c69a813597c172540b5100f5f2d42"
     },
     "internal/preview.css": {
-      "bytes": 29586,
-      "sha256": "a477c58167b9071abf96ae56722d31cf153eab1434c59a73d4b31e576215031a"
+      "bytes": 29540,
+      "sha256": "6707737f6a81566927fb79ad814e7a8a402119aafe6cbe32b4fe08e81519fc9c"
     },
     "internal/preview.js": {
       "bytes": 103731,
@@ -179,8 +183,8 @@
       "sha256": "3ec8b82d1bbcf84700fd58de5a220e84765f0001e5e6205c656149c10c21030a"
     },
     "internal/web-guide.js": {
-      "bytes": 8228,
-      "sha256": "61c516829a4d9084e7c470335a6a6ed929f23ed7b633b019954d6e2f6992b21a"
+      "bytes": 8703,
+      "sha256": "fc8c80120d16b29eb970d20935a405008e0e505087666f5aa41cb99df093e117"
     },
     "overlay.html": {
       "bytes": 3086,

@@ -281,7 +281,7 @@ for(const [ko,en,ja] of [
  ['자동: 컬럼의 패널 묶음을 정렬합니다. 수동: Y 좌표를 고정합니다. 미리보기에서 위아래로 드래그할 수 있습니다.','Auto: align the column group. Manual: pin the Y coordinate. Drag vertically in the preview.','自動：列のパネルをまとめて配置します。手動：Y 座標を固定します。プレビューで上下にドラッグできます。']
 ]){translations[ko]=en;japanese[ko]=ja;originalByTranslation.set(en,ko);originalByTranslation.set(ja,ko);}
 for(const [ko,en,ja] of [
- ['프리셋','Presets','プリセット'],['Lua 다운로드','Download Lua','Lua をダウンロード'],['Lua 불러오기','Import Lua','Lua を読み込む'],['프리셋 적용 취소','Undo preset','プリセットを元に戻す'],['기본 프리셋','Built-in presets','基本プリセット'],['Bento 기본','Bento default','Bento 基本'],['Overlap 게임 + 캠','Overlap game + camera','Overlap ゲーム + カメラ'],['흐림 사용','Enable blur','ぼかしを有効化'],
+ ['프리셋','Presets','プリセット'],['Lua 다운로드','Download Lua','Lua をダウンロード'],['Lua 불러오기','Import Lua','Lua を読み込む'],['프리셋 적용 취소','Undo preset','プリセットを元に戻す'],['기본 프리셋','Built-in presets','基本プリセット'],['Bento 기본','Bento default','Bento 基本'],['Overlap 게임 + 캠','Overlap game + camera','Overlap ゲーム + カメラ'],['흐림 사용','Enable blur','ぼかしを有効化'],['설정 열기','Open settings','設定を開く'],
  ['설정은 이 브라우저에 자동 저장됩니다. Lua를 불러오면 다른 컴퓨터에서도 이어서 편집할 수 있습니다.','Settings save automatically in this browser. Import your Lua to continue editing on another computer.','設定はこのブラウザーに自動保存されます。Lua を読み込むと別のパソコンでも編集を続けられます。'],
  ['Lua 다운로드 → OBS 도구 → 스크립트에 추가 → 소스 선택 → 적용','Download Lua → OBS Tools → Add script → Select sources → Apply','Lua をダウンロード → OBS ツール → スクリプトに追加 → ソースを選択 → 適用'],
  ['로컬 이미지·영상 파일을 사용하는 경우','Using local image or video files','ローカルの画像・動画を使う場合'],
