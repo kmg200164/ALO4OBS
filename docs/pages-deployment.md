@@ -1,5 +1,7 @@
 # GitHub Pages deployment
 
+Status: prepared, not yet published. Work is paused at the user's Windows restart request. No `gh-pages` branch, Pages site or deployment was created. Resume by checking `dev`, rebuilding, staging the verified output, pushing `gh-pages`, creating the branch publishing source, then validating the actual HTTPS workflow. Do not treat the planned URL below as live until those checks pass.
+
 Public editor: https://kmg200164.github.io/ALO4OBS/
 
 Source and README updates belong to `dev`. GitHub Pages publishes the root of the separate `gh-pages` branch. The branch contains only the verified output of `python build_site.py`, with `.nojekyll`. This is GitHub's official branch publishing flow; it does not merge or modify `main`.

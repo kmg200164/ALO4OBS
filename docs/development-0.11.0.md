@@ -8,7 +8,7 @@ The web editor prepares one `script-bento.lua` or `script-overlap.lua`. The same
 python build_site.py
 ```
 
-The output is `dist/site/`, with a stable `settings.html` and an `index.html` entry. The public editor is [GitHub Pages](https://kmg200164.github.io/ALO4OBS/), published from the generated `gh-pages` branch; source and README remain on `dev`. See [deployment operations](pages-deployment.md). The build command only builds locally and does not publish. The three site guides describe the Lua flow. Historical offline guides and ZIP export remain in the optional offline distribution.
+The output is `dist/site/`, with a stable `settings.html` and an `index.html` entry. The planned public editor URL is [GitHub Pages](https://kmg200164.github.io/ALO4OBS/), to be published from the generated `gh-pages` branch; source and README remain on `dev`. Deployment is paused for the user's Windows restart and the URL is not yet live. See [deployment operations](pages-deployment.md). The build command only builds locally and does not publish. The three site guides describe the Lua flow. Historical offline guides and ZIP export remain in the optional offline distribution.
 
 The build verifies every relative reference before replacing an output directory. Only a directory bearing its generated site marker can be replaced. Generated manifests record the version, byte counts and SHA-256 hashes. The editor checks the Lua runtime version and file hashes before exporting. Preserve the origin for browser draft continuity.
 
