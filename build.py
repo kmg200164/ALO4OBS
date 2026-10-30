@@ -138,7 +138,8 @@ def verify_entries(package):
                 if target.startswith(('http:', 'https:', 'data:', '#')):
                     continue
                 resolved = posixpath.normpath(posixpath.join(posixpath.dirname(name), target))
-                if resolved not in package:
+                # GitHub Pages serves foo.html at /foo, so the public site links without the extension.
+                if resolved not in package and resolved + '.html' not in package:
                     raise ValueError(f'Missing package reference: {name} -> {target}')
             if name.endswith('.js'):
                 # Runtime asset paths are relative to the root HTML, not internal/.

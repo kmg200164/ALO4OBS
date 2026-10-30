@@ -350,7 +350,7 @@ function translate(){
 }
 function set(value,persist=true){language=supportedLanguages.includes(value)?value:'en';if(persist){try{localStorage.setItem('overlay-ui-language',language)}catch{}}
  const currentFile=location.pathname.split(/[\\/]/).pop();
- const currentGuide=Object.entries(guideFiles).find(([,file])=>file===currentFile)?.[0];
+ const currentGuide=Object.entries(guideFiles).find(([,file])=>file.replace(/\.html$/,'')===currentFile.replace(/\.html$/,''))?.[0];
  if(currentGuide&&currentGuide!==language){location.href=guideFiles[language]+location.hash;return;}
  if(selector)selector.value=language;
  translate();window.dispatchEvent?.(new CustomEvent('kmg-language-change',{detail:{language}}));}

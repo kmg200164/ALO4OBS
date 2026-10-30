@@ -4,6 +4,8 @@ Status: live at the URL below. GitHub reports the branch source as gh-pages /, t
 
 Public editor: https://kmg200164.github.io/ALO4OBS/
 
+Public pages use extensionless URLs: `/settings`, `/guide`, `/guide-en`, `/guide-ja`. GitHub Pages serves each `.html` file at the extensionless path, so `build_site.py` rewrites the header, language-switch and landing links for the site build only. The offline ZIP keeps `.html` links because `file://` needs them.
+
 Source and README updates belong to `dev`. GitHub Pages publishes the root of the separate `gh-pages` branch. The branch contains only the verified output of `python build_site.py`, with `.nojekyll`. This is GitHub's official branch publishing flow; it does not merge or modify `main`.
 
 The repository is already public. Before the initial publication, the Pages API reported no existing site, deployments or custom domain. Publication therefore does not replace an existing website. The generated site keeps the current `settings.html` interface.

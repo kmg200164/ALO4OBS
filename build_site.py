@@ -24,11 +24,17 @@ def site_entries():
     guide = (package.source / 'web-guide.html').read_bytes()
     for language, name in [('en', 'guide-en.html'), ('ko', 'guide.html'), ('ja', 'guide-ja.html')]:
         result[name] = guide.replace(b'<html lang="en">', ('<html lang="' + language + '">').encode())
+    # GitHub Pages serves foo.html at /foo, so the public site links without the extension.
+    for name in ('internal/header.js', 'internal/i18n.js'):
+        data = result[name]
+        for page in ('guide-en', 'guide-ja', 'guide', 'settings'):
+            data = data.replace(page.encode() + b'.html', page.encode())
+        result[name] = data
     result['internal/web-guide.js'] = (package.source / 'web-guide.js').read_bytes()
     result['index.html'] = (
         '<!doctype html><html lang="en"><meta charset="utf-8">'
-        '<title>ALO4OBS</title><meta http-equiv="refresh" content="0;url=settings.html">'
-        '<body><a href="settings.html">Open ALO4OBS</a></body></html>\n'
+        '<title>ALO4OBS</title><meta http-equiv="refresh" content="0;url=settings">'
+        '<body><a href="settings">Open ALO4OBS</a></body></html>\n'
     ).encode()
     result['.nojekyll'] = b''
     result[SITE_MARKER] = b'ALO4OBS generated public static editor\n'

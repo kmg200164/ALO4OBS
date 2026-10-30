@@ -2,7 +2,7 @@
 
 Auto Layout Overlay for Open Broadcaster Software
 
-**[Open the web settings editor](https://kmg200164.github.io/ALO4OBS/)** · [Setup guide](https://kmg200164.github.io/ALO4OBS/guide-en.html) · [What's new](CHANGELOG.md)
+**[Open the web settings editor](https://kmg200164.github.io/ALO4OBS/)** · [Setup guide](https://kmg200164.github.io/ALO4OBS/guide-en) · [What's new](CHANGELOG.md)
 
 Arrange your stream in the browser, then download **one Lua file** and apply it in OBS. Choose **Bento** for separate panels or **Overlap** for panels above a full-screen Main source.
 

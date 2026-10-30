@@ -40,7 +40,7 @@ class StaticSiteTests(unittest.TestCase):
         self.assertEqual(actual['config.js'], (builder.source / 'config.public.js').read_bytes())
         self.assertNotIn('obs-settings.json', actual)
         self.assertFalse(any('plugin/' in name or 'install.' in name for name in actual))
-        self.assertIn('settings.html', actual['index.html'].decode())
+        self.assertIn('url=settings"', actual['index.html'].decode())
         html = actual['settings.html'].decode()
         self.assertIn('window.ALO4OBS_WEB_EDITOR = true;', html)
         self.assertNotIn(b'window.ALO4OBS_WEB_EDITOR', builder.entries['settings.html'])
