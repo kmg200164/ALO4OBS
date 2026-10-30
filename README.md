@@ -2,22 +2,46 @@
 
 Auto Layout Overlay for Open Broadcaster Software
 
-**[Download ALO4OBS 0.10.4](https://github.com/kmg200164/ALO4OBS/raw/refs/heads/main/downloads/ALO4OBS-v0.10.4.zip)** · [What's new](CHANGELOG.md)
+**[Open the web settings editor](https://kmg200164.github.io/ALO4OBS/)** · [Setup guide](https://kmg200164.github.io/ALO4OBS/guide-en.html) · [What's new](CHANGELOG.md)
 
-**0.11.0 is under development on `dev`.** The new web editor downloads one Lua script and imports that same file as a preset. Run `python build_site.py` to prepare the static site in `dist/site/`. Pages is not deployed by this command. See the [0.11.0 implementation and verification notes](docs/development-0.11.0.md). The published 0.10.4 download and instructions below remain available.
+Arrange your stream in the browser, then download **one Lua file** and apply it in OBS. Choose **Bento** for separate panels or **Overlap** for panels above a full-screen Main source.
 
-Arrange your OBS overlay in a browser, then apply it in OBS. Choose **Bento** to keep all panels separate, or **Overlap** to place auxiliary panels over a full-screen Main panel.
+<a name="quick-start"></a>
+
+## How to start
+
+1. Open **[ALO4OBS settings](https://kmg200164.github.io/ALO4OBS/)**. Choose a layout or a built-in preset.
+2. Select a preview panel and edit its content, size, spacing and colors. Panel images/videos, background images, web widgets and existing OBS sources remain supported.
+3. Click **Download Lua**. Save `script-bento.lua` or `script-overlap.lua` in a permanent, writable folder.
+4. In OBS, open **Tools → Scripts → +**, add the Lua, select the original sources and press **Apply saved settings / Auto layout**. For uploaded local images/videos, select their original files in the script's **Local file** fields. Originals are not embedded in Lua.
+5. Check the **ALO4OBS · BENTO** or **ALO4OBS · OVERLAP** scene in OBS before using it on stream.
+
+Use **OBS Studio 30.1 or newer**, Browser Source, Tools → Scripts and a **1920 × 1080 base canvas**. The browser preview shows layout and uploaded media; inspect actual captures, cameras and web widgets in OBS.
+
+## Continue editing
+
+Settings and selected media save automatically in the **same browser on the same computer**. Keep the downloaded Lua as a portable settings preset. Use **Import Lua** to restore the settings panel and both stored layout geometries in another browser. Select original local files again for their previews and OBS connections.
+
+**Undo preset** restores the state before the last preset application. Cleared browser storage cannot restore automatically. Personal Lua files can contain private widget URLs; keep them private. Import reads settings data without executing imported Lua or uploading it to a server.
+
+Later edits reach OBS after downloading the updated Lua, reloading its script entry, checking source/file selections and applying again. OBS prepares an internal rendering folder beside the Lua; retain it after Apply. Source selections belong to the OBS script entry, so a new script path or computer may require reselecting them.
+
+Overlap live blur requires Composite Blur. Turn **Enable blur** off to use the layout without that plugin. The **Overlap game + camera** preset starts with blur disabled.
+
+## Development and verification
+
+The web editor follows the **[dev branch](https://github.com/kmg200164/ALO4OBS/tree/dev)** and keeps the existing settings.html interface. Pages serves only the verified neutral static build from `gh-pages`; main is not merged or changed by deployment.
+
+Run `python build_site.py` to build `dist/site/`. See [implementation and verification notes](docs/development-0.11.0.md) and [Pages deployment](docs/pages-deployment.md). Windows automated checks cover Lua export/import, browser media restoration and file-copy failure handling. Registration, rendering and native file pickers in the real OBS app, plus macOS/Linux acceptance, remain pending.
 
 Found it useful? [Support continued improvements](https://buymeacoffee.com/kmg200164). Found a bug? [Report it here](https://github.com/kmg200164/ALO4OBS/issues/new?template=feedback.yml).
 
-<p align="center">
-  <a href="https://buymeacoffee.com/kmg200164">
-    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy me a coffee — support KMG" width="360">
-  </a>
-</p>
+<details>
+<summary>Legacy 0.10.4 offline ZIP download and instructions</summary>
 
-<a name="how-to-start"></a>
-<a name="quick-start"></a>
+**[Download the previous 0.10.4 offline package](https://github.com/kmg200164/ALO4OBS/raw/refs/heads/main/downloads/ALO4OBS-v0.10.4.zip)**
+
+The following instructions describe the previous ZIP workflow. The web editor above uses one Lua download.
 
 <details>
 <summary><h2>How to start</h2></summary>
@@ -180,3 +204,5 @@ The Windows helper installs the plugin and opens the HTML editor. You do not nee
 The implemented helpers select official packages for OBS 30–33: Windows x64 uses Legacy for 30–32 and modern for 33. The bundled macOS universal helper is `composite-blur-install.command`; the native Debian/Ubuntu amd64 helper is `composite-blur-install.sh`. macOS and Linux helpers open their OS installer for user review of permissions and dependencies. They do not automatically approve prompts or change security settings.
 
 Actual installation was verified on Windows OBS 32. Windows OBS 30/31/33 selection and macOS/Linux helper behavior were tested with command stubs, not installations on those systems. OBS 33 portable installation and Flatpak offline installation are not supported by these helpers. See [plugin support and verification](docs/PLUGIN-SUPPORT.md). Installer scope is separate from HTML/Lua compatibility.
+
+</details>
