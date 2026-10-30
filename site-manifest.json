@@ -74,13 +74,13 @@
       "bytes": 912,
       "sha256": "1b3be751fadf42e82f21f988d8eff2035554fc2e548dd315913d9c9e28227a9c"
     },
-    "guide.html": {
+    "guide-ko.html": {
       "bytes": 912,
       "sha256": "5aa3a2ea95bb155e8f0d3f504e35a54aae9f882019ab01fa58cd98a57ffe40e3"
     },
     "index.html": {
-      "bytes": 193,
-      "sha256": "30eac148e87b1269621a61193fe2ab44960da040995b52dbc9c9b50f3885b6ee"
+      "bytes": 183,
+      "sha256": "ce71db3471b7c3f6cb6ac194b44ebdbbd48f47ea5982c0fdb9e14c1c0063c81d"
     },
     "internal/background.js": {
       "bytes": 7050,
@@ -103,8 +103,8 @@
       "sha256": "a4f90c1b628e585c6882f5b0087d85b8461290cf889d25daf990caf68c02922e"
     },
     "internal/export-runtime.js": {
-      "bytes": 995930,
-      "sha256": "a15ea2d3b19f8a3e0f2112b0f203aee63177d9642773fa4cc14ee72e015e0849"
+      "bytes": 995994,
+      "sha256": "50cd2f37fff191c6675530ee0ba6d2b32054a6ce9dd99df744a36d1344d46e1a"
     },
     "internal/gradient.css": {
       "bytes": 5795,
@@ -131,12 +131,12 @@
       "sha256": "4ebf74f4238d5808b6019430f7004e789e2a607f763d79f9439d1a402c4de7bc"
     },
     "internal/header.js": {
-      "bytes": 19531,
-      "sha256": "8ad791e05daeddb47e832f9b9910ffd19ad807ec188d46d95fbf6967a4e92703"
+      "bytes": 19524,
+      "sha256": "9d41e4100f943a46a375e6dcfc58620e395b001a6b13da3968e72ee50c90da11"
     },
     "internal/i18n.js": {
-      "bytes": 91108,
-      "sha256": "3e3e3f2062ccfa4c41917055f602c5bd33f432c353198532847641bf86cfd0b7"
+      "bytes": 91128,
+      "sha256": "7788482872358d39e9d80ba5523581d78a2fc2dbc618cb78e071504f9b88a921"
     },
     "internal/lua-preset.js": {
       "bytes": 25257,

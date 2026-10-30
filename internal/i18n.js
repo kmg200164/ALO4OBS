@@ -206,7 +206,7 @@ Object.assign(japanese,{'처음 사용하시나요?':'初めてお使いです�
 const supportedLanguages=['ko','en','ja'];
 Object.assign(translations,{'설정 ZIP 전체를 압축 해제한 뒤, 같은 폴더의 script-bento.lua를 OBS에 추가하세요.':'Extract the entire settings ZIP, then add script-bento.lua from that folder in OBS.','설정 ZIP 전체를 압축 해제한 뒤, 같은 폴더의 script-overlap.lua를 OBS에 추가하세요.':'Extract the entire settings ZIP, then add script-overlap.lua from that folder in OBS.'});
 Object.assign(japanese,{'설정 ZIP 전체를 압축 해제한 뒤, 같은 폴더의 script-bento.lua를 OBS에 추가하세요.':'設定 ZIP をすべて展開し、同じフォルダの script-bento.lua を OBS に追加してください。','설정 ZIP 전체를 압축 해제한 뒤, 같은 폴더의 script-overlap.lua를 OBS에 추가하세요.':'設定 ZIP をすべて展開し、同じフォルダの script-overlap.lua を OBS に追加してください。'});
-const guideFiles={ko:'guide.html',en:'guide-en.html',ja:'guide-ja.html'};
+const guideFiles={ko:'guide-ko',en:'guide-en',ja:'guide-ja'};
 Object.assign(translations,{'미리보기에서 설정할 패널을 클릭하세요.':'Click a panel in the preview to edit its settings.'});Object.assign(japanese,{'미리보기에서 설정할 패널을 클릭하세요.':'プレビューで設定するパネルをクリックしてください。'});
 translations['OBS 설정']='Settings';
 for(const [ko,en,ja] of [['버그 신고','Report a bug','バグを報告'],['후원하기','Support this project','支援する'],['언어 / Language','Language','言語']]){translations[ko]=en;japanese[ko]=ja;}
@@ -345,12 +345,12 @@ function translate(){
   attributeOriginals.set(element,saved);
  }
  for(const id of ['fullscreen','bundle','change-layout']){const button=document.getElementById(id);if(button)button.setAttribute('aria-label',button.textContent.trim());}
- const guide=document.getElementById('guide-link')||document.querySelector('a[href="guide.html"],a[href="guide-en.html"],a[href="guide-ja.html"]');
+ const guide=document.getElementById('guide-link')||document.querySelector('a[href="guide-ko"],a[href="guide-en"],a[href="guide-ja"]');
  if(guide)guide.href=guideFiles[language];
 }
 function set(value,persist=true){language=supportedLanguages.includes(value)?value:'en';if(persist){try{localStorage.setItem('overlay-ui-language',language)}catch{}}
  const currentFile=location.pathname.split(/[\\/]/).pop();
- const currentGuide=Object.entries(guideFiles).find(([,file])=>file===currentFile)?.[0];
+ const currentGuide=Object.entries(guideFiles).find(([,file])=>file.replace(/\.html$/,'')===currentFile.replace(/\.html$/,''))?.[0];
  if(currentGuide&&currentGuide!==language){location.href=guideFiles[language]+location.hash;return;}
  if(selector)selector.value=language;
  translate();window.dispatchEvent?.(new CustomEvent('kmg-language-change',{detail:{language}}));}
