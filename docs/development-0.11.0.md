@@ -8,7 +8,7 @@ The web editor prepares one `script-bento.lua` or `script-overlap.lua`. The same
 python build_site.py
 ```
 
-The output is `dist/site/`, with a stable `settings.html` and an `index.html` entry. The planned public editor URL is [GitHub Pages](https://kmg200164.github.io/ALO4OBS/), to be published from the generated `gh-pages` branch; source and README remain on `dev`. Deployment is paused for the user's Windows restart and the URL is not yet live. See [deployment operations](pages-deployment.md). The build command only builds locally and does not publish. The three site guides describe the Lua flow. Historical offline guides and ZIP export remain in the optional offline distribution.
+The output is `dist/site/`, with a stable `settings.html` and an `index.html` entry. The public editor URL is [GitHub Pages](https://kmg200164.github.io/ALO4OBS/), published from the generated `gh-pages` branch; source and README remain on `dev`. See [deployment operations](pages-deployment.md). The build command only builds locally and does not publish. The three site guides describe the Lua flow. Historical offline guides and ZIP export remain in the optional offline distribution.
 
 The build verifies every relative reference before replacing an output directory. Only a directory bearing its generated site marker can be replaced. Generated manifests record the version, byte counts and SHA-256 hashes. The editor checks the Lua runtime version and file hashes before exporting. Preserve the origin for browser draft continuity.
 
@@ -36,7 +36,7 @@ Future layout versions are preserved without overwriting their durable browser d
 
 ## Verification
 
-Windows development verification on 2026-10-30: Node **310 passed, 32 skipped**, Python **63 passed**, and the separately enabled hosted-file browser suite **5 passed**. Baseline Node was 294 passed / 28 skipped. Browser coverage includes decoded panel images/video, byte restoration after reload, cross-context Lua import, five checks across three languages and 1440/390 px layouts. These results do not establish real OBS application acceptance.
+Windows development verification on 2026-10-30: Node **311 passed, 33 skipped**, Python **63 passed**, and separately enabled web/design browser checks **7 passed**. The actual public HTTPS web workflow also passed all **5** checks before the guide-only refinement. Baseline Node was 294 passed / 28 skipped. Browser coverage includes decoded panel images/video, byte restoration after reload, cross-context Lua import, three languages at 1440/390 px, header tooltip keyboard navigation and disconnected local font loading. These results do not establish real OBS application acceptance.
 
 ```sh
 node --test tests/*.test.cjs
@@ -56,4 +56,4 @@ The test fulfills an isolated HTTPS test origin from the exact built files. It e
 
 Codec tests execute generated scripts in the installed OBS LuaJIT DLL with an OBS state model. They cover both layouts, binary runtime extraction, reload isolation, invalid metadata, URL/type/schema rejection, no pre-Apply scene mutation, local-file copying and injected failures. A separate native-file test checks the installed libobs directory/replace/unlink APIs using workspace fixtures, including a Korean path.
 
-Not yet verified: registration and rendering in the real OBS application, native file picker interaction, actual capture/camera output, macOS/Linux acceptance, and a deployed GitHub Pages origin. The new one-image setup guide awaits that final flow verification; the old ZIP infographic is not presented by the web guides.
+Not yet verified: registration and rendering in the real OBS application, native file picker interaction, actual capture/camera output, macOS/Linux acceptance. The new one-image setup guide awaits that final flow verification; the old ZIP infographic is not presented by the web guides.

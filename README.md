@@ -2,8 +2,6 @@
 
 Auto Layout Overlay for Open Broadcaster Software
 
-> Pages deployment is prepared but paused for a Windows restart. The editor links below are the planned publication URLs and are not live yet. Source, settings UI and the single-Lua workflow are saved on `dev`.
-
 **[Open the web settings editor](https://kmg200164.github.io/ALO4OBS/)** · [Setup guide](https://kmg200164.github.io/ALO4OBS/guide-en.html) · [What's new](CHANGELOG.md)
 
 Arrange your stream in the browser, then download **one Lua file** and apply it in OBS. Choose **Bento** for separate panels or **Overlap** for panels above a full-screen Main source.
@@ -34,7 +32,7 @@ Overlap live blur requires Composite Blur. Turn **Enable blur** off to use the l
 
 The web editor follows the **[dev branch](https://github.com/kmg200164/ALO4OBS/tree/dev)** and keeps the existing settings.html interface. Pages serves only the verified neutral static build from `gh-pages`; main is not merged or changed by deployment.
 
-Run `python build_site.py` to build `dist/site/`. See [implementation and verification notes](docs/development-0.11.0.md) and [Pages deployment](docs/pages-deployment.md). Windows automated checks cover Lua export/import, browser media restoration and file-copy failure handling. Registration, rendering and native file pickers in the real OBS app, plus macOS/Linux acceptance, remain pending.
+Run `python build_site.py` to build `dist/site/`. See [implementation and verification notes](docs/development-0.11.0.md) and [Pages deployment](docs/pages-deployment.md) and [existing UI rules](docs/design-system.md). Windows automated checks cover Lua export/import, browser media restoration and file-copy failure handling. Registration, rendering and native file pickers in the real OBS app, plus macOS/Linux acceptance, remain pending.
 
 Found it useful? [Support continued improvements](https://buymeacoffee.com/kmg200164). Found a bug? [Report it here](https://github.com/kmg200164/ALO4OBS/issues/new?template=feedback.yml).
 

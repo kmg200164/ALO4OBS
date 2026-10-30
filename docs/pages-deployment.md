@@ -1,6 +1,6 @@
 # GitHub Pages deployment
 
-Status: prepared, not yet published. Work is paused at the user's Windows restart request. No `gh-pages` branch, Pages site or deployment was created. Resume by checking `dev`, rebuilding, staging the verified output, pushing `gh-pages`, creating the branch publishing source, then validating the actual HTTPS workflow. Do not treat the planned URL below as live until those checks pass.
+Status: live at the URL below. GitHub reports the branch source as gh-pages /, the build as successful, and HTTPS enforced. Source and README remain on dev; main is unchanged.
 
 Public editor: https://kmg200164.github.io/ALO4OBS/
 
@@ -16,7 +16,7 @@ The repository is already public. Before the initial publication, the Pages API 
 4. Copy only that generated inventory into an isolated checkout of `gh-pages`. Preserve any unrelated checkout and do not copy the source tree, local settings, tests or browser data. Commit and push normally. Never force-push to update the site.
 5. Confirm the Pages build succeeds and the public `site-manifest.json` matches the local output. Then verify Lua download/import and reopening on the actual HTTPS origin.
 
-The initial setup uses `POST /repos/kmg200164/ALO4OBS/pages` with `build_type: legacy` and source `gh-pages` / `/`. Subsequent pushes to that branch trigger GitHub's Pages build and deployment. Repository Website points to the editor. The default source branch remains `main`; the updated README is available at `https://github.com/kmg200164/ALO4OBS/tree/dev` until a separately authorized main update.
+For a repository without an enabled site, setup uses `POST /repos/kmg200164/ALO4OBS/pages` with `build_type: legacy` and source `gh-pages` / `/`. The first gh-pages push in this repository automatically enabled Pages; a create request returned already enabled, and the GET API confirmed the exact intended branch source. Subsequent pushes to that branch trigger GitHub's Pages build and deployment. Repository Website points to the editor. The default source branch remains `main`; the updated README is available at `https://github.com/kmg200164/ALO4OBS/tree/dev` until a separately authorized main update.
 
 The public build contains neutral defaults, application code, rendering resources and licenses. Uploads and user settings stay in browser storage. Lua downloads can contain the user's widget URLs, but they are generated locally and never committed to the publishing branch.
 

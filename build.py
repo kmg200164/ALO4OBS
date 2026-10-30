@@ -34,7 +34,7 @@ def check_public_config_urls(data):
 check_public_config_urls(public_config)
 gift_files = {
     'background.html', 'background.js', 'camera-preview.js', 'config.public.js', 'demo.html', 'demo.js', 'events.js',
-    'CHANGELOG.md', 'LICENSE', 'frame.html', 'gradient.css', 'gradient.js', 'guide-en.html', 'guide-ja.html', 'guide-layout.css', 'guide-layout.js', 'guide.html', 'header.css', 'header.js', 'i18n.js', 'OBS-script.lua',
+    'CHANGELOG.md', 'LICENSE', 'frame.html', 'gradient.css', 'gradient.js', 'guide-en.html', 'guide-ja.html', 'guide-base.css', 'guide-layout.css', 'guide-layout.js', 'guide.html', 'header.css', 'header.js', 'i18n.js', 'OBS-script.lua',
     'overlay.css', 'overlay.html', 'overlay.js', 'pack.js', 'lua-preset.js', 'panel-media.js', 'panel-shape.js',
     'panel-media-game.html', 'panel-media-custom1.html', 'panel-media-custom2.html',
     'panel-media-custom3.html', 'panel-media-chat.html', 'panel-media-translation.html',

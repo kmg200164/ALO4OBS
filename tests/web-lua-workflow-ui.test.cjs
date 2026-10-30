@@ -117,7 +117,7 @@ test('new web controls and guides fit desktop/mobile in all three languages',{sk
     assert.equal(await page.locator('.legacy-export').isVisible(),false);
     await page.screenshot({path:path.join(evidence,`${locale}-${width}-settings.png`)});
     const language=locale.slice(0,2),guide=language==='en'?'guide-en.html':language==='ja'?'guide-ja.html':'guide.html';
-    await page.goto(new URL(guide,base).href);assert.equal(await page.locator('#web-guide section').count(),5);
+    await page.goto(new URL(guide,base).href);assert.equal(await page.locator('#web-guide .step-card').count(),4);assert.equal(await page.locator('#web-guide .faq-item').count(),1);
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
     await page.screenshot({path:path.join(evidence,`${locale}-${width}-guide.png`)});
    }
