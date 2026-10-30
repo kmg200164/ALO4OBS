@@ -2,6 +2,17 @@
 
 Use the existing `settings.html` layout and components. UI changes extend that system; they do not introduce a separate skin, new palette or unrelated control styling.
 
+## Direction decided 2026-10-30 (not implemented yet)
+
+The owner is rebuilding the visual baseline in Figma (page `design-system` of file `PHYDbj9r5xSIRrcTWECX0D`). Until that page exists, do not treat the older Figma pages (`sample`, `html`, `theme color`) or `tests/fixtures/figma-theme-tokens.json` as the target for new UI. The current code still has the ten-palette theme and header toggles.
+
+- One UI accent (aloe). Light and dark follow the operating system setting (`prefers-color-scheme`). The ten accent presets and the header palette and light/dark buttons are to be removed. Broadcast panel colors are a separate setting and stay.
+- Bento and Overlap are to be merged into one model: the background is a panel, and the only difference is whether it is used as the main source. The first screen keeps only the first-use question, with no layout chooser.
+- Header: name and version on the left; four buttons (guide/settings, language, bug report, donation) on the right. No GitHub button and no layout button in the header.
+- The Composite Blur plugin install is the first step of the guide, because most streamers use Overlap.
+
+Do not start these changes before the owner's Figma baseline exists; read it first, then rewrite this document and the token file from it.
+
 ## Sources and owners
 
 - The project's 0.8.0 instructions require existing CSS tokens and components for new UI, with no new hardcoded colors or fixed-coordinate layout. Its 0.8.1 instructions define light/dark semantic color roles and component states.
