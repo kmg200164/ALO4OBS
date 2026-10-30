@@ -8,10 +8,7 @@ test('shared header retains geometry across guide and editor; guide layout butto
   for(const name of ['guide'+lang+'.html','settings.html','guide'+lang+'.html','settings.html']){
    await p.goto(pathToFileURL(path.resolve('template',name)).href);await p.locator('#app-version:not([hidden])').waitFor({state:'attached'});await p.evaluate(()=>document.fonts.ready);
    if(width<=920)await p.locator('.header-menu--right').evaluate(e=>e.open=true);
-   const guide=name.startsWith('guide');assert.equal(await p.locator('#change-layout').isDisabled(),guide);
-   assert.ok(await p.locator('#change-layout').getAttribute('aria-label'));
-   if(guide){const url=p.url();await p.locator('#change-layout').evaluate(n=>n.click());assert.equal(p.url(),url);await p.locator('#change-layout').evaluate(n=>n.focus());assert.notEqual(await p.evaluate(()=>document.activeElement.id),'change-layout');}
-   const boxes=await p.evaluate(()=>Object.fromEntries(['.app-header','.brand','#app-version','.header-menu--left','.header-menu--right','#change-layout','#theme-toggle'].map(s=>{const r=document.querySelector(s).getBoundingClientRect();return [s,[r.x,r.y,r.width,r.height]]})));
+   const boxes=await p.evaluate(()=>Object.fromEntries(['.app-header','.brand','#app-version','.header-menu--left','.header-menu--right','#theme-toggle'].map(s=>{const r=document.querySelector(s).getBoundingClientRect();return [s,[r.x,r.y,r.width,r.height]]})));
    if(reference)for(const s in boxes)for(let j=0;j<4;j++)assert.ok(Math.abs(boxes[s][j]-reference[s][j])<1,`${width} ${lang} ${name} ${s} ${j}: ${boxes[s]} vs ${reference[s]}`);
    reference=boxes;comparisons++;
   }await c.close();

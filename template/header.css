@@ -132,5 +132,3 @@ html[data-theme="light"] .icon-tooltip{background:#000;color:#fff}
 
 /* Keep shared navigation geometry stable across short and scrolling pages. */
 html{scrollbar-gutter:stable}
-.app-header #change-layout{width:var(--header-control-size);height:var(--header-control-size);padding:16px;border-radius:0}
-.app-header #change-layout>span{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}

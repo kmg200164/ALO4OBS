@@ -14,9 +14,9 @@ test('config.public.js exposes exactly the allowed repository and donation links
  assert.ok(!JSON.stringify(context.window.OVERLAY_CONFIG).includes('buymeacoffee'),'links must not leak into the exported settings config');
 });
 
-test('header markup: GitHub, bug-report, and donation buttons start hidden until config.public.js fills them in',()=>{
+test('header markup: bug-report and donation buttons start hidden until config.public.js fills them in',()=>{
  const header=fs.readFileSync(path.join(__dirname,'../template/header.js'),'utf8');
- for(const id of ['github-link','bug-report-link','donation-link']){
+ for(const id of ['bug-report-link','donation-link']){
   assert.match(header,new RegExp(`id=\\\\"${id}\\\\"[^>]*href=\\\\"\\\\"[^>]*hidden`),`${id} must start with an empty href and hidden`);
  }
 });
@@ -39,9 +39,8 @@ test('header navigation offers only the other page at the same icon position',()
  const source=fs.readFileSync(path.join(__dirname,'../template/header.js'),'utf8');
  const navigation=source.slice(source.indexOf('  const currentPath='),source.indexOf("  try{localStorage.removeItem"));
  for(const pathname of ['/settings.html','/guide.html','/guide-en.html','/guide-ja.html']){
-  const layoutButton={};const context={location:{pathname},settingsLink:{},guideLink:{},header:{querySelector:s=>s==='#change-layout'?layoutButton:{insertAdjacentHTML(){}}}};
+  const context={location:{pathname},settingsLink:{},guideLink:{},header:{querySelector:()=>({insertAdjacentHTML(){}})}};
   vm.runInNewContext(navigation,context);
-  assert.equal(layoutButton.disabled,pathname!=='/settings.html');
   assert.equal(context.settingsLink.hidden,pathname==='/settings.html');
   assert.equal(context.guideLink.hidden,pathname!=='/settings.html');
  }
@@ -74,7 +73,6 @@ test('header puts public links on the left and centers the brand between native 
  let markup='';const first=source.split(/\r?\n\r?\n/)[0];
  vm.runInNewContext(first,{document:{currentScript:{insertAdjacentHTML(_position,html){markup=html;}}}});
  assert.equal((markup.match(/<details /g)||[]).length,3);assert.equal((markup.match(/<summary /g)||[]).length,3);
- assert.ok(markup.indexOf('id="github-link"')<markup.indexOf('class="brand"'));
  assert.ok(markup.indexOf('id="donation-link"')<markup.indexOf('class="brand"'));
  assert.ok(markup.indexOf('class="brand"')<markup.indexOf('id="settings-link"'));
  assert.match(markup,/<a id="guide-link"[^>]*>[\s\S]*?data-lucide="book-open"/);

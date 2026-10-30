@@ -18,7 +18,6 @@ const stockHashes={
   "book-open": "b4c2d37ab56e0c761bf4513657ae2140d2c9a4b983fac08d51ebb3660091379c",
   "bug": "8a291012aca9ef7a99984cd6185924aecbad594a2b0f6d2699d91a4ba9ce6c83",
   "heart": "32beaf672de068374e940dabaa59b1ec2e8644dfe235217495a57e4e7e234016",
-  "github": "9df8afd9044cf350e04ec80e576b48dd8b133f3953ae06caeef7762ac73ea4ad",
   "sun": "212f5bbbc01eacefd72c4b8d0e4d7debd4a7a0128e0836a36f0b74273355c99f",
   "moon": "a7e35972a0e15d42f79f65f2e6766f08a87c36cd8bc121eaeaf087a2cd8b7d3b",
   "settings": "7297cc72ebc16421f4f526453b71f9eab0f4e484606dab45735ce323ae95f177",
@@ -37,9 +36,8 @@ test('every UI icon retains its pinned Lucide stock glyph and common stroke with
  const gradientIcons=JSON.parse(gradientSource.match(/const actionIcons=(\{[\s\S]*?\});/)[1]);
  const previewSource=fs.readFileSync(path.join(__dirname,'../template/preview.js'),'utf8');
  const fileIcon=JSON.parse(previewSource.match(/const fileIcon=("[^\r\n]*");/)[1]);
- const sharedLayoutButton=JSON.parse(headerSource.match(/insertAdjacentHTML\('afterbegin',([^\r\n]+)\);/)[1]);
  const found=new Set();let count=0;
- for(const [markup,size] of [[header,32],[sharedLayoutButton,24],[settings,24],[Object.values(gradientIcons).join(''),24],[fileIcon,24]])for(const icon of markup.matchAll(/<svg\b([^>]*)>([\s\S]*?)<\/svg>/g)){
+ for(const [markup,size] of [[header,32],[settings,24],[Object.values(gradientIcons).join(''),24],[fileIcon,24]])for(const icon of markup.matchAll(/<svg\b([^>]*)>([\s\S]*?)<\/svg>/g)){
   const name=icon[1].match(/data-lucide="([^"]+)"/)?.[1];
   assert.ok(stockHashes[name],`untracked UI icon ${name}`);
   const glyph=icon[2].replace(/>\s+</g,'><').trim();
@@ -49,7 +47,7 @@ test('every UI icon retains its pinned Lucide stock glyph and common stroke with
   assert.match(icon[1],/aria-hidden="true"/);assert.match(icon[1],/focusable="false"/);
   found.add(name);count++;
  }
- assert.equal(count,22);assert.deepEqual([...found].sort(),Object.keys(stockHashes).filter(name=>name!=='play').sort());
+ assert.equal(count,21);assert.deepEqual([...found].sort(),Object.keys(stockHashes).filter(name=>name!=='play').sort());
  assert.match(header,/data-lucide="sun"[^>]*class|class="[^"]*theme-icon-sun/);
  assert.match(header,/class="[^"]*theme-icon-moon/);
  assert.doesNotMatch(headerSource,/createElementNS/);

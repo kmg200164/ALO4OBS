@@ -6,7 +6,7 @@ keep their separate terms. These notices do not imply endorsement.
 ## Lucide icons
 
 All UI icons use the official **lucide-static 0.468.0** stock set:
-menu, github, bug, heart, settings, book-open, languages, sun, moon, palette,
+menu, bug, heart, settings, book-open, languages, sun, moon, palette,
 maximize, rotate-ccw, arrow-left-right, save, triangle-alert, trash-2, rotate-cw, plus, and folder-open.
 
 The original SVG glyphs are embedded inline with their 24 × 24 viewBox and

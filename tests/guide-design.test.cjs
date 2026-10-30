@@ -24,7 +24,7 @@ test('guide settings tooltip uses keyboard focus below the header; bundled Inter
    report[name]={latin};
    if(name!=='settings.html'){
     assert.equal(await page.locator('#web-guide .primary-link').count(),0);assert.equal(await page.locator('#web-guide .step-card').count(),4);
-    await page.locator('#github-link').focus();await page.keyboard.press('Tab');await page.keyboard.press('Tab');await page.keyboard.press('Tab');
+    await page.locator('#bug-report-link').focus();await page.keyboard.press('Tab');await page.keyboard.press('Tab');
     assert.equal(await page.evaluate(()=>document.activeElement.id),'settings-link');
     await page.locator('#icon-tooltip').waitFor({state:'visible'});assert.equal(await page.locator('#icon-tooltip').textContent(),label);
     const link=await page.locator('#settings-link').boundingBox(),tip=await page.locator('#icon-tooltip').boundingBox();assert.ok(tip.y>=link.y+link.height);

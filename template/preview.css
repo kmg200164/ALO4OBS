@@ -187,8 +187,6 @@ html[lang=ko] button,html[lang=ko] .action-button,html[lang=ko] .mini-action{fon
 
 .editor-workspace .section-bar .action-button>span{display:none}
 .editor-workspace .section-bar .action-button{width:48px;padding:12px}
-.app-header #change-layout{height:var(--header-control-size);min-height:0;width:var(--header-control-size);padding:0;border-radius:0}
-.app-header #change-layout svg{width:var(--header-icon-size);height:var(--header-icon-size)}
 .page-layout:has(>#status:not(.sr-only)){padding:32px 0}
 
 /* Keep the preview alongside settings; only the controls collapse on narrow screens. */

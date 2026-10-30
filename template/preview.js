@@ -1,7 +1,7 @@
 (() => {
   const byId=id=>document.getElementById(id);
   const form=byId('settings'), frame=byId('preview'), status=byId('status');
-  const presetButton=byId('change-layout');presetButton.classList.add('icon-button');byId('header-right-tools').prepend(presetButton);
+  
   function syncHitAreaScale(){
     const hits=byId('panel-hit-areas');
     // Read the iframe element: file:// child windows have separate opaque origins.
