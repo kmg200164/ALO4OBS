@@ -1,0 +1,51 @@
+.kmg-gradient-popover{position:fixed;z-index:10000;width:min(360px,calc(100vw - 16px));max-height:calc(100vh - 16px);overflow:auto;padding:16px;border:0;border-radius:12px;background:var(--surface-card);color:var(--content-primary);box-shadow:var(--ui-shadow);font:500 14px/1.35 Inter,"Yu Gothic UI","Yu Gothic","Hiragino Kaku Gothic ProN","Apple SD Gothic Neo","Malgun Gothic",Arial,sans-serif;overscroll-behavior:contain}
+.kmg-gradient-popover *{box-sizing:border-box}
+.kmg-gradient-head{display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:8px;border-radius:8px;background:var(--surface-accent-subtle)}
+.kmg-gradient-popover button,.kmg-gradient-popover select,.kmg-gradient-popover input{font:inherit;color:inherit}
+.kmg-gradient-popover button{min-width:48px;min-height:48px;border:0;border-radius:8px;background:var(--surface-field);cursor:pointer}
+.kmg-gradient-popover button:hover:not(:disabled){background:var(--surface-hover);color:var(--content-on-surface-hover)}
+.kmg-gradient-popover button:focus-visible{outline:3px solid var(--focus-ring);outline-offset:3px}
+.kmg-gradient-popover button:disabled{opacity:.42;cursor:default}
+.kmg-gradient-type{flex:1;min-width:0;height:48px;padding:0 12px;border:0;border-radius:8px;background:var(--surface-field)}
+.kmg-gradient-icon{width:48px;flex:none;font-size:23px}
+.kmg-gradient-action{flex:none;padding:0 10px}
+.kmg-gradient-angle-line{display:flex;align-items:center;gap:8px;height:48px;margin-bottom:12px;padding:4px 8px;border-radius:8px;background:var(--surface-accent-subtle);color:var(--content-primary)}
+.kmg-gradient-angle-line>span:first-child{flex:1}
+.kmg-gradient-angle,.kmg-gradient-value{height:40px;min-width:56px;padding:0 8px;border:0;border-radius:6px;background:var(--surface-field);text-align:right}
+.kmg-gradient-unit{color:var(--content-primary);color:var(--content-secondary)}
+.kmg-gradient-track{position:relative;height:32px;margin:18px 4px 26px;border:0;border-radius:4px;background-color:var(--preview-background);background-image:none;touch-action:none}
+.kmg-gradient-handle{position:absolute!important;top:50%;width:28px;min-width:28px!important;height:48px;min-height:48px!important;padding:0!important;transform:translate(-50%,-50%);border:0!important;border-radius:7px!important;background:var(--surface-field);box-shadow:var(--ui-shadow);touch-action:none}
+.kmg-gradient-handle::after{content:"";display:block;width:5px;height:18px;margin:auto;border-right:1px solid currentColor;border-left:1px solid currentColor;opacity:.8}
+.kmg-gradient-handle.is-selected{background:var(--accent-default);color:var(--content-on-accent)}
+.kmg-gradient-stops-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 8px}
+.kmg-gradient-stops-heading strong{font-size:16px}
+.kmg-gradient-add{padding:0 10px}
+.kmg-gradient-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.kmg-gradient-stop{display:flex;align-items:center;gap:10px;width:100%;padding:0 10px!important;text-align:left}
+.kmg-gradient-stop.is-selected{background:var(--surface-accent-subtle);color:var(--content-on-accent-subtle)}
+.kmg-gradient-swatch{width:24px;height:24px;flex:none;border:0;border-radius:5px;background:var(--surface-field)}
+.kmg-gradient-stop-name{flex:1}
+.kmg-gradient-stop-value{color:var(--content-secondary);font-variant-numeric:tabular-nums}
+.kmg-gradient-details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px}
+.kmg-gradient-field{display:flex;align-items:center;gap:6px;min-width:0;min-height:48px;padding:4px 8px;border-radius:8px;background:var(--surface-accent-subtle)}
+.kmg-gradient-field>span:first-child{font-size:12px;color:var(--content-secondary)}
+.kmg-gradient-value{flex:1;width:0;min-width:0;height:36px;padding:0 5px;border:0;background:var(--surface-field);font-size:13px}
+.kmg-gradient-hex-field .kmg-gradient-value{text-align:center;text-transform:uppercase}
+.kmg-gradient-remove{width:48px;margin-left:auto;display:flex;color:var(--status-error)!important}
+@media(max-width:360px){.kmg-gradient-popover{padding:12px}.kmg-gradient-head{gap:4px}.kmg-gradient-details{gap:6px}.kmg-gradient-field{padding:4px}.kmg-gradient-field>span:first-child{font-size:11px}.kmg-gradient-action{padding:0 6px;font-size:12px!important}}
+
+.kmg-gradient-popover button:active:not(:disabled){background:var(--surface-pressed);color:var(--content-on-surface-pressed)}
+.kmg-gradient-remove{background:var(--surface-error)!important}
+
+.kmg-gradient-stop:hover .kmg-gradient-stop-value,.kmg-gradient-stop:active .kmg-gradient-stop-value{color:currentColor}
+
+.kmg-gradient-stop.is-selected:hover,.kmg-gradient-stop.is-selected:active{background:var(--surface-hover);color:var(--content-on-surface-hover)}
+
+.kmg-gradient-popover button:hover:focus-visible,.kmg-gradient-popover button:active:focus-visible{outline-color:currentColor}
+.kmg-gradient-popover .kmg-gradient-remove:hover,.kmg-gradient-popover .kmg-gradient-remove:active{background:var(--status-error)!important;color:var(--surface-error)!important}
+
+/* Executable actions use the same filled icon component as settings actions. */
+.kmg-gradient-popover .kmg-gradient-action-button{display:inline-flex;align-items:center;justify-content:center;flex:none;width:48px;height:48px;padding:12px;border-radius:12px;background:var(--accent-default);color:var(--content-on-accent)}
+.kmg-gradient-action-button .button-svg{width:24px;height:24px}
+.kmg-gradient-popover .kmg-gradient-action-button:hover:not(:disabled){background:var(--accent-hover);color:var(--content-on-accent-hover)}
+.kmg-gradient-popover .kmg-gradient-action-button:active:not(:disabled){background:var(--accent-pressed);color:var(--content-on-accent-pressed)}

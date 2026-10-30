@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ALO4OBS · Demo</title>
+  <link rel="stylesheet" href="internal/overlay.css">
+  <style>
+    body.demo{background:#1f1f1f}
+    .demo .overlay{background:#000;overflow:hidden}
+    .demo-tile{position:absolute;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;border:0;padding:24px}
+    .demo-panel-number{font-size:22px;font-weight:700;line-height:1.2}
+    .demo-content-type{align-self:flex-start;padding:10px 14px;border:1px solid #b5b5b5;border-radius:8px;color:#d5d5d5;font-size:18px;font-weight:600;letter-spacing:.03em}
+    .demo-tile[data-region="game"] .demo-panel-number{font-size:34px}
+    .demo-tile[data-region="game"] .demo-content-type{font-size:24px}
+  </style>
+</head>
+<body class="demo">
+  <main id="demo-stage" class="overlay" aria-label="Seven configurable panels in a Bento grid">
+    <div id="demo-panels"></div>
+  </main>
+  <script src="internal/config.public.js"></script>
+  <script src="internal/events.js"></script>
+  <script src="internal/panel-shape.js"></script>
+  <script src="internal/demo.js"></script>
+</body>
+</html>

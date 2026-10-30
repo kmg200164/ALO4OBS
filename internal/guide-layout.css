@@ -1,0 +1,65 @@
+body{--guide-frame-canvas:var(--surface-field);--guide-frame-parent:var(--guide-frame-neutral);--guide-frame-child:var(--preview-background);--guide-frame-text:var(--preview-label-content)}
+.guide-layout-figure{width:min(100%,694px);min-width:0;margin:4px 0 8px;container-type:inline-size}
+.guide-layout-canvas{--guide-layout-unit:1.67cqw;--guide-layout-half:.835cqw;--guide-layout-quarter:.4175cqw;--guide-layout-double:3.34cqw;width:100%;aspect-ratio:16/9;display:grid;grid-template-columns:minmax(0,3.125fr) minmax(0,1fr);gap:var(--guide-layout-unit);padding:var(--guide-layout-unit);overflow:hidden;border-radius:var(--guide-layout-double);background:var(--guide-frame-canvas)}
+.guide-layout-parent{min-width:0;min-height:0;display:grid;gap:var(--guide-layout-unit);padding:var(--guide-layout-unit);overflow:hidden;border-radius:var(--guide-layout-unit);background:var(--guide-frame-parent)}
+.guide-layout-parent--left{grid-template-rows:minmax(0,2.58fr) minmax(0,1fr)}
+.guide-layout-parent--right{grid-template-rows:repeat(3,minmax(0,1fr))}
+.guide-layout-custom-band{display:grid;padding:var(--guide-layout-unit);border-radius:var(--guide-layout-half);background:var(--guide-frame-child)}
+.guide-layout-customs{min-width:0;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:minmax(0,1fr);gap:var(--guide-layout-unit)}
+.guide-layout-child{min-width:0;min-height:0;border-radius:var(--guide-layout-half);background:var(--guide-frame-child);color:var(--guide-frame-text)}
+.guide-layout-custom-item{min-width:0;min-height:0;border-radius:var(--guide-layout-quarter);background:var(--guide-frame-parent)}
+.guide-layout-caption{display:flex;flex-direction:column;gap:8px;margin-top:10px;color:var(--muted);font-size:13px;line-height:1.45}
+.guide-layout-legend{display:flex;flex-wrap:wrap;gap:12px}
+.guide-layout-legend>span{display:inline-flex;align-items:center;gap:6px}
+.guide-layout-swatch{width:14px;height:14px;display:inline-block;border-radius:3px}
+.guide-layout-swatch--parent{background:var(--guide-frame-parent)}
+.guide-layout-swatch--child{background:var(--guide-frame-child)}
+@media(max-width:760px){.guide-layout-caption{font-size:12px}}
+
+.guide-layout-canvas{outline:none}
+
+body[data-theme=light]{--guide-frame-child:var(--neutral-white);--guide-frame-text:var(--neutral-black)}
+
+/* Literal controls and file names are highlights; ordinary strong text stays ordinary text. */
+.page-layout .step-content code,.page-layout .faq-body code,.page-layout .page-heading code,.page-layout>p code,.step-card kbd,.faq-item kbd,.step-card .control-label{background:var(--accent-default);color:var(--content-on-accent)}
+.step-card kbd,.faq-item kbd{padding:2px 6px;border-radius:4px;font:inherit;font-weight:600}
+.faq-item:hover,.faq-item:has(:focus-visible){background:var(--accent-default);color:var(--content-on-accent);cursor:pointer}
+.faq-item:hover .faq-body p,.faq-item:hover .faq-body strong,.faq-item:hover .faq-body a,.faq-item:has(:focus-visible) .faq-body p,.faq-item:has(:focus-visible) .faq-body strong,.faq-item:has(:focus-visible) .faq-body a{color:var(--content-on-accent)}
+.faq-item:hover summary::after,.faq-item:has(:focus-visible) summary::after{color:currentColor}
+.faq-item summary:focus-visible{outline-color:var(--content-on-accent);outline-offset:-3px}
+
+/* Keep the first view short; detailed setup and recovery stay behind native details. */
+.guide-quick-start{margin-top:var(--space-4)}
+.guide-workflow{margin:0 auto;width:min(100%,760px)}
+.guide-workflow img{display:block;width:100%;height:auto;border-radius:12px}
+.guide-process-list{list-style:none;margin:16px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.guide-process-list li{display:flex;align-items:flex-start;gap:8px;font-size:14px;line-height:1.4;color:var(--text)}
+.guide-process-number{flex:none;font-weight:600;color:var(--accent)}
+.faq-item summary{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.guide-chevron{display:block;flex:none;color:currentColor;transition:transform .15s ease}
+.faq-item[open] .guide-chevron{transform:rotate(180deg)}
+.faq-item .faq-body{gap:12px}
+@media(max-width:760px){.faq-item{padding:0}.guide-process-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px}}
+@media(prefers-reduced-motion:reduce){.guide-chevron{transition:none}}
+
+.faq-item:is(:hover,:has(:focus-visible)) :is(code,kbd,.control-label){background:var(--content-on-accent);color:var(--accent-default)}
+
+/* Use the shared spacing scale to separate headings, actions and explanations. */
+.page-heading{display:flex;flex-direction:column;gap:var(--space-2);margin-bottom:var(--space-3)}
+.page-heading p{margin-top:0}
+.page-heading strong{color:var(--text);font-weight:600}
+.guide-intro{margin-block:var(--space-3)}
+.step-card,.step-content,.faq-item .faq-body{gap:var(--space-2)}
+.faq-list{gap:var(--space-2)}
+.faq-title{margin-bottom:var(--space-2)}
+.guide-workflow figcaption{margin-top:var(--space-2)}
+.guide-workflow .editor-help{margin-top:var(--space-2)}
+
+.page-layout code{padding:2px 6px;border-radius:4px;font:inherit;font-weight:600;overflow-wrap:anywhere;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.page-layout>.editor-help{margin-block:var(--space-3)}
+.step-content>h2{margin-bottom:var(--space-1)}
+
+/* Symbols track the same foreground as their surrounding text. */
+.page-layout .faq-item li::marker,.page-layout .step-content li::marker{color:currentColor}
+.faq-item:is(:hover,:has(:focus-visible)) :is(p,strong,a,li,.level-chip b,.guide-process-number){color:inherit}
+.faq-item:is(:hover,:has(:focus-visible)) .privacy-note{border-left-color:currentColor}
