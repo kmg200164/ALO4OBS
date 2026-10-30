@@ -63,6 +63,12 @@ test('style presets choose the nearest value with lower tie-break and force stro
  assert.deepEqual(config.regionBackgrounds.game.stroke.gradient.stops.map(stop=>stop.opacity),[100,100]);
 });
 
+test('explicit zero blur survives normalization for plugin-free presets',()=>{
+ const config={globalStyle:{fill:{opacity:20,blur:0},stroke:{width:4}},regionBackgrounds:{game:{blur:0,fill:{blur:0}}}};
+ styleContext.normalizeStylePresets(config);
+ assert.equal(config.globalStyle.fill.blur,0);assert.equal(config.regionBackgrounds.game.blur,0);assert.equal(config.regionBackgrounds.game.fill.blur,0);
+});
+
 test('fresh and empty backgrounds retain solid black while first gradient edit starts neutral',()=>{
  const publicContext={window:{}};
  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../template/config.public.js'),'utf8'),publicContext);
@@ -146,7 +152,7 @@ test('guide return restores editor only for the same page and source; first visi
  const pagePath='file:///package/settings.html',sourceFingerprint='current source',config=events.switchLayoutPreset({layoutVersion:4},'overlap');
  for(const marker of [null,{path:pagePath,source:sourceFingerprint,selected:'panel5_2'},{path:'file:///other/settings.html',source:sourceFingerprint,selected:'panel5_2'},{path:pagePath,source:'older source',selected:'panel5_2'},{path:pagePath,source:sourceFingerprint,selected:'unknown'}]){
   let opened=false,consumed=false;const controls={disabled:true};
-  const c={pagePath,sourceFingerprint,guideReturnKey:'return',sessionStorage:{getItem:()=>JSON.stringify(marker),removeItem(){consumed=true;}},localStorage:{getItem:()=>null},structuredClone,sourceConfig:config,restoredSettings:()=>config,normalize:structuredClone,config:{},selected:null,OverlayEvents:events,draftReady:false,form:{inert:true},byId:()=>controls,document:{querySelectorAll:()=>[]},showStatus(){},uploadStorage:{restore:async()=>({missing:[],entries:new Map()})},showEditor(){opened=true;},renderGlobal(){},renderPlacement(){},renderEditor(){},apply(){}};
+  const c={pagePath,sourceFingerprint,guideReturnKey:'return',sessionStorage:{getItem:()=>JSON.stringify(marker),removeItem(){consumed=true;}},localStorage:{getItem:()=>null},structuredClone,sourceConfig:config,restoredSettings:()=>config,normalize:structuredClone,config:{},selected:null,OverlayEvents:events,draftReady:false,form:{inert:true},byId:()=>controls,document:{querySelectorAll:()=>[]},syncPresetActions(){},showStatus(){},uploadStorage:{restore:async()=>({missing:[],entries:new Map()})},showEditor(){opened=true;},renderGlobal(){},renderPlacement(){},renderEditor(){},apply(){}};
   vm.runInNewContext(source.slice(start,end),c);await c.restoreDraft();
   const valid=marker?.path===pagePath&&marker.source===sourceFingerprint;
   assert.equal(opened,valid);assert.equal(consumed,true);assert.equal(c.config.layoutMode,'overlap');

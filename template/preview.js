@@ -23,9 +23,10 @@
   let draftReady=false,storageWarning='',migrationBackupFailed=false,showSafetyGuide=true,panelDrag=null,suppressPanelClick=false;
   const freshSmoothing=/Mac/i.test(navigator.userAgentData?.platform||navigator.platform||'')?0.6:0;
   const missingUploads=new Set();
-  function showStatus(message,isError=false){
+  let presetUndo={},presetBusy=false,restoredBrowserDraft=false;
+  function showStatus(message,isError=false,visible=false){
     status.textContent=window.KMGI18n?.localize(message)||message;
-    status.classList.toggle('sr-only',!isError);
+    status.classList.toggle('sr-only',!isError&&!visible);
     status.setAttribute('role',isError?'alert':'status');
   }
   const uploadStorage=window.OverlayUploadStorage.create({storage:{setItem:(...args)=>window.localStorage.setItem(...args)},indexedDB:window.indexedDB,scope:window.location.href.split(/[?#]/)[0],onWarning:message=>{
@@ -92,12 +93,12 @@
   }
   function normalizeStylePresets(next){
     const fill=next.globalStyle.fill,stroke=next.globalStyle.stroke;
-    fill.opacity=nearestPreset(fill.opacity,globalOpacityPresets,20);fill.blur=nearestPreset(fill.blur,globalBlurPresets,32);
+    fill.opacity=nearestPreset(fill.opacity,globalOpacityPresets,20);fill.blur=fill.blur===0?0:nearestPreset(fill.blur,globalBlurPresets,32);
     stroke.width=nearestPreset(stroke.width,globalStrokeWidthPresets,4);forceStrokeAlpha(stroke);next.borderOpacity=100;
     for(const region of Object.values(next.regionBackgrounds)){
       if(!region||typeof region!=='object')continue;
       region.opacity=nearestPreset(region.fill?.opacity??region.opacity,opacityPresets,20);
-      region.blur=nearestPreset(region.fill?.blur??region.blur,blurPresets,16);
+      const blurValue=region.fill?.blur??region.blur;region.blur=blurValue===0?0:nearestPreset(blurValue,blurPresets,16);
       if(region.fill){region.fill.opacity=region.opacity;region.fill.blur=region.blur;}
       region.borderOpacity=100;
       if(region.stroke){region.stroke.width=nearestPreset(region.stroke.width,strokeWidthPresets,4);forceStrokeAlpha(region.stroke);}
@@ -335,7 +336,8 @@
         ${propertyRow('단색',color('globalFillColor',f.color),'globalFillMode','solid',f.mode==='solid')}
         ${propertyRow('그라디언트',gradientControl('globalFill'),'globalFillMode','gradient',f.mode==='gradient')}
         ${propertyRow('불투명도',presetRange('globalFillOpacity',f.opacity,globalOpacityPresets,20,globalStrengthLabels,'%'),'','',false,'radio','property-row--size property-row--preset')}
-        ${propertyRow('흐림',presetRange('globalFillBlur',f.blur,globalBlurPresets,32,globalStrengthLabels,'px'),'','',false,'radio','property-row--size property-row--preset')}
+        ${editorToggle('흐림 사용','globalBlurEnabled',f.blur!==0)}
+        ${propertyRow('흐림',presetRange('globalFillBlur',f.blur,globalBlurPresets,32,globalStrengthLabels,'px').replace('<input ',f.blur===0?'<input disabled ':'<input '),'','',false,'radio','property-row--size property-row--preset')}
       </div></details><div class="divider"></div>
       <details class="property-section"><summary><h4>패널 테두리</h4></summary><div class="property-group">
         ${propertyRow('없음','','globalStrokeMode','none',t.mode==='none')}
@@ -479,7 +481,8 @@
       ${propertyRow('이미지 URL','<input name="regionImage" type="url" placeholder="https://…">','regionFillMode','url',fillChoice==='url')}
       ${propertyRow('이미지 파일',fileControl('region','image/png,image/jpeg,image/webp,image/gif'),'regionFillMode','file',fillChoice==='file')}
       ${editorPreset('불투명도','regionOpacity',fill.opacity??region.opacity??20,opacityPresets,20)}
-      ${editorPreset('흐림','regionBlur',fill.blur??region.blur??16,blurPresets,16)}
+      ${editorToggle('흐림 사용','regionBlurEnabled',(fill.blur??region.blur)!==0)}
+      ${editorPreset('흐림','regionBlur',fill.blur??region.blur??16,blurPresets,16).replace('<input ',(fill.blur??region.blur)===0?'<input disabled ':'<input ')}
       `)}
       <div class="divider"></div>
       ${section('패널 테두리',`
@@ -563,7 +566,7 @@
     if(key==='game'&&config.layoutMode!=='overlap')config.panelSizing.game.aspect=control('panelAspect')?.value||'16:9';
     const fillChoice=control('regionFillMode')?.value||fill.mode||'solid',fillMode=['url','file'].includes(fillChoice)?'none':fillChoice,strokeMode=control('regionStrokeMode')?.value||stroke.mode||(r.borderVisible===false?'none':'solid');
     r.color=fillMode==='gradient'&&fill.gradient?.stops?.length?fill.gradient.stops[0].color:control('regionColor').value;
-    r.opacity=presetRangeValue('regionOpacity',globalOpacityPresets,20);r.blur=presetRangeValue('regionBlur',globalBlurPresets,16);
+    r.opacity=presetRangeValue('regionOpacity',globalOpacityPresets,20);r.blur=control('regionBlurEnabled')?.checked===false?0:presetRangeValue('regionBlur',globalBlurPresets,16);
     r.borderColor=strokeMode==='gradient'&&stroke.gradient?.stops?.length?stroke.gradient.stops[0].color:control('regionBorderColor').value;
     r.borderVisible=strokeMode!=='none';
     r.imageUrl=control('regionImage').value.trim();r.image=r.image||r.imageUrl;r.imageFile=r.imageFile||(/^assets\//.test(r.image||'')?r.image:'');
@@ -591,7 +594,7 @@
       const prefix=part===b?'globalBackground':part===f?'globalFill':'globalStroke';
       for(const suffix of fields){const input=control(prefix+suffix);if(!input)continue;const prop=suffix.toLowerCase()==='color2'?'color2':suffix.toLowerCase();part[prop]=['opacity','blur','width'].includes(prop)?Number(input.value):input.value;}
     }
-    f.opacity=presetRangeValue('globalFillOpacity',globalOpacityPresets,20);f.blur=presetRangeValue('globalFillBlur',globalBlurPresets,32);
+    f.opacity=presetRangeValue('globalFillOpacity',globalOpacityPresets,20);f.blur=control('globalBlurEnabled')?.checked===false?0:presetRangeValue('globalFillBlur',globalBlurPresets,32);
     if(control('panelGap'))config.panelGap=OverlayEvents.normalizeGap(presetRangeValue('panelGap',OverlayEvents.panelGaps,32));
     t.width=presetRangeValue('globalStrokeWidth',globalStrokeWidthPresets,4);forceStrokeAlpha(t);
     config.backgroundColor=b.color;config.backgroundImage=['file','url'].includes(b.mode)?b.url:'';
@@ -609,9 +612,10 @@
   }
   function savedConfig(source){
     const saved=structuredClone(source);
-    delete saved._localUploads;delete saved._sourceFingerprint;
+    delete saved._localUploads;delete saved._sourceFingerprint;delete saved._presetUndo;
     return saved;
   }
+  function draftConfig(source){return {...savedConfig(source),_presetUndo:structuredClone(presetUndo)};}
   function clampPanelSizes(){
     if(config.layoutMode==='overlap'){
       const target=sizeConstraintTarget;sizeConstraintTarget=null;
@@ -709,13 +713,13 @@
       syncCamera();
       drawHits(data.layout);
       send(frame,'apply',live);
-      if(draftReady&&!migrationBackupFailed&&!missingUploads.size&&!panelDrag?.moved)void uploadStorage.save(savedConfig(data),uploads,sourceFingerprint);
+      if(draftReady&&!migrationBackupFailed&&!missingUploads.size&&!presetBusy&&!panelDrag?.moved)void uploadStorage.save(draftConfig(data),uploads,sourceFingerprint);
       const warning=missingUploads.size?'저장한 파일을 복원하지 못했습니다. 파일을 다시 선택하세요.':storageWarning;
       showStatus(warning||message||'설정 미리보기 준비 완료',!!warning);
     }catch(error){showStatus(error.message,true);}
   }
   function selectPanel(key,reveal=false){if(!OverlayEvents.activePanelKeys(config).includes(key)||!OverlayEvents.effectivePanelEnabled(config)[key])return;readEditor();selected=selected===key?null:key;renderEditor();syncCamera();drawHits(config.layout||OverlayEvents.autoLayout({placement:config.panelPlacement,enabled:config.panelEnabled,sizing:config.panelSizing,gap:config.panelGap,sidePosition:config.sidePosition}));if(selected&&reveal&&!document.fullscreenElement)requestAnimationFrame(()=>{if(selected!==key)return;const card=form.querySelector('.panel-card'),bounds=card.getBoundingClientRect();if(bounds.top<96||bounds.bottom>innerHeight)card.scrollIntoView({block:'start'});});}
-  function reset(){const mode=config.layoutMode,previous=OverlayEvents.normalizeLayoutPresets(config);draftReady=true;form.inert=false;byId('bundle').disabled=false;byId('reset').disabled=false;
+  function reset(){const mode=config.layoutMode,previous=OverlayEvents.normalizeLayoutPresets(config);presetUndo={};byId('undo-preset').disabled=true;draftReady=true;form.inert=false;byId('bundle').disabled=false;byId('reset').disabled=false;
     for(const choice of document.querySelectorAll('[data-layout-choice]'))choice.disabled=false;uploadStorage.reset();uploadRequests.clear();missingUploads.clear();storageWarning='';migrationBackupFailed=false;uploads.clear();cameraActive=false;cameraController?.disconnect();const clean=normalize(defaults);previous[mode]=OverlayEvents.normalizeLayoutPresets(clean)[mode];config=OverlayEvents.switchLayoutPreset({...clean,...previous.bento,layoutMode:'bento',layoutPresets:previous},mode);byId('change-layout').querySelector('[data-layout-label]').textContent=localized('레이아웃 전환 · 현재 '+(mode==='overlap'?'Overlap':'Bento'));selected=null;renderGlobal();renderPlacement();renderEditor();apply('기본 설정을 복원했습니다');}
 
   form.addEventListener('input',event=>{
@@ -758,6 +762,7 @@
     if(/^overlapColumn[1-5](?:Enabled|Wide)$/.test(input.name)&&updateOverlapColumn(input))return;
     if(input.matches('[data-upload]')){handleUpload(input);return;}
     if(input.name==='cameraDevice')return;
+    if(['globalBlurEnabled','regionBlurEnabled'].includes(input.name)){const range=control(input.name==='globalBlurEnabled'?'globalFillBlur':'regionBlur');if(range)range.disabled=!input.checked;}
     if(input.name==='panelGap'&&presetRangeValue('panelGap',OverlayEvents.panelGaps,32)===8&&config.globalStyle.stroke.mode!=='none'&&window.confirm(localized('간격이 매우 좁습니다. 전역 테두리를 제거할까요? 패널별 개별 설정은 유지됩니다.')))control('globalStrokeMode').value='none';
     if(['placementSwap','sidePosition'].includes(input.name)){updatePlacement(input);apply();return;}
     if(input.name==='regionOverride'){
@@ -822,7 +827,7 @@
   byId('reset').onclick=reset;
   const chooser=byId('layout-chooser');
   function showChooser(){readEditor();readGlobal();for(const section of document.querySelectorAll('.editor-workspace,.preview-section,.settings-section'))section.hidden=true;chooser.hidden=false;byId('layout-question').focus({preventScroll:true});}
-  function showEditor(){chooser.hidden=true;for(const section of document.querySelectorAll('.editor-workspace,.preview-section,.settings-section'))section.hidden=false;byId('change-layout').querySelector('[data-layout-label]').textContent=localized('레이아웃 전환 · 현재 '+(config.layoutMode==='overlap'?'Overlap':'Bento'));}
+  function showEditor(){chooser.hidden=true;for(const section of document.querySelectorAll('.editor-workspace,.preview-section,.settings-section'))section.hidden=false;byId('change-layout').querySelector('[data-layout-label]').textContent=localized('레이아웃 전환 · 현재 '+(config.layoutMode==='overlap'?'Overlap':'Bento'));syncPresetActions();}
   const guideReturnKey='obs-overlay-guide-return',pagePath=window.location.href.split(/[?#]/)[0];
   byId('guide-link').addEventListener('click',async event=>{
     if(event.button!==0||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;
@@ -907,7 +912,108 @@
     const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)throw new Error('마스크 생성 실패');
     return {name,bytes:new Uint8Array(await blob.arrayBuffer())};
   }
+  function syncPresetActions(){
+    for(const button of document.querySelectorAll('#import-lua,#reset,#change-layout,[data-layout-choice],[data-built-in]'))button.disabled=!draftReady||presetBusy;
+    byId('undo-preset').disabled=!draftReady||presetBusy||!presetUndo[config.layoutMode];
+    byId('bundle').disabled=!draftReady||presetBusy;
+    byId('bundle-legacy').disabled=!draftReady||presetBusy;
+  }
+  function setPresetBusy(value){
+    presetBusy=value;
+    for(const element of document.querySelectorAll('.editor-workspace,.preset-toolbar,#layout-chooser'))element.inert=value;
+    form.inert=value;syncPresetActions();
+  }
+  function presetError(error){
+    if(/^Invalid Lua preset:/.test(error.message))return localized('Lua 프리셋을 읽지 못했습니다. 지원하는 ALO4OBS Lua 파일인지 확인하세요.');
+    if(/user media|local media|media assets/i.test(error.message))return localized('로컬 이미지·영상은 OBS 소스로 선택하거나 ZIP 파일로 저장하세요. Lua에는 원본 파일을 넣지 않습니다.');
+    return error.message;
+  }
+  async function prepareLuaEntries(data){
+    if(window.OBS_LUA_RUNTIME_VERSION!==window.KMG_VERSION||!window.OBS_LUA_RUNTIME)throw new Error(localized('설정 사이트와 Lua 버전이 다릅니다. 페이지를 새로고침하세요.'));
+    const entries=[],metadata=window.OBS_LUA_RUNTIME_METADATA;
+    for(const [name,encoded] of Object.entries(window.OBS_LUA_RUNTIME)){
+      const bytes=Uint8Array.from(atob(encoded),c=>c.charCodeAt(0));
+      if(metadata){
+        const item=metadata.files?.[name];
+        if(metadata.version!==window.KMG_VERSION||!item||item.bytes!==bytes.length)throw new Error(localized('설정 사이트와 Lua 버전이 다릅니다. 페이지를 새로고침하세요.'));
+        const digest=await crypto.subtle.digest('SHA-256',bytes),hash=Array.from(new Uint8Array(digest),n=>n.toString(16).padStart(2,'0')).join('');
+        if(hash!==item.sha256)throw new Error(localized('설정 사이트와 Lua 버전이 다릅니다. 페이지를 새로고침하세요.'));
+      }
+      entries.push({name,bytes});
+    }
+    for(const key of OverlayEvents.activePanelKeys(data))entries.push(await alphaMask(data.layout[key],'assets/'+key+'-alpha-mask.png',data));
+    return entries;
+  }
   byId('bundle').onclick=async()=>{
+    if(!draftReady||presetBusy)return;
+    setPresetBusy(true);
+    try{
+      const data=savedConfig(current());
+      const lua=OverlayLuaPreset.encode(data,await prepareLuaEntries(data),{version:window.KMG_VERSION});
+      const blob=new Blob([lua],{type:'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+      a.href=url;a.download=OverlayPack.scriptNames[data.layoutMode];a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+      showStatus(localized('Lua를 OBS 도구 → 스크립트에 추가한 뒤 소스를 선택하고 적용하세요.'));
+    }catch(error){showStatus(presetError(error),true);}
+    finally{
+      setPresetBusy(false);
+      if(!migrationBackupFailed&&!missingUploads.size)void uploadStorage.save(draftConfig(current()),uploads,sourceFingerprint);
+    }
+  };
+  async function applyPreset(candidate,{undo=false}={}){
+    if(!draftReady||presetBusy)return;
+    setPresetBusy(true);uploadRequests.clear();
+    try{
+      if(missingUploads.size||migrationBackupFailed)throw new Error(localized('현재 설정을 보관하지 못했습니다. 파일 복원을 확인한 뒤 다시 시도하세요.'));
+      const before=savedConfig(current()),next=normalize(savedConfig(candidate));
+      next.layout=OverlayEvents.resolveConfigLayout(next);
+      await uploadStorage.flush();
+      if(!await uploadStorage.save(draftConfig(before),uploads,sourceFingerprint))throw new Error(localized('현재 설정을 보관하지 못했습니다. 프리셋을 적용하지 않았습니다.'));
+      const durable=JSON.parse(localStorage.getItem('obs-overlay-config'));
+      const nextUndo=structuredClone(presetUndo);
+      if(undo)delete nextUndo[config.layoutMode];
+      else nextUndo[next.layoutMode]={...before,_localUploads:durable._localUploads||[]};
+      const candidateUploads=new Map(uploads);
+      if(undo){
+        const recovered=await uploadStorage.restore(candidate);
+        if(recovered.missing.length)throw new Error(localized('현재 설정을 보관하지 못했습니다. 파일 복원을 확인한 뒤 다시 시도하세요.'));
+        for(const [key,entry] of recovered.entries)candidateUploads.set(key,{...entry,url:await previewData(entry.file)});
+      }
+      if(!await uploadStorage.save({...savedConfig(next),_presetUndo:nextUndo},candidateUploads,sourceFingerprint))throw new Error(localized('현재 설정을 보관하지 못했습니다. 프리셋을 적용하지 않았습니다.'));
+      presetUndo=nextUndo;config=next;uploads.clear();for(const [key,entry] of candidateUploads)uploads.set(key,entry);
+      uploadRequests.clear();selected=null;cameraActive=false;cameraController?.disconnect();
+      renderGlobal();renderPlacement();renderEditor();showEditor();drawHits(config.layout);send(frame,'apply',liveConfig(config));
+      const media=OverlayLuaPreset.mediaReferences(next);
+      const absent=media.some(path=>![...uploads.values()].some(entry=>entry.path===path));
+      showStatus(localized(absent?'배치를 복원했습니다. 로컬 이미지·영상 미리보기는 원본 파일을 다시 선택하세요.':undo?'이전 설정을 복원했습니다.':'프리셋을 적용했습니다. OBS에는 Lua를 다운로드한 뒤 적용하세요.'),false,absent);
+    }catch(error){showStatus(presetError(error),true);}
+    finally{setPresetBusy(false);}
+  }
+  byId('import-lua').onclick=()=>byId('lua-file').click();
+  byId('lua-file').onchange=async event=>{
+    const input=event.target,file=input.files?.[0];if(!file)return;
+    try{
+      if(file.size>36*1024*1024)throw new Error(localized('Lua 파일이 너무 큽니다. ALO4OBS에서 다운로드한 Lua를 선택하세요.'));
+      const imported=OverlayLuaPreset.decode(await file.text());
+      if(presetBusy)return;
+      await applyPreset(imported);
+    }catch(error){showStatus(presetError(error),true);}
+    finally{input.value='';}
+  };
+  byId('undo-preset').onclick=()=>{const previous=presetUndo[config.layoutMode];if(previous)void applyPreset(previous,{undo:true});};
+  for(const button of document.querySelectorAll('[data-built-in]'))button.onclick=()=>{
+    const mode=button.dataset.builtIn==='overlap-camera'?'overlap':'bento',previous=current(),base=OverlayEvents.switchLayoutPreset(normalize(defaults),mode);
+    const next=OverlayEvents.switchLayoutPreset(previous,mode),snapshots=OverlayEvents.normalizeLayoutPresets(next);
+    if(mode==='overlap'){
+      base.panelEnabled=Object.fromEntries(OverlayEvents.overlapPanelKeys.map(key=>[key,key==='game'||key==='panel5_3']));
+      base.overlapColumns=Object.fromEntries([1,2,3,4,5].map(column=>[column,{enabled:column===5,widthMode:'fixed',width:355}]));
+      base.panelContent={...next.panelContent,panel5_3:{...next.panelContent.panel5_3,type:next.panelContent.panel5_3?.type==='none'?'source':next.panelContent.panel5_3?.type||'source'}};
+      base.globalStyle.fill.blur=0;
+    }else base.panelContent=next.panelContent;
+    const shape=OverlayEvents.normalizeLayoutPresets(base)[mode];snapshots[mode]=shape;
+    Object.assign(next,shape,{layoutPresets:snapshots,panelContent:base.panelContent,globalStyle:base.globalStyle,regionBackgrounds:base.regionBackgrounds,regionStyleOverrides:{},backgroundColor:'#000000',backgroundImage:'',cornerRadius:base.cornerRadius,cornerSmoothing:base.cornerSmoothing,globalShadow:base.globalShadow,panelShadows:base.panelShadows});
+    void applyPreset(next);
+  };
+  byId('bundle-legacy').onclick=async()=>{
     try{
       const data=current(),uploadSnapshot=Array.from(uploads,([key,entry])=>[key,{...entry}]),entries=OverlayPack.settingsEntries(data);
       if(!window.OBS_EXPORT_RUNTIME)throw new Error('Open settings from the downloaded template package before saving.');
@@ -931,13 +1037,21 @@
       status.textContent=localized('설정 ZIP 전체를 압축 해제한 뒤, 같은 폴더의 '+OverlayPack.scriptNames[data.layoutMode||'bento']+'를 OBS에 추가하세요.');
     }catch(error){if(error.name==='AbortError')return;showStatus(error.message,true);}
   };
+  if(window.ALO4OBS_WEB_EDITOR)document.querySelector('.legacy-export').hidden=true;
   frame.addEventListener('load',()=>{syncHitAreaScale();if(draftReady)send(frame,'apply',liveConfig(current()));});
   async function restoreDraft(){
     form.inert=true;byId('bundle').disabled=true;byId('reset').disabled=true;
     showStatus('저장한 설정과 파일을 불러오는 중입니다');
     let saved,savedSource;try{saved=JSON.parse(localStorage.getItem('obs-overlay-config'));savedSource=saved?._sourceFingerprint??localStorage.getItem('obs-overlay-source-config');}catch{}
+    if(saved?.layoutVersion>4)throw new Error(localized('새 버전에서 저장한 설정입니다. 최신 설정 사이트에서 열어 주세요.'));
     const restored=restoredSettings(sourceConfig,saved,savedSource);
-    const clean=structuredClone(restored);delete clean._localUploads;delete clean._sourceFingerprint;
+    restoredBrowserDraft=restored===saved;
+    presetUndo=restoredBrowserDraft&&saved._presetUndo&&typeof saved._presetUndo==='object'?structuredClone(saved._presetUndo):{};
+    for(const [mode,snapshot] of Object.entries(presetUndo)){
+      try{if(!['bento','overlap'].includes(mode))throw new Error('Invalid layout');normalize(snapshot);}
+      catch{delete presetUndo[mode];}
+    }
+    const clean=structuredClone(restored);delete clean._localUploads;delete clean._sourceFingerprint;delete clean._presetUndo;
     // Preserve the pre-migration draft before replacing arbitrary development placements.
     if(restored===saved&&saved.overlapSizing===undefined){
       try{if(!localStorage.getItem('obs-overlay-before-fixed-columns'))localStorage.setItem('obs-overlay-before-fixed-columns',JSON.stringify(saved));}
@@ -956,7 +1070,7 @@
     for(const choice of document.querySelectorAll('[data-layout-choice]'))choice.disabled=false;
     let returnContext;try{returnContext=JSON.parse(sessionStorage.getItem(guideReturnKey));sessionStorage.removeItem(guideReturnKey);}catch{}
     if(returnContext?.path===pagePath&&returnContext.source===sourceFingerprint){selected=OverlayEvents.activePanelKeys(config).includes(returnContext.selected)?returnContext.selected:null;showEditor();}
-    renderGlobal();renderPlacement();renderEditor();apply();
+    renderGlobal();renderPlacement();renderEditor();apply();syncPresetActions();
   }
   function recoverDraft(error){
     config=normalize(defaults);selected=null;uploads.clear();missingUploads.clear();
@@ -974,6 +1088,7 @@
   byId('first-use-yes').onclick=enterFirstGuide;
   firstUse.addEventListener('cancel',event=>{event.preventDefault();enterSettings();});
   function offerFirstUse(){
+    if(window.ALO4OBS_WEB_EDITOR){rememberFirstUse('done');if(restoredBrowserDraft)showEditor();return;}
     let state;try{state=localStorage.getItem(firstUseKey);}catch{}
     try{state=state||sessionStorage.getItem(firstUseKey);}catch{}
     if(window.location.hash==='#from-first-guide'){
@@ -982,5 +1097,5 @@
     else if(state==='done')showEditor();
     else{firstUse.showModal();byId('first-use-yes').focus();}
   }
-  void restoreDraft().catch(recoverDraft).then(offerFirstUse);
+  void restoreDraft().catch(error=>{migrationBackupFailed=true;recoverDraft(error);syncPresetActions();}).then(offerFirstUse);
 })();

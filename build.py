@@ -4,6 +4,7 @@ from zipfile import ZIP_DEFLATED, ZipFile
 import re
 import posixpath
 import tempfile
+import hashlib
 
 repository = Path(__file__).resolve().parent
 source = repository / 'template'
@@ -34,7 +35,7 @@ check_public_config_urls(public_config)
 gift_files = {
     'background.html', 'background.js', 'camera-preview.js', 'config.public.js', 'demo.html', 'demo.js', 'events.js',
     'CHANGELOG.md', 'LICENSE', 'frame.html', 'gradient.css', 'gradient.js', 'guide-en.html', 'guide-ja.html', 'guide-layout.css', 'guide-layout.js', 'guide.html', 'header.css', 'header.js', 'i18n.js', 'OBS-script.lua',
-    'overlay.css', 'overlay.html', 'overlay.js', 'pack.js', 'panel-media.js', 'panel-shape.js',
+    'overlay.css', 'overlay.html', 'overlay.js', 'pack.js', 'lua-preset.js', 'panel-media.js', 'panel-shape.js',
     'panel-media-game.html', 'panel-media-custom1.html', 'panel-media-custom2.html',
     'panel-media-custom3.html', 'panel-media-chat.html', 'panel-media-translation.html',
     'panel-media-hand.html', 'preview.css', 'README.txt',
@@ -59,6 +60,8 @@ for path in sorted(files):
         data = re.sub(r'((?:src|href)=")([^"/]+\.(?:js|css))(\?[^\"]*)?(\")',
                       lambda m: m[1] + ('' if m[2] == 'config.js' else 'internal/') + m[2] + (m[3] or '') + m[4],
                       data.decode()).encode()
+        data = re.sub(rb'([?&]v=)[0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9.-]+)?',
+                      lambda m: m[1] + version.encode(), data)
     if path.suffix in {'.js', '.css'} and path.name != 'config.js':
         relative = 'internal/' + relative
         if path.suffix == '.css':
@@ -69,7 +72,7 @@ for path in sorted(files):
 # locally by the explicitly loaded Lua script, rather than downloaded as .js.
 import base64
 import json
-runtime_names = [name for name in entries if name not in {'config.js', 'VERSION', 'OBS-script.lua', 'assets/setup-workflow.png'} and not name.startswith(('guide', 'settings', 'README', 'CHANGELOG')) and not name.startswith(('internal/preview', 'internal/upload-storage'))]
+runtime_names = [name for name in entries if name not in {'config.js', 'VERSION', 'OBS-script.lua', 'assets/setup-workflow.png', 'internal/lua-preset.js'} and not name.startswith(('guide', 'settings', 'README', 'CHANGELOG')) and not name.startswith(('internal/preview', 'internal/upload-storage'))]
 js_names = [name for name in runtime_names if name.endswith('.js')]
 lua = entries['OBS-script.lua'].decode('utf-8')
 install = ['-- Install bundled browser runtime when this OBS script is loaded.']
@@ -81,7 +84,41 @@ for name in js_names:
 saved_runtime = {name: base64.b64encode(entries[name]).decode('ascii') for name in runtime_names if name not in js_names}
 saved_runtime['OBS-script.lua'] = base64.b64encode(('\n'.join(install) + '\n' + lua).encode()).decode('ascii')
 entries['internal/export-runtime.js'] = ('window.OBS_EXPORT_RUNTIME = ' + json.dumps(saved_runtime) + ';\n').encode()
-entries['settings.html'] = entries['settings.html'].replace(b'<script src="internal/pack.js">', b'<script src="internal/export-runtime.js"></script><script src="internal/pack.js">')
+entries['settings.html'] = re.sub(
+    rb'(?=<script src="internal/pack\.js(?:\?[^\"]*)?">)',
+    ('<script src="internal/export-runtime.js?v=' + version + '"></script>').encode(),
+    entries['settings.html'], count=1)
+
+# The single-Lua export embeds raw runtime bytes. Unlike the legacy ZIP's Lua,
+# this source has no prepended file writes: the codec creates directories first.
+lua_runtime_names = {
+    'OBS-script.lua', 'config.js', 'LICENSE.txt',
+    'background.html', 'frame.html', 'overlay.html', 'wallpaper.html',
+    'internal/background.js', 'internal/config.public.js', 'internal/events.js',
+    'internal/gradient.js', 'internal/overlay.css', 'internal/overlay.js',
+    'internal/panel-media.js', 'internal/panel-shape.js',
+    'assets/InterVariable.woff2', 'assets/Inter-LICENSE.txt',
+    'assets/Lucide-LICENSE.txt', 'assets/figma-squircle-LICENSE.txt',
+    'assets/THIRD-PARTY-NOTICES.md',
+}
+lua_runtime_names.update(name for name in entries if re.fullmatch(r'panel-media-(?:game|custom[1-3]|chat|translation|hand|panel[1-5]_[1-3])\.html', name))
+lua_runtime = {name: entries[name] for name in sorted(lua_runtime_names)}
+lua_runtime_metadata = {
+    'version': version,
+    'encoding': 'base64',
+    'files': {name: {'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()}
+              for name, data in lua_runtime.items()},
+}
+entries['internal/lua-runtime.js'] = (
+    'window.OBS_LUA_RUNTIME_VERSION = ' + json.dumps(version) + ';\n'
+    'window.OBS_LUA_RUNTIME = ' + json.dumps({name: base64.b64encode(data).decode('ascii')
+                                            for name, data in lua_runtime.items()}) + ';\n'
+    'window.OBS_LUA_RUNTIME_METADATA = ' + json.dumps(lua_runtime_metadata) + ';\n'
+).encode()
+entries['settings.html'] = re.sub(
+    rb'(?=<script src="internal/(?:lua-preset|pack)\.js(?:\?[^\"]*)?">)',
+    ('<script src="internal/lua-runtime.js?v=' + version + '"></script>').encode(),
+    entries['settings.html'], count=1)
 
 def verify_entries(package):
     """Check references before replacing any existing delivery ZIP."""
@@ -112,6 +149,7 @@ def verify_entries(package):
 
 def build_editor(destination=output):
     verify_entries(entries)
+    verify_entries(lua_runtime)
     destination = Path(destination)
     destination.parent.mkdir(exist_ok=True)
     temporary = None

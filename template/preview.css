@@ -221,3 +221,13 @@ html[lang=ko] button,html[lang=ko] .action-button,html[lang=ko] .mini-action{fon
 #first-use::backdrop{background:rgb(0 0 0 / .55)}
 .first-use-actions{display:flex;gap:var(--space-2);justify-content:flex-end;flex-wrap:wrap}
 .first-use-actions button{min-width:64px;padding:12px 16px}
+.preset-toolbar{grid-column:1/-1;min-width:0;margin-bottom:16px}
+.preset-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.preset-actions .action-button{min-height:44px;white-space:nowrap;padding:10px 14px}
+.preset-toolbar .editor-help,.legacy-export .editor-help{margin:8px 0;max-width:72ch}
+.builtin-presets summary,.legacy-export summary{cursor:pointer;min-height:44px;padding:10px 0}
+.builtin-presets[open]{flex-basis:100%}
+.legacy-export{margin:0 24px 16px}
+.lua-help{margin:0 24px 8px}
+#bundle{background:var(--accent-default);color:var(--content-on-accent)}
+@media(max-width:760px){.preset-toolbar{padding:0 8px}.legacy-export,.lua-help{margin-left:16px;margin-right:16px}.preset-actions{align-items:flex-start}}

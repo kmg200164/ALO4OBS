@@ -29,7 +29,7 @@ test('ZIP export after reopening uses restored bytes and preserves its snapshot 
   const f=fixture(),first=controller(f);await first.save(draft(),files(),'source');
   const saved=JSON.parse(f.local.get('obs-overlay-config')),restored=await controller(f).restore(saved);
   const preview=fs.readFileSync(require.resolve('../template/preview.js'),'utf8');
-  const start=preview.indexOf("  byId('bundle').onclick=async()=>{"),end=preview.indexOf("  frame.addEventListener('load'",start);
+  const start=preview.indexOf("  byId('bundle-legacy').onclick=async()=>{"),end=preview.indexOf("  frame.addEventListener('load'",start);
   let entries;const bundle={},status={},keys=['game','custom1','custom2','custom3','chat','translation','hand'];
   const data={...saved,layout:Object.fromEntries(keys.map(key=>[key,{}]))};
   const context={localized:s=>s,OverlayEvents:require('../template/events.js'),showStatus:(message)=>{status.textContent=message;},uploads:restored.entries,keys,status,current:()=>structuredClone(data),byId:()=>bundle,window:{OBS_EXPORT_RUNTIME:{}},

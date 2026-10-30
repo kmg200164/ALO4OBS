@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.11.0 — development, not deployed
+
+- Prepare a neutral GitHub Pages editor with versioned resources and verified runtime hashes. Start with the layout picker and restore the same browser's existing draft on return.
+- Download one layout-specific Lua and import its bounded, validated settings metadata without executing imported code. Restore panel controls and both layout snapshots.
+- Add Bento and Overlap game + camera defaults, preserving local connections. Keep a durable previous-state snapshot for preset Undo; failed storage writes leave the current editor unchanged.
+- Keep original media out of Lua. Select referenced local files through OBS properties; Apply copies them locally in verified chunks. Existing file upload previews and browser file persistence remain supported. Legacy ZIP export stays available only in the offline editor.
+- Add explicit blur enable switches and retain zero blur through save/import/reopen. The game + camera default requires no blur plugin.
+- Retain the published 0.10.4 packages. No main merge, Pages deployment, tag or Release is part of this development change.
+
 ## 0.10.4 — 2026-10-24
 
 - Packaging hotfix: expose Windows/macOS/Linux installation helpers beside settings.html at the ZIP root; keep plugin packages/source under files and update helper/documentation paths. Explicitly load the built-in Windows PowerShell signature module.

@@ -4,6 +4,8 @@ Auto Layout Overlay for Open Broadcaster Software
 
 **[Download ALO4OBS 0.10.4](https://github.com/kmg200164/ALO4OBS/raw/refs/heads/main/downloads/ALO4OBS-v0.10.4.zip)** · [What's new](CHANGELOG.md)
 
+**0.11.0 is under development on `dev`.** The new web editor downloads one Lua script and imports that same file as a preset. Run `python build_site.py` to prepare the static site in `dist/site/`. Pages is not deployed by this command. See the [0.11.0 implementation and verification notes](docs/development-0.11.0.md). The published 0.10.4 download and instructions below remain available.
+
 Arrange your OBS overlay in a browser, then apply it in OBS. Choose **Bento** to keep all panels separate, or **Overlap** to place auxiliary panels over a full-screen Main panel.
 
 Found it useful? [Support continued improvements](https://buymeacoffee.com/kmg200164). Found a bug? [Report it here](https://github.com/kmg200164/ALO4OBS/issues/new?template=feedback.yml).

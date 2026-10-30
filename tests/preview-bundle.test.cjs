@@ -4,7 +4,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
 const source=fs.readFileSync(path.join(__dirname,'../template/preview.js'),'utf8');
-const start=source.indexOf("  byId('bundle').onclick=async()=>{"),end=source.indexOf("  frame.addEventListener('load'",start);
+const start=source.indexOf("  byId('bundle-legacy').onclick=async()=>{"),end=source.indexOf("  frame.addEventListener('load'",start);
 
 function harness(options={}){
  let releaseMasks,captured,downloadName;
@@ -16,7 +16,7 @@ function harness(options={}){
  if(options.restored)uploads.clear();
  const bundle={},status={};
  const context={OverlayEvents:require('../template/events.js'),showStatus:(message,error)=>{status.textContent=message;status.error=error;},fetch:options.fetch,uploads,status,keys,localized:s=>s,Uint8Array,Blob,URL:{createObjectURL:()=> 'blob:test',revokeObjectURL(){}},setTimeout(){},
-  byId:id=>id==='bundle'?bundle:null,current:()=>structuredClone(data),
+  byId:id=>id==='bundle-legacy'?bundle:null,current:()=>structuredClone(data),
   alphaMask:async(_,name)=>{await maskGate;return {name,bytes:new Uint8Array([1])};},
   OverlayPack:{scriptNames:require('../template/pack.js').scriptNames,isolateRuntime:entries=>entries,settingsEntries:input=>[{name:'obs-settings.json',bytes:new TextEncoder().encode(JSON.stringify(input))}],zip:entries=>{captured=entries;return new Uint8Array([0]);}},
   document:{createElement:()=>({click(){downloadName=this.download;}})},window:{OBS_EXPORT_RUNTIME:{},showSaveFilePicker:options.showSaveFilePicker}

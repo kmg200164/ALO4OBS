@@ -923,6 +923,7 @@ local function apply_generic(settings)
  return result
 end
 local function apply(props,property)
+ if alo4obs_prepare_media~=nil and not alo4obs_prepare_media(cfg) then return false end
  local file=io.open(script_path()..'obs-settings.json','r')
  if file==nil then obs.script_log(obs.LOG_WARNING,'Save the OBS settings ZIP in settings.html and extract it into the overlay folder first.');return false end
  local json=file:read('*a');file:close()
@@ -1219,7 +1220,9 @@ function script_properties()
    obs.source_list_release(sources)
   end
  end
- if generic then obs.obs_properties_add_text(p,'live_blur_info',en and 'Bento blurs its configured background image/color. Overlap live panel blur needs a Main OBS source and Composite Blur. The Windows OBS 30-33 distribution includes composite-blur-install.cmd; close OBS and run it once. Set blur to 0 to use OBS without the plugin. The browser preview cannot show live OBS video.' or 'Bento는 지정한 배경 이미지·색상을 사용합니다. Overlap 라이브 블러에는 Main OBS 소스와 Composite Blur가 필요합니다. Windows OBS 30-33 배포 ZIP의 composite-blur-install.cmd를 OBS 종료 후 한 번 실행하세요. 플러그인 없이 사용하려면 블러를 0으로 설정하세요. 브라우저 미리보기에는 실제 OBS 영상이 나오지 않습니다.',obs.OBS_TEXT_INFO) end
+ if generic and alo4obs_add_media_properties==nil then obs.obs_properties_add_text(p,'live_blur_info',en and 'Bento blurs its configured background image/color. Overlap live panel blur needs a Main OBS source and Composite Blur. The Windows OBS 30-33 distribution includes composite-blur-install.cmd; close OBS and run it once. Set blur to 0 to use OBS without the plugin. The browser preview cannot show live OBS video.' or 'Bento는 지정한 배경 이미지·색상을 사용합니다. Overlap 라이브 블러에는 Main OBS 소스와 Composite Blur가 필요합니다. Windows OBS 30-33 배포 ZIP의 composite-blur-install.cmd를 OBS 종료 후 한 번 실행하세요. 플러그인 없이 사용하려면 블러를 0으로 설정하세요. 브라우저 미리보기에는 실제 OBS 영상이 나오지 않습니다.',obs.OBS_TEXT_INFO) end
+ if generic and alo4obs_add_media_properties~=nil then obs.obs_properties_add_text(p,'standalone_info',en and 'This Lua stores layout settings. Select original local files below when used. Overlap live blur needs Composite Blur; disable blur in the web editor to use it without that plugin.' or 'Lua에는 배치 설정을 담습니다. 로컬 파일을 사용했다면 아래에서 원본을 선택하세요. Overlap 라이브 흐림에는 Composite Blur가 필요하며, 플러그인 없이 사용하려면 웹 설정에서 흐림 사용을 끄세요.',obs.OBS_TEXT_INFO) end
+ if alo4obs_add_media_properties~=nil then alo4obs_add_media_properties(p,cfg,en) end
  obs.obs_properties_add_button(p,'apply',en and 'Apply saved settings / Auto layout' or '저장한 설정 / 자동 배치 적용',apply)
  return p
 end

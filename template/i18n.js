@@ -280,6 +280,24 @@ for(const [ko,en,ja] of [
  ['열 활성화','Enable column','列を有効化'],['패널 개수','Panel count','パネル数'],['이미지 URL','Image URL','画像 URL'],['자동/수동','Auto / Manual','自動 / 手動'],['높이 자동/수동','Height Auto / Manual','高さ 自動 / 手動'],['너비 자동/수동','Width Auto / Manual','幅 自動 / 手動'],['세로 위치 자동/수동','Vertical position Auto / Manual','縦位置 自動 / 手動'],['컬럼 정렬','Column alignment','列の配置'],['상단 정렬','Top','上揃え'],['중앙 정렬','Center','中央揃え'],['하단 정렬','Bottom','下揃え'],
  ['자동: 컬럼의 패널 묶음을 정렬합니다. 수동: Y 좌표를 고정합니다. 미리보기에서 위아래로 드래그할 수 있습니다.','Auto: align the column group. Manual: pin the Y coordinate. Drag vertically in the preview.','自動：列のパネルをまとめて配置します。手動：Y 座標を固定します。プレビューで上下にドラッグできます。']
 ]){translations[ko]=en;japanese[ko]=ja;originalByTranslation.set(en,ko);originalByTranslation.set(ja,ko);}
+for(const [ko,en,ja] of [
+ ['프리셋','Presets','プリセット'],['Lua 다운로드','Download Lua','Lua をダウンロード'],['Lua 불러오기','Import Lua','Lua を読み込む'],['프리셋 적용 취소','Undo preset','プリセットを元に戻す'],['기본 프리셋','Built-in presets','基本プリセット'],['Bento 기본','Bento default','Bento 基本'],['Overlap 게임 + 캠','Overlap game + camera','Overlap ゲーム + カメラ'],['흐림 사용','Enable blur','ぼかしを有効化'],
+ ['설정은 이 브라우저에 자동 저장됩니다. Lua를 불러오면 다른 컴퓨터에서도 이어서 편집할 수 있습니다.','Settings save automatically in this browser. Import your Lua to continue editing on another computer.','設定はこのブラウザーに自動保存されます。Lua を読み込むと別のパソコンでも編集を続けられます。'],
+ ['Lua 다운로드 → OBS 도구 → 스크립트에 추가 → 소스 선택 → 적용','Download Lua → OBS Tools → Add script → Select sources → Apply','Lua をダウンロード → OBS ツール → スクリプトに追加 → ソースを選択 → 適用'],
+ ['로컬 이미지·영상 파일을 사용하는 경우','Using local image or video files','ローカルの画像・動画を使う場合'],
+ ['Lua에는 배치 설정만 담습니다. 로컬 파일을 함께 옮기는 기존 기능은 ZIP 파일로 저장하세요. 이미지·영상은 OBS 소스로 추가해 배치할 수도 있습니다.','Lua stores layout settings. Use the existing ZIP export to carry local files together. You can also add images or videos as OBS sources and arrange them.','Lua には配置設定を保存します。ローカルファイルもまとめて移す場合は既存の ZIP 保存を使ってください。画像・動画を OBS ソースとして追加して配置することもできます。'],
+ ['Lua 프리셋을 읽지 못했습니다. 지원하는 ALO4OBS Lua 파일인지 확인하세요.','Could not read this Lua preset. Choose a supported ALO4OBS Lua file.','Lua プリセットを読み込めませんでした。対応する ALO4OBS Lua ファイルを選択してください。'],
+ ['로컬 이미지·영상은 OBS 소스로 선택하거나 ZIP 파일로 저장하세요. Lua에는 원본 파일을 넣지 않습니다.','Select local images or videos as OBS sources, or save a ZIP. Lua does not include the original media files.','ローカル画像・動画は OBS ソースとして選択するか ZIP に保存してください。Lua に元のメディアファイルは含まれません。'],
+ ['설정 사이트와 Lua 버전이 다릅니다. 페이지를 새로고침하세요.','The editor and Lua runtime versions do not match. Reload this page.','設定サイトと Lua のバージョンが一致しません。ページを再読み込みしてください。'],
+ ['Lua를 OBS 도구 → 스크립트에 추가한 뒤 소스를 선택하고 적용하세요.','Add the Lua in OBS Tools → Scripts, select your sources, then Apply.','OBS ツール → スクリプトで Lua を追加し、ソースを選択して適用してください。'],
+ ['현재 설정을 보관하지 못했습니다. 파일 복원을 확인한 뒤 다시 시도하세요.','Could not retain the current settings. Restore missing files and try again.','現在の設定を保存できませんでした。ファイルの復元を確認して再試行してください。'],
+ ['현재 설정을 보관하지 못했습니다. 프리셋을 적용하지 않았습니다.','Could not retain the current settings. The preset was not applied.','現在の設定を保存できませんでした。プリセットは適用していません。'],
+ ['이전 설정을 복원했습니다.','Previous settings restored.','以前の設定を復元しました。'],
+ ['배치를 복원했습니다. 로컬 이미지·영상 미리보기는 원본 파일을 다시 선택하세요.','Layout restored. Reselect original local images or videos for their previews.','配置を復元しました。ローカル画像・動画のプレビューには元のファイルを再選択してください。'],
+ ['프리셋을 적용했습니다. OBS에는 Lua를 다운로드한 뒤 적용하세요.','Preset applied. Download the Lua and apply it in OBS.','プリセットを適用しました。Lua をダウンロードして OBS で適用してください。'],
+ ['Lua 파일이 너무 큽니다. ALO4OBS에서 다운로드한 Lua를 선택하세요.','This Lua file is too large. Choose a Lua downloaded from ALO4OBS.','Lua ファイルが大きすぎます。ALO4OBS からダウンロードした Lua を選択してください。'],
+ ['새 버전에서 저장한 설정입니다. 최신 설정 사이트에서 열어 주세요.','These settings were saved by a newer version. Open them in the latest editor.','新しいバージョンで保存された設定です。最新の設定サイトで開いてください。']
+]){translations[ko]=en;japanese[ko]=ja;originalByTranslation.set(en,ko);originalByTranslation.set(ja,ko);}
 function localize(original,targetLanguage=language){
  const raw=String(original).trim();
  const key=validationAliases.get(raw)||originalByTranslation.get(raw)||raw;
