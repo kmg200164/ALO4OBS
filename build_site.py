@@ -22,13 +22,14 @@ def site_entries():
     result['settings.html'] = result['settings.html'].replace(
         b'<script', b'<script>window.ALO4OBS_WEB_EDITOR = true;</script><script', 1)
     guide = (package.source / 'web-guide.html').read_bytes()
-    for language, name in [('en', 'guide-en.html'), ('ko', 'guide.html'), ('ja', 'guide-ja.html')]:
+    result.pop('guide.html', None)
+    for language, name in [('en', 'guide-en.html'), ('ko', 'guide-ko.html'), ('ja', 'guide-ja.html')]:
         result[name] = guide.replace(b'<html lang="en">', ('<html lang="' + language + '">').encode())
     # GitHub Pages serves foo.html at /foo, so the public site links without the extension.
     for name in ('internal/header.js', 'internal/i18n.js'):
         data = result[name]
-        for page in ('guide-en', 'guide-ja', 'guide', 'settings'):
-            data = data.replace(page.encode() + b'.html', page.encode())
+        for page, target in (('guide-en', 'guide-en'), ('guide-ja', 'guide-ja'), ('guide', 'guide-ko'), ('settings', 'settings')):
+            data = data.replace(page.encode() + b'.html', target.encode())
         result[name] = data
     result['internal/web-guide.js'] = (package.source / 'web-guide.js').read_bytes()
     result['index.html'] = (
