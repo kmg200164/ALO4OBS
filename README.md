@@ -109,11 +109,11 @@ Switch layouts from the header. Each layout retains its panel content and settin
 
 0.10.2 export correction passed Bento → Overlap → Bento downloads and extraction through the Windows compressed-folder engine, with every extracted file matching its ZIP entry. The native save picker is no longer used.
 
-0.10.1 correction checks passed **288 Node tests**, **35 Python checks**, **24 browser conditions** (Bento/Overlap, Korean/English/Japanese, light/dark, 768/1920 px), sequential Bento → Overlap → Bento downloads and **six real Apply calls** in isolated Windows OBS 32.2.2. Header navigation and editing context were retained; exported archive names matched their settings and runtime paths. See [0.10.1 verification](docs/release-readiness-0.10.1.md).
+0.10.1 correction checks passed **288 Node tests**, **35 Python checks**, **24 browser conditions** (Bento/Overlap, Korean/English/Japanese, light/dark, 768/1920 px), sequential Bento → Overlap → Bento downloads and **six real Apply calls** in isolated Windows OBS 32.2.2. Header navigation and editing context were retained; exported archive names matched their settings and runtime paths. See [0.10.1 verification](docs/dev/release-readiness-0.10.1.md).
 
 Historical 0.10.0 checks passed **305 tests over HTTP and 305 with direct file opening**, **35 Python checks**, a **96-condition language/theme/layout/width matrix**, **139 height-control UI states** and **20,000 generated geometry configurations**. An isolated Windows **OBS 32.2.2** run passed **52 Apply calls and 2,164 assertions**, including a controlled internal failure, rollback and successful reapplication. All **484 production OBS configuration file hashes** remained unchanged.
 
-These checks use synthetic OBS sources. macOS, real camera/capture devices, authenticated personal widgets and the native save-dialog flow remain unverified. The original intermittent native mutex crash has not been uniquely attributed; repeated-Apply success does not certify every plugin/device combination. See [release verification and remaining boundaries](docs/release-readiness-0.10.0.md).
+These checks use synthetic OBS sources. macOS, real camera/capture devices, authenticated personal widgets and the native save-dialog flow remain unverified. The original intermittent native mutex crash has not been uniquely attributed; repeated-Apply success does not certify every plugin/device combination. See [release verification and remaining boundaries](docs/dev/release-readiness-0.10.0.md).
 
 </details>
 

@@ -5,7 +5,7 @@
   "promptDelete": false,
   "showInlineTitle": true,
   "readableLineLength": false,
-  "attachmentFolderPath": "./Attachments",
+  "attachmentFolderPath": "assets/attachments",
   "defaultViewMode": "preview",
   "strictLineBreaks": false,
   "livePreview": false

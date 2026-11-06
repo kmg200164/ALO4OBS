@@ -1,5 +1,5 @@
 ---
-parent: '[[projects/ALO4OBS/ALO4OBS|ALO4OBS]]'
+parent: '[[ALO4OBS|ALO4OBS]]'
 created: 2026-10-02
 updated: 2026-10-02
 tags: [obs, web_overlay, implementation_plan]
@@ -15,7 +15,7 @@ tags: [obs, web_overlay, implementation_plan]
 
 **Tech Stack:** HTML, CSS Grid/Flex, JavaScript, Node 내장 테스트 러너(가용 runtime 확인 후 사용).
 
-**Spec:** [[projects/ALO4OBS/ALO4OBS|ALO4OBS]]
+**Spec:** [[ALO4OBS|ALO4OBS]]
 
 ## Global Constraints
 

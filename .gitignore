@@ -22,9 +22,7 @@ dist/
 !downloads/ALO4OBS-v*.zip
 !vendor/obs-composite-blur-1.6.0/*.zip
 # Vault attachments / screenshot / backup patch (tracked despite *.zip)
-!Attachments/
-!Attachments/**
-!screenshot-package-20261024/
-!screenshot-package-20261024/**
-!Backup/
-!Backup/**
+!assets/
+!assets/**
+!wip/
+!wip/**

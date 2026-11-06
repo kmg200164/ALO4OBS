@@ -41,7 +41,7 @@ Source version is now 0.8.0 at the user's request. Output is dist/ALO4OBS-v0.8.0
 
 ## 4. Release body draft
 
-The complete Markdown body is in [release-notes-0.8.0.md](release-notes-0.8.0.md). README release notes must be replaced for the eventual approved release, and the same notes copied into the Release body. Nothing has been published.
+The complete Markdown body is in [release-notes-0.8.0.md](../release-notes-0.8.0.md). README release notes must be replaced for the eventual approved release, and the same notes copied into the Release body. Nothing has been published.
 
 ## 5. Uploaded-file persistence
 
@@ -69,11 +69,11 @@ No release-readiness claim until the storage/native/platform items above are tes
 
 Final rendered header: 1278 px viewport brand center 631.328 px / header center 631.333 px; 360 px viewport both centers 172.333 px. Menus start closed at 920/480/360, open mutually exclusively, close with Escape, and settings/guide navigation works. Actual outer window stayed 1293×1398. Independent high review found no confirmed defect in the three reviewed header files; historical diff comparison was unavailable to that reviewer, while root verified working-tree status and diff checks.
 
-![Wide header and panels](images/qa-0.8.0/alo4obs-wide.jpg)
-![Narrow header](images/qa-0.8.0/alo4obs-narrow.jpg)
-![Narrow right menu](images/qa-0.8.0/alo4obs-menu-narrow.jpg)
-![Selected tag and selectors](images/qa-0.8.0/alo4obs-card-narrow.jpg)
-![Full-width sliders](images/qa-0.8.0/alo4obs-count-narrow.jpg)
+![Wide header and panels](../images/qa-0.8.0/alo4obs-wide.jpg)
+![Narrow header](../images/qa-0.8.0/alo4obs-narrow.jpg)
+![Narrow right menu](../images/qa-0.8.0/alo4obs-menu-narrow.jpg)
+![Selected tag and selectors](../images/qa-0.8.0/alo4obs-card-narrow.jpg)
+![Full-width sliders](../images/qa-0.8.0/alo4obs-count-narrow.jpg)
 
 Temporary QA server 8767 stopped. Two unconnected QA tabs could not be closed through the browser connector; cleanup is not claimed complete. Preview server 8765 and requested live status server 8766 remain. That initial 8765 connection failed; the final controllable Chrome 8765 tab was refreshed and verified on 2026-10-07.
 
@@ -85,7 +85,7 @@ Actual Chrome 8765 input checks now pass all five positions for opacity (10/20/4
 
 At the actual wide viewport, count/global ranges span 308.89px inside 324.89px cards, leaving only 8px padding per side. The swap control uses native switch semantics with CSS appearance:none. A new rendered screenshot records the live maximum blur label.
 
-![Live slider value](images/qa-0.8.0/alo4obs-slider-live.jpg)
+![Live slider value](../images/qa-0.8.0/alo4obs-slider-live.jpg)
 
 Final integration: Node 189/189, Python 11/11, verified 0.8.0 ZIP with 47 files. Independent high review passed icon, slider, locale and final alignment changes. Chrome 8765 now shows name left/value right/full-width track and Main/Sub text left/vertical switch right; 480px viewport has no horizontal overflow. Original test settings and viewport were restored. All UI icons are official Lucide 0.468.0 stock. Gradient backdrop activation and blur(64px) were checked before restoring the solid background.
 Header follow-up: at 1200px and wider, the centered brand displays Auto Layout Overlay for OBS; narrower viewports display ALO4OBS. CSS alone controls the visible text. Actual Chrome 1278px and 480px checks passed without horizontal overflow; focused header/icon tests 8/8 passed. Window viewport override was reset.

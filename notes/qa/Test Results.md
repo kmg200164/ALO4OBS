@@ -13,7 +13,7 @@ tags: [project, verification]
 - **QA030-05:** 실제 초기화 후 첫 Gradient의 135° #303030→#909090, stop opacity 100%를 육안 확인했습니다. solid 기본 #000000도 유지됩니다. 사용자 색상 #336699, alpha 50% 편집 후 reload에서 저장값 보존을 확인했습니다. 자동 검사에서도 legacy color/color2와 명시적 gradient 보존 통과.
 - **QA030-02 전체화면:** 사용자가 직접 현재 미리보기에서 전체화면 진입 후 Esc 복귀를 확인해 정상 동작으로 판정했습니다. 자동 조작 입력 도구에서만 `TypeError: not granted`가 관측됐으며 제품 결함 판정은 취소했습니다. 설정·샘플 상태 보존은 별도 검증되지 않았습니다. 요청 대상을 바꾸지 않고 working iframe fullscreen 동작을 유지합니다.
 - **v0.3.2 검증:** 관련 Node 36/36, 전체 Node 83/83, Python 배포 회귀 5/5, JavaScript 구문 14개 통과. ZIP 빌드·CRC·패키지 검사 통과.
-- **최종 패키지:** [[projects/ALO4OBS/Attachments/OBS-Streaming-Template.zip|OBS-Streaming-Template.zip]] v0.3.2, 58개 파일, CRC 유효, 빌드 참조 검사 통과, config.js가 config.public.js와 바이트 일치. 로컬 HTML/CSS 참조 66개 유효. 개인 이미지 6개·backgroundwhole·obssettings 미포함. credential/로컬 경로 패턴 후보 0건(부재 보증 아님). SHA-256 `00397b34b3f1adb61cf209d510c682b2e74ac6206894d8c67190ab830592dcba` (493,075 bytes).
+- **최종 패키지:** [[assets/attachments/OBS-Streaming-Template.zip|OBS-Streaming-Template.zip]] v0.3.2, 58개 파일, CRC 유효, 빌드 참조 검사 통과, config.js가 config.public.js와 바이트 일치. 로컬 HTML/CSS 참조 66개 유효. 개인 이미지 6개·backgroundwhole·obssettings 미포함. credential/로컬 경로 패턴 후보 0건(부재 보증 아님). SHA-256 `00397b34b3f1adb61cf209d510c682b2e74ac6206894d8c67190ab830592dcba` (493,075 bytes).
 
 - **실제 브라우저 설정 ZIP:** 기존 사용자 Chrome의 HTTP Source 화면에서 초기화·`#bundle` 버튼을 실제 조작해 Downloads/`OBS-settings.zip` 저장 확인. 233,489 bytes, 7개 파일, CRC 통과. config.js·obs-settings.json·알파 마스크 5개 포함. 배경 그라디언트 #303030→#336699 편집값의 불투명도 50%와 각도 135°가 ZIP JSON에 보존됨. 다운로드 connector 이벤트는 시간 초과됐지만 저장 파일을 직접 검사했다.
 - **실제 화면:** 동적 패널 7개 × KO/EN/JA 3개 언어, 21개 조합의 컨트롤 접근성 이름 확인. custom1 콘텐츠 7개 역할 × 3개 언어, 21개 분기 현지화 확인. KO/EN/JA에서 잘못된 배경 `javascript:` URL 저장 거절. 정상 로컬 데모 SVG URL은 설정 본문 색상을 바꾸지 않고 미리보기 wallpaper에 표시됨. Dark/Light 설정 카드 하단이 맞고 밝은 이음새가 없음.
@@ -72,7 +72,7 @@ Node 명령: `node --test --test-isolation=none tests/*.test.cjs`. 배포 회귀
 
 ### 최종 산출물과 복구
 
-- [[projects/ALO4OBS/Attachments/KMG-streaming-template.zip|KMG-streaming-template.zip]], v0.2.4, 64개 파일. **선물용, 공개 권리 미확인.**
+- [[assets/attachments/KMG-streaming-template.zip|KMG-streaming-template.zip]], v0.2.4, 64개 파일. **선물용, 공개 권리 미확인.**
 - SHA-256: `7b6062244a648b18ae50367a74cf8b616e63abf20acf2b62e07f1dda92117855`.
 - 이전 ZIP 원본: `C:/Users/KMG/AppData/Local/Temp/OBS-Overlay-QA-20261004-before-0bff0b19-0236-48d5-ad23-38c957399a8b.zip`.
 - Lua 수정 전 원본/patch: `C:/Users/KMG/AppData/Local/Temp/obs-overlay-qa-lua-20261004/`.

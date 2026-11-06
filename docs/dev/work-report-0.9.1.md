@@ -32,7 +32,7 @@ Previously accepted 0.9.0 work was retained rather than recreated: twenty approv
 - template/version.js, template/settings.html: 0.9.1 version and cache references.
 - build.py and tests/test_build.py: distribution launcher goes directly to the editor; guide infographic is included in the distribution only, excluded from the personal OBS runtime. This avoids adding an unused image to each personal settings ZIP.
 - tests/regional-style-ui.test.cjs: strength mapping/export, gradient/media preservation and rendered global/regional parity. tests/panel-sizing-ui.test.cjs: existing heading assertions updated. tests/guide-progressive.test.cjs and tests/theme.test.cjs: collapsed workflow, whole-card behavior, mode surfaces and accent/inverse nested-highlight rendering.
-- CHANGELOG.md, docs/work-report-0.9.0.md, docs/QA.md and this report: correction record and separated evidence.
+- CHANGELOG.md, docs/dev/work-report-0.9.0.md, docs/QA.md and this report: correction record and separated evidence.
 - downloads/ALO4OBS-v0.9.1.zip and docs/images/qa-0.9.1/: neutral local distribution and synthetic visual evidence. Private QA fixtures/logs are excluded by .gitignore.
 
 ## Automated and browser evidence
@@ -60,15 +60,15 @@ Installed OBS **32.2.2** was copied to a separate portable diagnostic folder, wi
 
 The harness could not call `obs_frontend_exit` (not exposed by the installed Lua binding); the first successful report was followed by this diagnostic teardown error. The controller stopped only the verified copied QA process after scene saving. The second harness used controller teardown without that call. This is not a product Apply failure. Private checks, synthetic scene snapshot and logs are retained; the copied 488 MB OBS binaries are removed after testing.
 
-![Regional and global controls](images/qa-0.9.1/regional-detail.png)
+![Regional and global controls](../images/qa-0.9.1/regional-detail.png)
 
-![Pure-white fields in actual Chrome](images/qa-0.9.1/pure-fields-chrome.jpg)
+![Pure-white fields in actual Chrome](../images/qa-0.9.1/pure-fields-chrome.jpg)
 
-![Accent-hover guide in actual Chrome](images/qa-0.9.1/guide-accent-chrome.jpg)
+![Accent-hover guide in actual Chrome](../images/qa-0.9.1/guide-accent-chrome.jpg)
 
-![Collapsed guide at 390px](images/qa-0.9.1/guide-390.png)
+![Collapsed guide at 390px](../images/qa-0.9.1/guide-390.png)
 
-![Actual isolated OBS synthetic output](images/qa-0.9.1/native-synthetic.png)
+![Actual isolated OBS synthetic output](../images/qa-0.9.1/native-synthetic.png)
 
 ## Package integrity
 

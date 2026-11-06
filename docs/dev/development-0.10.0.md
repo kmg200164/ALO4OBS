@@ -98,7 +98,7 @@ This update has not been applied in real OBS. The previous isolated Windows OBS 
 | Existing `downloads/ALO4OBS-v0.9.0.zip` | 955,839 | `3328e0bdfd73a85b85945834a377a09622056b815d3ad9e9667061de43827da0` |
 | Existing `downloads/ALO4OBS-v0.9.1.zip` | 2,425,643 | `05a481e9068981bd38c04922d118838d24debed07f8e90536f83aa563cb1ef18` |
 
-Hashes were calculated from the files after the final runtime build. Historical 0.9.0 and 0.9.1 ZIPs were not rebuilt or overwritten. The 0.9.0 value matches the corrected historical report. [CHANGELOG](../CHANGELOG.md) records this new-feature scope as 0.10.0 development, not additional 0.9.1 patch numbers.
+Hashes were calculated from the files after the final runtime build. Historical 0.9.0 and 0.9.1 ZIPs were not rebuilt or overwritten. The 0.9.0 value matches the corrected historical report. [CHANGELOG](../../CHANGELOG.md) records this new-feature scope as 0.10.0 development, not additional 0.9.1 patch numbers.
 
 ## Remaining verification and approval
 
