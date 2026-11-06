@@ -1,0 +1,12 @@
+{
+  "alwaysUpdateLinks": true,
+  "openBehavior": "file:",
+  "newFileLocation": "current",
+  "promptDelete": false,
+  "showInlineTitle": true,
+  "readableLineLength": false,
+  "attachmentFolderPath": "./Attachments",
+  "defaultViewMode": "preview",
+  "strictLineBreaks": false,
+  "livePreview": false
+}

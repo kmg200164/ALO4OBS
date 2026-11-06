@@ -5,10 +5,26 @@ obs-settings.json
 *backup*.zip
 *.zip
 node_modules/
+**/node_modules/
 __pycache__/
+**/__pycache__/
 .qa-private/
 docs/images/qa-0.9.0/
 dist/
+**/dist/
+**/build/
+**/.pytest_cache/
+.venv/
+**/.venv/
+**/browsers/
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
 !downloads/ALO4OBS-v*.zip
-
 !vendor/obs-composite-blur-1.6.0/*.zip
+# Vault attachments / screenshot / backup patch (tracked despite *.zip)
+!Attachments/
+!Attachments/**
+!screenshot-package-20261024/
+!screenshot-package-20261024/**
+!Backup/
+!Backup/**

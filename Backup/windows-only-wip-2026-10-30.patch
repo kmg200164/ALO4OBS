@@ -1,0 +1,268 @@
+diff --git a/docs/QA.md b/docs/QA.md
+index a421ad3..3254c79 100644
+--- a/docs/QA.md
++++ b/docs/QA.md
+@@ -281,3 +281,9 @@ At 08:21 UTC, the parent inspected actual pixels of user-provided Library image
+ ## 0.10.4 installer discoverability hotfix
+ 
+ The exact public GitHub download was fetched and matched the originally published 14661711-byte hash. Its CMD existed under files/, not beside settings.html; no missing-binary claim is made. Based on the user's correction, all three installation helpers now appear at the distribution root. Plugin packages/source remain under files/plugin. Personal settings exports retain only their layout Lua at root. Helper paths and README/three guides match the new location. Windows /check initially exposed inherited PowerShell module lookup incompatibility; explicitly importing the built-in signature module from PSHOME fixed it. Extracted candidate /check then reported Verified. No files changed. Command-stub tests retain running-OBS refusal and version/overwrite checks; no operating installation was run. The previously supplied review directory no longer existed, so it was not recreated or represented as updated. The 0.11.0 design draft is unrelated and excluded from this hotfix.
++
++## User broadcast feedback and future release presentation
++
++The user reported that, after broadcasting personally, nothing particularly problematic stood out. This is an experience report from the user's own environment, not completion of every feature/OS verification or approval for another Release.
++
++For a future formal release, the user wants a clean, visually polished, readable README comparable to a landing page. Record this as release preparation only; no current README redesign is authorized. Actual screenshots/demos, a clear download/install journey and support-scope presentation were suggestions from the parent, not an approved design. No product, README design, version, commit or push changes were made for this note.
+diff --git a/docs/presets-proposal-0.11.0.md b/docs/presets-proposal-0.11.0.md
+new file mode 100644
+index 0000000..6603dbd
+--- /dev/null
++++ b/docs/presets-proposal-0.11.0.md
+@@ -0,0 +1,76 @@
++# 0.11.0 preset proposal
++
++Draft for design approval. No implementation, migration, dependency or product-version change is authorized by this document. Decisions below marked **Proposed** are not final.
++
++## Confirmed experience
++
++Use GitHub Pages for the primary guide/settings editor and download the final OBS package. This supersedes the earlier local-HTML-only constraint. A downloadable editor is an optional fallback proposal, not a separately approved deliverable. Reuse a saved settings ZIP as an importable preset; people can exchange files through GitHub or other file delivery. Also offer curated built-in presets, informed by public broadcast patterns. Do not describe these as a measured worldwide average. Built-ins and community files follow the same import rules.
++
++Bento and Overlap presets are stored separately. Applying a preset changes layout, colors, background and panel appearance together, without asking users to select individual properties. Preserve the recipient's widget connections. Before applying, automatically retain the previous state and provide Undo.
++
++Save asks for a name and offers **Save for personal use** or **Save as a shared preset**. Personal export retains the owner's connections already available to the HTML editor. Shared export excludes private connections and includes its required background assets.
++
++## Approved roadmap and one import workflow
++
++0.11.0 combines the web editor transition, unified ZIP import and presets. Follow with real-use bug fixes, optimization and stabilization in 0.11.x; release the validated stable result as 1.0.0. Landing-page-quality README presentation is a formal-release preparation item. An RC stage is not a required user-approved milestone. Keep scope on stabilizing the core workflow instead of indefinitely adding features. This roadmap is not permission to change a version, implement or deploy now.
++
++Moving existing settings into the website and applying someone else's preset use the same bounded ZIP reader, schema/asset validation and atomic application/Undo pipeline. “Upload” means reading a file selected locally in the browser, not sending it to a server. Only the explicit intent differs: restore my personal settings versus apply appearance while keeping my connections. The archive's personal/shared label is not proof of ownership.
++
++## Web delivery direction
++
++The first OBS ZIP includes its matching installation helpers, plugin packages/source/notices and layout runtime so the target is one download and one extraction. Later settings-only ZIPs omit installation payloads. A shared preset remains a sanitized settings/image exchange file, not a plugin installer. The website cannot detect a local OBS plugin installation: the user selects installation-inclusive or settings-only output; a remembered choice is not evidence of installation.
++
++Generate ZIPs and process images/settings in the browser. Do not upload personal files, URLs or tokens to the hosting service; no account/cloud database is introduced. Required public runtime/plugin resources come from the site with pinned hashes. Existing file:// settings/assets do not automatically become HTTPS storage: use the validated existing ZIP import path, with the stated OBS mapping limitation. Missing assets remain an explicit error.
++
++Keep a stable HTTPS origin and application-namespaced localStorage/IndexedDB keys. Origin changes, other browsers and deleted storage are not recoverable automatically. Migrate supported setting schemas with backup/validation before publishing new state; reject unsupported future schemas without overwriting the old state. Keep editor scripts, runtime templates and plugin manifests on a coherent versioned resource set, with mismatch detection rather than mixing cached versions. External image URL CORS/HTTPS restrictions still apply; do not add a proxy or fetch personal connections as assets.
++
++Web editor updates do not replace an installed OBS Lua, its local assets or selected sources. Applying an update still uses the explicit OBS ZIP/reload/Apply workflow when required. A normal website visit does not guarantee offline availability. Do not promise offline editing without a separately approved fallback. This document authorizes no Pages activation, workflow deployment, version change or modification of the published 0.10.4 package.
++
++## Extend the existing ZIP and schema
++
++Reuse `pack.js` exports, `events.js` normalization/layout validation, `preview.js` restoration and `upload-storage.js` configuration/asset persistence. Existing ZIP writing is available; a bounded ZIP reader still needs an implementation choice after approval.
++
++Keep `script-bento.lua` or `script-overlap.lua` at the personal ZIP root and the existing `files/bento/` or `files/overlap/` runtime layout. **Proposed:** add a small `preset.json` sidecar inside that layout folder, with an independently versioned preset format, name, layout type, personal/shared purpose and asset manifest. Keep the existing config.json / obs-settings.json configuration representation. Require duplicate configuration copies and sidecar/path/layout declarations to agree; reject conflicts instead of guessing. Do not claim old app versions understand the new metadata without verification.
++
++Import existing ZIPs without this sidecar through a validated legacy configuration path. The recipient supplies the display name when metadata is absent. Unsupported preset versions or unknown layout types fail with a clear message; do not silently substitute Bento or discard unrecognized fields. Cross-layout application is not automatic. **Proposed:** offer an explicit switch to the matching layout before applying, preserving the other layout's stored state.
++
++Current `layoutPresets` stores geometry/visibility for Bento and Overlap; appearance is currently shared. Extend its validated per-layout snapshot to include appearance rather than creating a second preset engine. Migrate existing shared appearance to both snapshots without changing its visible result. A preset must not overwrite the inactive layout or the connection store.
++
++## Import/export boundary
++
++Construct a new validated appearance object from an explicit allowlist; never spread imported configuration over the live settings.
++
++| Include as preset appearance | Keep local / exclude from shared data |
++|---|---|
++| Panel positions, sizes, counts, enabled flags and layout gap/alignment | Widget URLs, provider connections, authorization values and reactive-widget links |
++| Global background color/gradient and bundled background image | Absolute paths, local file URLs, browser-extension URLs and device/source identifiers |
++| Panel fill/stroke, blur, radius, shadows and explicit none choices | Camera/device selection, OBS source selections, account/service data |
++| Validated visual fit/crop settings, separate from connection identity | Source fingerprints, local upload IDs, browser storage state and incidental metadata |
++
++Appearance application uses the allowlist for **all archives**, including a stranger's personal ZIP. Never import their tokens merely because the sidecar says personal. Preserve the recipient's panel content type and connection identity; apply only allowlisted appearance. Explicit “restore my personal settings” is a separate intent within the same validated importer: it may restore the user's HTML-held connections after the user identifies the file as their own, including migration into a new web origin. Validate connection types/URLs separately, never accept sender absolute paths/device/OBS identifiers, and never select this intent from archive metadata alone. Shared-only presets cannot restore connections. The browser cannot prove file ownership, so communicate that personal restore can replace HTML connection values and must use the user's own ZIP. Presets are layout-specific so no speculative Bento-to-Overlap connection remapping is needed. Hidden panels retain their local connections for later reuse.
++
++Personal export may retain HTML-held URLs/content configuration for the owner's OBS use. Important existing limit: actual OBS source-selector mappings live in each registered Lua entry, not in exported JSON, and the browser editor cannot read them. Reusing that entry can retain its mappings; registering a new path can require selecting sources again. Cross-machine OBS mapping backup is not promised by this design. Both save choices retain the current per-layout visual settings, including none values.
++
++For a shared background, include actual image bytes under generated relative asset names, not sender URLs or local paths. Do not fetch arbitrary remote URLs during import. **Proposed:** require a bundled image for a shared background; if a remote background cannot be safely included, block that export with an actionable explanation rather than silently changing the design. Personal widget URLs are never treated as downloadable image assets.
++
++## Assets and hostile files
++
++Read ZIP bytes as data only. Never execute or load imported Lua, JS, HTML, CSS, installers or plugin binaries; ignore them while locating the allowlisted JSON and image assets. When exporting again, use this installed editor's trusted runtime templates, not runtime files from the imported archive. Imported names render as text, not HTML.
++
++Validate names, normalized paths, manifests, actual image signatures and successful decoding. Reject absolute/drive/UNC paths, parent traversal, symlinks, duplicate/case-colliding names and inconsistent references. Only required raster image assets are candidates for shared appearance. **Proposed:** PNG/JPEG/WebP initially; SVG, animation, video and arbitrary embedded documents need a separate decision. Preserve other local media connections rather than importing executable or unbounded content.
++
++Enforce ZIP byte, entry-count, expanded-byte, per-file, nesting, pixel-dimension and decode-memory limits before/while processing; do not trust declared archive sizes alone. Reject encrypted/multi-volume archives and nested archives as preset inputs. Bound actual streamed expansion and total decoded image cost to prevent compression/image bombs. **Proposed starting limits for review:** 20 MiB ZIP, 100 MiB total expansion, 100 entries, 10 MiB per image, 8192 pixels per side. These numbers require approval and representative asset checks, not silent adoption.
++
++Require the uploader to have redistribution rights for included images; a personal-use image is not automatically shareable. Built-ins use licensed/original assets with attribution. Explain that visible image content may contain personal information. **Proposed:** strip nonessential image metadata during shared export and generate neutral filenames; choose the exact policy before implementation. Do not infer copyright ownership from a filename or automatically assign a license to another person's work.
++
++## Apply, storage and Undo
++
++Stage parsing, validation, asset decoding and a complete candidate settings object before changing the editor. Capture the current configuration plus asset references before the one-step apply. Any invalid field, missing asset, failed decode or staging failure keeps the original settings/assets and view intact; do not partially apply the preset. Applying in HTML does not modify running OBS; the existing export/reload/Apply workflow remains explicit.
++
++Reuse localStorage for small configuration/selection state and IndexedDB for asset bytes. Existing durability ordering (bytes before a configuration can reference them) remains mandatory. **Proposed:** stage the prior-state snapshot and required assets first, then publish one configuration/undo reference; avoid independent writes that can leave half-updated state. Retain assets referenced by current settings, saved presets or Undo. Do not garbage-collect them simply because another preset was selected.
++
++Both stores can be unavailable, quota-limited or cleared; file:// behavior and browser/origin isolation still apply. ZIPs remain the portable backup, not a promise that browser storage survives moving between browsers. Confirmed: retain one state immediately before the last preset application per layout, including appearance and assets; restore it after restart only when durably saved in the same browser/storage area. Deleted storage, another browser or file:// path isolation are not covered; Undo does not rewind external services or OBS. Confirmed storage-failure policy: if browser storage cannot retain background images, required assets or Undo data, stop preset application, preserve the existing settings/assets/Undo state and explain the reason. This addresses browser quota/storage failure, not an assumption that downloading one ZIP usually fills the disk. Do not add automatic cleanup, session-only memory fallback or settings deletion. Do not promise Undo across closing the browser unless both snapshot and assets were stored successfully.
++
++## Approval points
++
++Approve sidecar/version handling, the exact appearance allowlist, asset limits and remote-background export behavior. PNG/JPEG/WebP priority, Undo retention and storage-failure behavior are confirmed above. Curated built-in selection is pending public-pattern research and asset licensing; no worldwide-average statistical claim is supported. Implementation planning and test code follow design approval.
+diff --git a/docs/superpowers/plans/2026-10-24-presets-0.11.0.md b/docs/superpowers/plans/2026-10-24-presets-0.11.0.md
+new file mode 100644
+index 0000000..f9fec60
+--- /dev/null
++++ b/docs/superpowers/plans/2026-10-24-presets-0.11.0.md
+@@ -0,0 +1,166 @@
++# 0.11.0 Presets Implementation Plan
++
++> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
++
++**Goal:** 기존 설정 이전과 다른 사람 프리셋 적용을 하나의 안전한 ZIP 가져오기로 통합하고, GitHub Pages의 가이드·설정 웹 편집기에서 이름 붙인 개인용·공유용 설정 ZIP을 저장하고, 검증한 프리셋을 연결 정보 유지와 되돌리기를 보장하며 일괄 적용한다.
++
++**Architecture:** 기존 `pack/events/preview/upload-storage`를 확장한다. ZIP 해석은 pack, 외관 스키마는 events, 검증된 프리셋 조합은 작은 `preset.js`, 자산·Undo 내구성은 upload-storage, 사용자 동작은 preview가 담당한다. 기존 전체 설정 ZIP과 프리셋을 별개 저장 시스템으로 만들지 않는다. 첫 OBS 출력은 설치 자산 포함, 이후는 설정 전용으로 분리하며 정적 웹 배포 산출물과 로컬 OBS 런타임은 같은 버전으로 묶는다.
++
++**Tech Stack:** 기존 브라우저 JavaScript·Node 내장 테스트·Python 빌드·localStorage·IndexedDB. 새 패키지 의존성 없음이 우선 제안이다.
++
++**Spec:** `docs/presets-proposal-0.11.0.md`. 사용자 승인 요약이 우선이며 상세 초안의 Proposed 용량 수치는 미승인이다. Undo는 레이아웃별 마지막 프리셋 적용 직전 상태 1개로 확정됐다. 브라우저 자산/Undo 저장 실패는 적용 중단·기존 상태 보존·이유 안내로 확정됐다.
++
++## 확정 출시 로드맵
++
++0.11.0에서 웹 전환·통합 ZIP 가져오기·프리셋을 묶고, 이후 0.11.x에서 실사용 버그 수정·최적화·안정화를 진행한다. 검수된 안정 상태를 1.0.0으로 출시하며 README의 랜딩페이지급 개선은 정식 출시 준비 항목이다. 1.0.0-rc.1은 이전 제안이지 필수 승인 단계가 아니다. 새 기능을 계속 늘리지 않고 핵심 흐름을 안정화한다. 실제 버전 변경·구현·배포 승인을 뜻하지 않는다.
++
++## Global Constraints
++
++- 기존 공개 0.10.4/README는 유지한다. Pages 활성화·배포 워크플로 실행·새 브랜치·포트폴리오 사이트는 이번 작업 범위가 아니다.
++- 이번 산출물은 계획 한 개다. 구현·의존성 설치·브랜치/버전 변경·commit/push는 하지 않는다. 아래 체크박스는 향후 구현 승인 후 수행한다.
++- “업로드”는 브라우저의 로컬 파일 읽기이며 서버 전송이 아니다. 웹 이전/프리셋의 reader·검증·적용·Undo는 중복 구현하지 않는다.
++- 기본 진입은 GitHub Pages 웹 가이드·편집기다. 로컬 HTML 고정 조건은 대체하며 다운로드형 편집기는 보조 경로 제안이다. 저장은 이름 + 개인용/공유용 선택. 받은 ZIP·기본 프리셋은 항목 선택 없이 외관을 일괄 적용한다.
++- Bento/Overlap을 각각 보관하며 비활성 레이아웃과 내 연결 정보를 덮어쓰지 않는다. none 선택도 외관이다.
++- 공유 이미지 우선 형식은 PNG/JPEG/WebP. 가져온 Lua/JS/HTML/CSS/설치 파일은 실행·삽입·import하지 않는다.
++- 실제 OBS 소스 선택은 Lua 등록 항목에 있어 HTML이 읽을 수 없다. 개인용 ZIP은 HTML이 가진 연결만 유지하며 OBS 매핑 자동 백업을 약속하지 않는다.
++- 기본 프리셋 구체 배치는 별도 검수한다. 공개 방송 패턴 조사는 진행 중이며 전세계 평균·조사 완료를 주장하지 않는다.
++- 아래 함수/필드명은 구현 계획 제안이다. 용량 수치는 마지막 결정 항목을 승인한 뒤 운영 기본값으로 사용한다. Undo는 레이아웃별 마지막 적용 직전 상태 1개를 보관하고, 성공적으로 영속 저장됐을 때 동일 브라우저/저장영역에서 재시작 후 복구한다. 저장영역 삭제·다른 브라우저·file:// 경로별 격리를 넘어선 복구는 보장하지 않는다. 저장 실패 정책은 확정된 적용 중단·기존 상태 보존·이유 안내를 사용한다.
++
++## Review Focus
++
++1. 개인용으로 표시된 남의 ZIP도 토큰을 덮어쓰지 않아야 한다 → 작업 1·3.
++2. 경로 중복·중앙/로컬 헤더 불일치·허위 크기로 제한을 우회하지 못해야 한다 → 작업 2.
++3. 이미지 바이트가 유효해도 과대 픽셀·메모리 사용이면 원래 상태를 지켜야 한다 → 작업 2·3.
++4. quota/차단/탭 간 저장 경합이 적용과 Undo를 반쪽 상태로 남기지 않아야 한다 → 작업 3.
++5. 다른 레이아웃 프리셋·연속 가져오기·이름 취소가 현재 연결/선택 상태를 잃게 하지 않아야 한다 → 작업 4·5.
++
++## 수정 파일과 공통 인터페이스
++
++- `template/events.js`: 기존 layout snapshot에 검증된 외관을 포함. 기존 정규화·배치 계산 재사용.
++- `template/pack.js`: 기존 ZIP writer·settingsEntries·isolateRuntime 유지, 제한된 ZIP reader 추가.
++- **제안 신규 파일** `template/preset.js`: 공유 허용 목록, ZIP 내용/메타데이터/자산 검증과 후보 설정 조합. UI·스토리지 직접 접근 없음.
++- `template/upload-storage.js`: 기존 큐와 잠금을 재사용한 적용 전 snapshot·자산·Undo 커밋.
++- `template/preview.js`, `settings.html`, `i18n.js`, 필요 부분의 `preview.css`: 기존 저장 동작에 이름/목적 선택, 가져오기/적용/되돌리기 연결. 새 화면 시스템은 만들지 않는다.
++- `build.py`: 정적 사이트 출력과 OBS 출력의 버전 manifest/설치 자산 결합을 담당한다. preset.js를 editor-only로 동봉하고 기존 OBS 런타임 수집에서 제외. 기본 프리셋 자료는 검수된 뒤 같은 parser로 읽도록 동봉한다.
++
++공통 타입(계획용 표기이며 TypeScript 전환 아님):
++
++- `LayoutMode = 'bento' | 'overlap'`, `Purpose = 'personal' | 'shared'`.
++- `Asset = {path, bytes: Uint8Array, mime, width, height}`. 저장 ID는 수신자가 생성하며 송신자 ID를 믿지 않는다.
++- `ImportIntent = 'restore-personal' | 'apply-appearance'`: 사용자 동작으로만 선택한다. ZIP metadata는 소유권 증명이 아니다.
++- `Appearance`: 배치/크기/표시/간격 + 배경/색/그라디언트 + 패널 fill/stroke/blur/모서리/그림자 + 시각적 fit/crop. 콘텐츠 type·URL·OBS/device 식별자는 제외.
++- `ValidatedPreset = {name, layoutMode, appearance, assets: Asset[], personalConnections?}`. personalConnections는 명시적 개인 복원에서만 별도 타입/URL 검증을 거친 HTML 연결 데이터이며 OBS 매핑·절대 경로는 포함하지 않는다. 내부 검증 완료 값만 적용 계층에 전달.
++- `PresetPolicy = {maxZipBytes,maxEntries,maxExpandedBytes,maxAssetBytes,maxImageSide,maxDecodedPixels}`. 값은 명시적으로 주입하고 무제한 기본값은 금지.
++- `UndoRecord = {id, layoutMode, config, assetIds}`. 적용 전 전체 설정 복사와 자산 참조를 보관해 연결·비활성 레이아웃도 복원한다.
++
++## Task 1: 외관 경계와 기존 스키마 호환
++
++**Files:** Modify `template/events.js`; Create `template/preset.js`; Test `tests/preset-schema.test.cjs`.
++
++**Interfaces:**
++- `OverlayEvents.extractPresetAppearance(config, layoutMode) -> Appearance`.
++- `OverlayEvents.applyPresetAppearance(current, validatedPreset) -> Config` (순수 함수).
++- `OverlayPresets.makePresetMetadata({name,layoutMode,purpose,assets}) -> Metadata`.
++- Metadata 제안: `presetVersion:1`, `name`, `layoutMode`, `purpose`, 자산 manifest. 기존 scoped 폴더의 `preset.json`에 두며 config.json/obs-settings.json은 기존 표현 유지.
++
++- [ ] 실패 테스트 작성: `shared_allowlist_strips_connections`, `apply_preserves_recipient_connections_and_none`, `snapshots_keep_other_layout`, `unknown_version_layout_and_type_conflict_rejected`.
++  핵심 assertion: 외관 적용 intent에서는 개인용 표시가 있어도 받은 연결값은 적용되지 않음; recipient.panelContent의 type/URL은 그대로; 허용된 fit/crop만 적용; 미지원 콘텐츠나 외관 타입을 조용히 치환하지 않음; 기존 공유 외관은 양쪽 snapshot으로 안전하게 이전.
++- [ ] `node --test tests/preset-schema.test.cjs`로 새 API 부재의 FAIL 확인.
++- [ ] 외관 허용 목록을 명시적으로 구성하고 기존 normalizer를 호출한다. apply는 새 객체를 반환하며 입력을 변경하지 않는다. sender prototype/__proto__/unknown 필드는 수용하지 않는다.
++- [ ] 같은 명령 PASS 및 기존 `tests/type-scene-runtime.test.cjs` 회귀 확인. 작업 인터페이스 검토 후 다음 작업으로 진행한다.
++
++## Task 2: 안전한 기존 ZIP 가져오기
++
++**Files:** Modify `template/pack.js`, `template/preset.js`; Test `tests/preset-import.test.cjs`.
++
++**의존성 조사 근거:** repo에 package.json/lockfile과 ZIP reader가 없다. pack.zip은 CRC32·ZIP method 0(STORE) writer다. 따라서 ALO4OBS 기존 ZIP은 새 라이브러리 없이 읽을 수 있다. 일반 재압축 ZIP의 method 8(DEFLATE)은 [브라우저 DecompressionStream('deflate-raw')](https://developer.mozilla.org/en-US/docs/Web/API/DecompressionStream/DecompressionStream) 기능 감지 후 제한된 스트림으로 읽는 안이다. 지원하지 않으면 기존 STORE는 계속 지원하고 DEFLATE만 명확히 거부한다. 실행 단계에서 목표 브라우저/file:// 지원을 확인하며, 불가하면 라이브러리를 임의 추가하지 않고 결정 요청한다.
++
++**Interfaces:**
++- `OverlayPack.readZip(bytes, {policy, inflateRaw}) -> Promise<Map<string,Uint8Array>>`.
++- `inflateRaw(compressed, outputLimit) -> Promise<Uint8Array>`는 실제 출력량을 세며 초과 즉시 취소한다. Node 테스트는 내장 zlib 어댑터, 브라우저는 native stream 어댑터를 주입한다.
++- `OverlayPresets.readPreset(bytes, {policy,inflateRaw,decodeImage,intent}) -> Promise<ValidatedPreset>`.
++- `decodeImage(bytes,mime,policy) -> Promise<{width,height}>`: 시그니처·헤더 크기/픽셀 제한 검사 후 실제 디코딩, bitmap/object URL 정리.
++
++- [ ] 실패 테스트: `legacy_store_zip_imports_without_sidecar`, `deflate_crc_and_output_bounds`, `reject_traversal_case_duplicates_symlink_encrypted_zip64`, `reject_conflicting_config_and_layout`, `reject_image_signature_pixels_and_bombs`, `embedded_lua_never_evaluated`.
++  JSON 복사본의 충돌·잘린 archive/겹친 데이터 영역·중앙/로컬 파일명 불일치·unknown format·의도적 과대 팽창을 포함한다. 테스트는 아주 작은 policy를 주입해 경계값±1을 검사한다.
++- [ ] `node --test tests/preset-import.test.cjs` FAIL 확인.
++- [ ] 중앙 디렉터리/오프셋/CRC를 검증하고 정규 경로 allowlist만 읽는다. 압축 해제 전 전체 크기·개수 검사를 하고 해제 중에도 실제 출력/총합을 제한한다. 중첩/다중 볼륨/암호화/ZIP64는 초기 범위에서 명시적으로 거부한다. runtime 스크립트는 검증할 데이터로도 실행하지 않고 폐기한다.
++- [ ] scoped config·legacy root config를 읽고 동일 config 복사본과 metadata/path/layout 일치를 확인한다. sidecar 없는 ZIP의 이름은 UI에서 받는다. 자산명은 수신자가 안전한 상대 경로로 재작성한다. 외부 URL을 가져오지 않는다.
++- [ ] 위 테스트 PASS. 실제 browser adapter의 STORE/DEFLATE·지원 불가·디코딩 실패를 향후 `tests/preset-ui.test.cjs`에서도 검증한다.
++
++## Task 3: 적용 전 snapshot·자산·Undo의 일관성
++
++**Files:** Modify `template/upload-storage.js`, `template/preset.js`; Test `tests/preset-storage.test.cjs`.
++
++**Interfaces:** 기존 `create(...).save/restore/flush` 유지.
++- `preparePreset(current, preset, {decodeImage,policy,intent}) -> Promise<{config,assets}>`: 작업 1·2를 조합하되 live state는 바꾸지 않는다. 외관 적용은 연결을 유지하고, 명시적 개인 복원만 검증된 personalConnections를 후보 설정에 반영한다.
++- storage의 `commitPreset({before,after,assets,layoutMode}) -> Promise<{undoId}>`.
++- storage의 `restorePresetUndo(layoutMode, {decodeImage,policy}) -> Promise<{config,assets}>`.
++- 저장용 후보/기존 자산을 먼저 IDB에 보관하고 config와 Undo ID를 **같은 기존 config JSON 쓰기**로 공개하는 방식 제안. refs는 브라우저 로컬 메타데이터이며 export에서 제거한다. 기존 commit queue/lock 안에서 연결하되 save를 재귀 호출해 lock 교착을 만들지 않는다.
++
++- [ ] 실패 테스트: `quota_and_blocked_storage_keep_old_state`, `missing_asset_never_partially_applies`, `undo_restores_layout_and_asset_bytes`, `other_layout_and_connection_refs_retained`, `concurrent_save_cannot_split_undo_and_config`, `last_undo_per_layout_restores_after_same_store_restart`, `cleared_or_other_store_does_not_claim_undo`.
++  기존 upload-storage mock backend에 put/setItem 실패·늦은 완료·잠금 큐를 주입한다. quota 실패 후 이전 config와 자산이 여전히 열리고 반복 실패가 Undo를 소비하지 않는지 검사한다.
++- [ ] `node --test tests/preset-storage.test.cjs tests/upload-storage.test.cjs` FAIL 확인.
++- [ ] **확정**: 배경 이미지·필수 자산·Undo snapshot의 브라우저 저장 실패 시 적용을 중단하고 기존 설정·자산·Undo 상태를 보존하며 이유를 안내한다. ZIP 한 개의 디스크 다운로드 용량과 구분한다. 자동 청소·임시 메모리 모드·설정 삭제는 추가하지 않는다. 성공한 뒤에만 preview config/uploads를 교체한다. restorePresetUndo도 snapshot 자산 재검증 후 config/Undo 참조를 같은 경계로 커밋하고 결과를 반환한다. 현재 설정·Undo·저장 프리셋이 참조하는 자산은 유지한다. 이전 asset을 삭제하는 새 GC 기능은 이번 범위에 넣지 않는다.
++- [ ] 같은 명령 PASS. Undo가 HTML 상태만 복원하며 운영 OBS나 외부 서비스를 되돌리지 않는지 계약에 명시한다. Undo는 레이아웃별 마지막 프리셋 적용 직전 상태 1개만 보관한다. 설정과 필요한 자산이 성공적으로 영속 저장된 경우 동일 브라우저/저장영역에서 재시작 후 복구한다. 저장영역 삭제·다른 브라우저·file:// 경로별 격리에서는 복구를 보장하지 않는다. 저장 실패 시 적용 중단·기존 상태 보존 정책은 유지한다.
++
++## Task 4: 웹 편집기의 저장·가져오기와 OBS ZIP 출력
++
++**Files:** Modify `template/preview.js`, `settings.html`, `i18n.js`, 필요한 `preview.css`, `pack.js`, `preset.js`, `build.py`; Test `tests/preset-ui.test.cjs`, `tests/preset-export.test.cjs`.
++
++**Interfaces:**
++- `OverlayPresets.exportPresetEntries({config,assets,name,purpose}) -> Promise<Entry[]>`, `Entry={name,bytes}`는 기존 pack.zip 입력과 동일.
++- 개인용은 현재 HTML 연결과 신뢰된 현재 OBS runtime을 유지. 공유용은 연결 제거된 appearance/config와 허용 이미지·metadata만 포함하는 안. 두 형식 모두 작업 2 importer로 읽는다. 기존 개인 ZIP의 Lua 최상위·scoped paths는 그대로 유지한다.
++- `build_web(destination) -> WebManifest` 제안: 정적 페이지·editor-only 코드·versioned runtime/플러그인 manifest를 출력하며 실제 Pages 활성화/배포는 하지 않는다.
++- `exportObsEntries({config,assets,name,includeInstaller,webManifest}) -> Promise<Entry[]>` 제안: 개인용 OBS 출력에만 사용한다. includeInstaller=true면 설치 도우미를 Lua 옆 루트에 두고 패키지·GPL 소스를 files/plugin에 넣는다. false면 기존 설정 ZIP 구조를 유지한다. 공유 프리셋은 이 경로를 사용하지 않는다.
++- 가져오기 의도를 “내 개인 설정 복원”과 “프리셋 외관 적용·내 연결 유지”로 명확히 구분한다. 개인 복원은 본인 ZIP이라는 사용자 명시 선택 후 HTML 보관 연결을 검증·복원할 수 있다. 공유 전용 ZIP은 연결 복원이 불가하며 metadata가 personal이라고 자동 신뢰하지 않는다. 브라우저는 소유권을 증명하지 못하므로 교체 의미를 표시한다. OBS 매핑/절대 경로는 어느 모드에서도 가져오지 않는다.
++- 도우미의 payload 루트와 웹 URL/완료 안내를 해당 출력에 맞춘다. 웹 출력에 없는 files/settings.html을 자동으로 열지 않는다. 웹은 설치 여부를 탐지하지 않으며 사용자가 명시적으로 출력 종류를 고른다.
++- `import file -> readPreset(intent) -> preparePreset(intent) -> commitPreset -> UI 교체`. 기존 ZIP 이전과 공유 프리셋은 이 파이프라인 하나를 사용한다. 적용 버튼은 전체 동작을 수행하며 항목별 체크박스를 만들지 않는다.
++
++- [ ] 실패 테스트: `save_name_purpose_cancel_no_download`, `personal_retains_own_urls_shared_excludes_secrets`, `shared_includes_validated_background_bytes`, `import_preserves_local_widgets`, `explicit_personal_restore_migrates_own_html_connections`, `personal_label_alone_cannot_replace_tokens`, `apply_undo_keyboard_three_languages`, `second_import_cannot_commit_stale_result`.
++  파일명/EXIF/metadata에 넣은 가짜 토큰과 개인 경로가 공유 JSON·파일명에 남지 않는지 검사한다. 이미지 자체의 보이는 개인정보는 자동 판별했다고 주장하지 않는다.
++- [ ] `node --test tests/preset-export.test.cjs` 및 opt-in UI 테스트 FAIL 확인.
++- [ ] 기존 저장 버튼에 이름/목적 선택을 붙인다. 이름은 textContent로 표시·파일명 안전화한다. 가져온 Lua를 새 ZIP에 재사용하지 않고 현재 설치본 runtime을 사용한다. 사용자 취소/이중 클릭에는 import generation을 사용해 늦은 결과를 무효화한다.
++- [ ] 이미지를 포함할 수 없는 원격 배경은 공유 export를 막고 이유를 설명하는 **제안**. 권리 확인 문구/metadata 제거는 저장 단계에 통합하며 송신자 라이선스를 임의 부여하지 않는다.
++- [ ] `first_obs_zip_has_root_installers_and_payload`, `settings_only_omits_installer`, `shared_never_includes_plugin_payload`, `cached_manifest_version_mismatch_blocks_export` 실패 테스트를 `tests/preset-export.test.cjs`/`tests/test_build.py`에 추가한다. 전체 ZIP을 만든 뒤에만 다운로드한다. 개인정보는 브라우저에서 처리하며 외부 통신 스텁으로 사용자 자산/URL/토큰의 업로드 요청이 없음을 검사한다.
++- [ ] 사이트와 runtime/플러그인 자산은 같은 versioned manifest로 읽고 해시/버전 불일치면 출력하지 않는다. 기존 공개 버전 파일을 덮어쓰는 배포 계획은 금지하며 캐시 갱신 정책은 후속 배포 승인 때 검수한다.
++- [ ] build의 editor-only script 목록에 preset.js를 넣고 `runtime_names`에서는 제외한다. 기존 파일 수 assertion을 새 editor-only 항목만큼 갱신하되 Lua 상대 경로/OBS 런타임에는 기능을 끼워 넣지 않는다.
++- [ ] 관련 단위·격리 headless file:// UI PASS. 사용자 Chrome/OBS는 조작하지 않는다.
++
++## Task 5: 기본 프리셋·file:// 이전·웹 회귀
++
++**Files:** Modify `template/settings.html`, `preview.js`, `i18n.js`, `build.py`, README/가이드 해당 절; 검수 후 `template/presets/` 자료. Test `tests/preset-ui.test.cjs`, `tests/test_build.py`, 기존 export 테스트.
++
++**Interfaces:** 기본 목록 항목 `{id,name,layoutMode,archivePath}` → 동봉 ZIP bytes → 작업 2의 `readPreset(intent: apply-appearance)`과 작업 3의 적용 경로. 별도 default 적용 엔진은 만들지 않는다.
++
++- [ ] 실패 테스트: `builtin_and_import_use_same_validation`, `layout_mismatch_is_explicit_and_undoable`, `legacy_personal_zip_roundtrip`, `background_none_and_widget_connections_survive`.
++  공유 ZIP/기존 개인 ZIP을 Bento·Overlap 각각 읽고 재내보낸다. 새 파일의 이름·선택 레이아웃·Lua 상대 경로와 사라지면 안 되는 로컬 자산을 검사한다. cross-layout 전환은 적용 전에 타입을 표시하고 Undo로 원래 활성 타입까지 복원한다.
++- [ ] `node --test tests/preset-ui.test.cjs tests/type-scene-runtime.test.cjs tests/preview-bundle.test.cjs` 및 `python -m unittest discover -s tests -p test_build.py`의 실패 확인.
++- [ ] `file_zip_migrates_to_https_without_origin_access`, `stable_origin_restart_restores_config_assets_undo`, `namespace_avoids_other_pages_projects`, `unknown_schema_preserves_old_state`를 `tests/preset-ui.test.cjs`/`tests/preset-storage.test.cjs`에 추가한다. 같은 browser context의 재시작/다른 origin/삭제된 store를 분리하며 자동 이관을 약속하지 않는다.
++- [ ] 기존 범용 저장 키를 애플리케이션 namespace로 이전하는 함수를 upload-storage에 넣는다. 같은 웹 origin에서 발견한 이전 키만 검증 후 이전하고 이전 데이터를 먼저 지우지 않는다. file:// 데이터는 웹에서 직접 읽으려 하지 않는다. 지원 스키마만 단계적으로 변환하고 알 수 없는 버전은 원상 보존한다.
++- [ ] UI/저장 테스트는 file://만이 아니라 기존 격리 HTTP 테스트 경로와 안정된 origin에서 실행한다. HTTPS 배포 검수는 실제 활성화 승인 후 별도 수행한다. 설정 ZIP은 기존 로컬 OBS runtime으로 계속 로드되며 편집기 갱신이 운영 Lua를 자동 교체하지 않는지 문서/출력 계약을 검사한다.
++- [ ] UI에는 검수된 기본 자료만 표시한다. 작업 중에는 테스트 fixture를 사용하고 공개 방송 조사나 기본 배치 승인 전에 임의 디자인·다른 사람의 방송 이미지를 제품 기본값으로 넣지 않는다. 실제 목록과 라이선스 표시는 별도 검수 완료 후 연결한다.
++- [ ] 관련 테스트 PASS 후 전체 `node --test tests/*.test.cjs`, `python -m unittest discover -s tests -p 'test_*.py'`, 임시 목적지 `build.build(Path(...))`, `git diff --check` 실행. 미실행 opt-in을 PASS로 세지 않는다.
++  UI 실행 준비 예: 빌드 추출본의 `files/settings.html`을 `KMG_SETTINGS_HTML`에, 같은 폴더의 file URI를 `KMG_THEME_RENDER_URL`에 지정한다. 신규 preset UI gate는 `KMG_RUN_PRESET_UI=1`로 통일한다. 기존 guide/column gate는 별도 지정하고 headless 검사만 수행한다.
++- [ ] 손상 ZIP/파일 유실/스토리지 차단에 기존 설정 보존, 실제 내보내기→가져오기→적용→Undo 증거를 보고한다. 문서/버전/배포 확정·commit/push는 별도 승인 후에만 한다.
++
++## 정책 상태와 남은 결정
++
++1. **자산·ZIP 정책:** 초안의 20 MiB ZIP / 100 MiB 팽창 / 100항목 / 이미지당 10 MiB / 한 변 8192px는 예시 제안이다. decoded pixel 총량, metadata 제거·권리 확인, 포함 불가한 원격 배경의 공유 차단 정책까지 승인 필요. 테스트는 정책 주입으로 먼저 준비할 수 있지만 운영 상수는 임의 확정하지 않는다.
++2. **확정된 Undo·저장 실패 정책(결정 불필요):** 레이아웃별 마지막 프리셋 적용 직전 상태 1개를 보관한다. 성공적으로 영속 저장된 경우 동일 브라우저/저장영역의 재시작 후 복구하며 저장영역 삭제·다른 브라우저·file:// 경로별 격리를 넘어서는 복구는 보장하지 않는다. 저장 실패 시 적용 중단·기존 상태 보존·이유 안내를 유지한다.
++3. **기본 자료와 전환 표현:** 조사 중인 기본 프리셋의 실제 배치/자산/권리 및 이름은 별도 검수한다. 다른 레이아웃 파일의 전환+적용 버튼 문구도 이때 확인한다. 레이아웃별 저장·내 연결 보존 자체는 이미 확정 요구다.
++
++
++## 웹 전환의 미결 UX 2개
++
++1. 최초 출력 선택을 “설치 포함 OBS ZIP”/“설정만 ZIP” 두 동작으로 표시할지, 저장 창의 설치 포함 옵션으로 둘지 결정한다. 웹의 설치 탐지·자동 설치 완료 판정은 어느 안에서도 하지 않는다.
++2. 다운로드형 편집기를 오프라인 보조로 실제 제공할지 결정한다. Pages 기본 진입은 확정됐지만 보조 제공과 캐싱 기반 오프라인 기능은 승인된 것으로 간주하지 않는다.
++
++## 작성 후 자체 점검
++
++- 승인 요약 6항목 → 작업 1–5에 모두 대응. 상세 초안의 수치는 결정 1, Undo·저장 실패 확정 정책은 항목 2, 기본 배치는 결정 3으로 분리했다.
++- readPreset → ValidatedPreset → preparePreset → commitPreset, UndoRecord와 export Entry의 이름/입출력을 통일했다. 인터페이스에서 파일/바이트와 자산 ID를 혼용하지 않는다.
++- 토큰/타입충돌(1·4), 경로/중복/압축폭탄(2), 이미지·부분실패·quota·Undo(2·3), 비동기 UI 경합·기존 ZIP(4·5)으로 Review Focus를 덮는다.
++- 개인 복원과 외관 적용의 intent를 작업 2·3·4의 동일 read/prepare 인터페이스에 전달한다. 웹 이전 전용 reader나 별도 토큰 자동복원 경로를 만들지 않는다.
++- 웹 전환은 작업 4(출력/버전 일치)·5(origin 이전/namespace/마이그레이션)에 연결했다. 최초/반복/공유 ZIP의 설치 자산 경계를 구분하며 기존 확정 Undo·저장 실패 정책을 유지한다.
++- 저장소/제품 코드는 이 계획 작성 중 변경하지 않는다. 다음 단계는 계획 검수이며 아직 실행하지 않는다.

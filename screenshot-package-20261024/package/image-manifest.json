@@ -1,0 +1,44 @@
+[
+  {
+    "file": "01-html-guide.png",
+    "width": 1600,
+    "height": 1100,
+    "sha256": "0370E6910717B39ADC6B475E5132A6FB4718B048F3699774B455652B3DFA429A"
+  },
+  {
+    "file": "02-html-bento-settings.png",
+    "width": 1600,
+    "height": 1100,
+    "sha256": "69D429ED4E1CA1E853340AE55CE244AD825F8F42A096654679473C8C98E37713"
+  },
+  {
+    "file": "03-obs-tools-scripts.png",
+    "width": 488,
+    "height": 422,
+    "sha256": "08A47F07253A70B6E09D7081096751AB4DED161EF008DDAC8834E687F70592B2"
+  },
+  {
+    "file": "04-obs-add-script.png",
+    "width": 1774,
+    "height": 1272,
+    "sha256": "0FE54927618E9374F7D82C79B6B550F1D17D14987F43B62BF3A8FD21EA01B7C6"
+  },
+  {
+    "file": "05-obs-qa-application-v0.10.0.jpg",
+    "width": 1282,
+    "height": 991,
+    "sha256": "D7998230A2653FF6F9C3352FC27790EBF9FACD890E5BC139E6FAF912E015B209"
+  },
+  {
+    "file": "06-bento-live.png",
+    "width": 2048,
+    "height": 1113,
+    "sha256": "E0AF72CF05A7580C1DF7331A07B500876CD5291CF963C234954E46C05C09269D"
+  },
+  {
+    "file": "07-overlap-live.png",
+    "width": 2048,
+    "height": 1113,
+    "sha256": "A6E9C1140C5C9A617AEEDE876662B52A1F7953A7DB094212CC2B7FC8CEFC78D2"
+  }
+]
