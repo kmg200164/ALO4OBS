@@ -67,7 +67,7 @@ Node 명령: `node --test --test-isolation=none tests/*.test.cjs`. 배포 회귀
 - config.public.js는 중립 초기화/배포 정본이고 최종 ZIP의 config.js와 바이트가 같다. Source/config.js는 개인 실행 설정으로 Git 추적과 과거 이력에 남는다. ignore 추가만으로 이미 추적된 파일이나 이력은 제거되지 않는다.
 - 프로젝트 과거 텍스트 114개와 ZIP 이력 6개를 조사했다. 전형적 토큰·URL credential·개인 절대 경로 패턴 후보는 발견하지 못했지만 비밀값 부재를 보증하지 않는다. 과거 ZIP 3개에는 개인 데모명 표식이 남는다. 원문 값은 보고하지 않는다.
 - 현재 Git root는 개인 external_brain Vault이며 별도 공개 프로젝트 repository는 없다. Vault 전체 파일·이력을 공개 대상으로 사용하면 안 된다. 별도 공개 파일/이력 선택은 사용자 승인 뒤 필요하다.
-- 프로젝트 코드 LICENSE 미선택. 게임 배경·대회 로고/파생 카드·손캠 이미지·목업·플랫폼 favicon·여러 Figma 아이콘 및 인라인 SVG의 공개 재배포 권한 미확인. 파일별 근거는 [[projects/ALO4OBS/Source/assets/asset-sources|asset-sources]]에 있다. Inter OFL 및 확인된 Lucide 고지는 다른 자산 전체의 권리를 증명하지 않는다.
+- 프로젝트 코드 LICENSE 미선택. 게임 배경·대회 로고/파생 카드·손캠 이미지·목업·플랫폼 favicon·여러 Figma 아이콘 및 인라인 SVG의 공개 재배포 권한 미확인. 파일별 근거는 asset-sources에 있다. Inter OFL 및 확인된 Lucide 고지는 다른 자산 전체의 권리를 증명하지 않는다.
 - build.py의 gift allowlist를 public allowlist로 바꾸지 않았다. 권리 미확인 자산은 현재 선물용 ZIP에 계속 포함되며 공개 가능한 패키지로 판정하지 않는다. 파일 삭제·Git 이력 재작성·repository 생성·commit/push·공개·배포를 수행하지 않았다.
 
 ### 최종 산출물과 복구
@@ -132,7 +132,7 @@ Node 명령: `node --test --test-isolation=none tests/*.test.cjs`. 배포 회귀
 - 실제 API 이벤트의 OBS 표시는 아직 별도 미검증.
 - 실제 플랫폼 API·번역 API, MP4/WebM 재생, 외부 iframe 링크, 브라우저 다운로드 완료 파일은 미검증.
 
-[[ALO4OBS]]
+[[alo4obs]]
 
 - demo.html: 직접 만든 가상 스폰서 SVG·플레이어 아바타, 4개 플랫폼 mock 채팅, 시각이 붙은 번역 2줄을 브라우저와 OBS에서 표시 확인.
 

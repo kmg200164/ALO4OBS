@@ -1,12 +1,12 @@
 ---
-parent: "[[ALO4OBS]]"
+up: "[[alo4obs]]"
 tags: [project, alo4obs, analysis]
 created: 2026-10-30
 updated: 2026-10-30
 description: "Bento와 Overlap을 하나로 합칠 때 코드·설정·테스트·안내에서 깨지는 곳의 목록. 읽기 전용 조사, 코드 변경 없음."
 ---
 
-명기가 2026-10-30에 "Bento와 Overlap을 합친다"고 결정했다([[ALO4OBS]] 허브). 이 노트는 합치기 전에 알아야 할 **차이와 깨지는 곳**만 모은다. 기준 코드는 저장소 `dev` `fa8aa1b`(작업 사본 `C:\Users\KMG\Documents\Codex\2026-10-30\task-2\ALO4OBS`)다. 코드는 바꾸지 않았다.
+명기가 2026-10-30에 "Bento와 Overlap을 합친다"고 결정했다([[alo4obs]] 허브). 이 노트는 합치기 전에 알아야 할 **차이와 깨지는 곳**만 모은다. 기준 코드는 저장소 `dev` `fa8aa1b`(작업 사본 `C:\Users\KMG\Documents\Codex\2026-10-30\task-2\ALO4OBS`)다. 코드는 바꾸지 않았다.
 
 ## 한 줄 결론
 

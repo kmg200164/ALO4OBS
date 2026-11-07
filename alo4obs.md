@@ -1,23 +1,14 @@
 ---
-parent: '[[projects/projects|projects]]'
+type: hub
 created: 2026-10-02
 updated: 2026-11-06
 tags: [hub, project]
-base: '[[projects/projects.base|Projects.base]]'
 description: "ALO4OBS(Auto Layout Overlay for OBS) 허브. 공개 제품 폴더와 개인 노트(notes·assets·wip)의 위치만 안내한다."
-project_status: developing
-project_type: software
-ownership: personal
-sharing: private
 ---
-
-## 자료 찾기
-
-![[core/Navigation.base]]
 
 # ALO4OBS — Auto Layout Overlay for OBS
 
-콘텐츠가 서로 가리지 않도록 패널을 자동 배치하는 OBS 오버레이. 현재 상태는 [[STATUS]], 결정·요구사항·버전별 기록은 [[notes/project-log|진행 기록]]에 있다.
+콘텐츠가 서로 가리지 않도록 패널을 자동 배치하는 OBS 오버레이. 현재 상태는 [[README]], 결정·요구사항·버전별 기록은 [[notes/project-log|진행 기록]]에 있다.
 
 - 저장소: [kmg200164/ALO4OBS](https://github.com/kmg200164/ALO4OBS) · [이슈](https://github.com/kmg200164/ALO4OBS/issues)
 

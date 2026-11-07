@@ -1,8 +1,8 @@
 ---
-parent: '[[ALO4OBS]]'
+up: '[[alo4obs]]'
 created: 2026-10-02
 updated: 2026-11-06
-tags: [log, ALO4OBS]
+tags: [log, alo4obs]
 description: "ALO4OBS 결정·요구사항·버전별 진행 기록. 2026-11-06(t301) 구조 정리 때 루트 허브 본문을 여기로 옮겼다."
 ---
 
@@ -34,8 +34,8 @@ description: "ALO4OBS 결정·요구사항·버전별 진행 기록. 2026-11-06(
 - **사용자 결정(2026-10-30, 디자인 재정비 때 함께 반영):** 대부분의 스트리머가 Overlap 레이아웃을 쓰므로 **Composite Blur 플러그인 설치를 안내의 최우선 단계로 둔다.** 지금은 FAQ 항목에 "흐림을 0으로 두면 플러그인이 필요 없다"고만 적혀 있다. 이걸 사용 흐름 맨 앞으로 올린다. 단일 Lua 웹 흐름은 플러그인 파일을 담지 못하므로(옛 ZIP에는 `files/plugin/`과 설치 스크립트가 있었다), 공식 배포처 링크와 OBS 30–32용 설치 방법을 안내가 직접 가리켜야 한다. 공식 v1.6.0 Legacy 빌드가 후보이며 설치·재시작은 아직 미승인·미검증이다.
 - **사용자 결정(2026-10-30): UI 강조색은 알로에 하나만 남기고, 라이트/다크는 사용자 컴퓨터의 시스템 설정(`prefers-color-scheme`)을 따른다.** 10색 프리셋과 헤더의 팔레트·라이트/다크 버튼은 없앤다. 방송 화면의 패널 색 설정은 UI 테마와 별개라 그대로 둔다. 코드 반영은 Figma `design-system` 페이지가 나온 뒤 새 화면과 함께 한다(지금 코드는 10색·토글 그대로, 미반영).
 - **사용자 결정(2026-10-30): Bento와 Overlap을 하나로 합친다.** 배경도 패널이고, 차이는 그 패널을 메인 소스로 쓰느냐 마느냐뿐이다. 첫 화면의 레이아웃 양자택일(`#layout-chooser`)은 없애고, 처음 쓰는지 묻는 질문(`#first-use`) 하나만 남긴다. 헤더는 이름·버전을 왼쪽에, 버튼 4개(가이드/설정, 언어, 버그 신고, 후원)를 오른쪽에 모으는 안을 Figma에서 확정한다. 코드 반영은 Figma `design-system` 페이지 뒤에 한다(미반영).
-- **코드 차이 조사 완료(2026-10-30, 읽기 전용):** [[notes/planning/Bento-Overlap 통합 영향 목록|Bento-Overlap 통합 영향 목록]]. 한 줄 결론: 개념은 합칠 수 있지만 배치 계산 방식(Bento 계층 규칙 vs Overlap 5열 격자)이 달라서 새 배치 모델을 정해야 한다.
-- **새 화면 설계 준비:** [[notes/planning/화면 설계 기능 목록|화면 설계 기능 목록]](초안). 명기가 줄을 지우고 더해 기능을 확정하면 필요한 아이콘이 추려진다. 아이콘은 Figma Lucide 플러그인(v1.65.0)에서 필요한 것만 컴포넌트(`Icon/이름`)로 만든다.
+- **코드 차이 조사 완료(2026-10-30, 읽기 전용):** [[notes/planning/bento-overlap-통합-영향-목록|Bento-Overlap 통합 영향 목록]]. 한 줄 결론: 개념은 합칠 수 있지만 배치 계산 방식(Bento 계층 규칙 vs Overlap 5열 격자)이 달라서 새 배치 모델을 정해야 한다.
+- **새 화면 설계 준비:** [[notes/planning/화면-설계-기능-목록|화면 설계 기능 목록]](초안). 명기가 줄을 지우고 더해 기능을 확정하면 필요한 아이콘이 추려진다. 아이콘은 Figma Lucide 플러그인(v1.65.0)에서 필요한 것만 컴포넌트(`Icon/이름`)로 만든다.
 - **결정(2026-10-30): 미리보기를 패널 배치 편집 화면으로 쓰고 모델은 격자 트랙으로 간다.** 열과 행의 크기가 고정(fixed)이거나 채움(fill)이고, 칸을 드래그로 합쳐 패널을 만든다. 터치와 키보드 전용 대안은 고려하지 않는다(스트리머는 PC·마우스 사용). "미리보기"와 "설정"이라는 이름은 없앤다. 둘 다 설정을 위한 하나의 도구이다. 아래는 처음 제안 내용이다.
 - **아이디어 원문(2026-10-30): 미리보기 자체를 패널 배치 편집 화면으로 쓴다.** 그리드를 띄우고 드래그한 영역을 하나의 패널로 합친다. 패널 사이 여백에 마우스를 올리면 너비 조절 핸들이 되고, 드래그하면 한쪽은 고정(fixed), 다른 쪽은 채움(fill)이 된다(Figma 오토 레이아웃과 같은 경험). 합치기 전 확인할 점: ① 격자 트랙 모델(칸 합치기)과 중첩 분할 모델(나누기) 중 무엇인지 ② Lua와 JS의 배치 엔진을 같은 규칙으로 다시 만드는 비용 ③ 터치·키보드 대안 ④ 편집 모드와 패널 설정 모드의 구분.
 - **합치기 전에 정해야 할 것(Figma에서 확정):** ① 합친 뒤의 기본 배치(대부분 Overlap을 쓰므로 배경이 메인이고 패널이 위에 놓이는 쪽이 기본인지) ② Bento의 Main·Sub·Side 구조와 Overlap의 칸 배치를 어떻게 한 모델로 만들지 ③ 이미 저장된 Lua·브라우저 설정의 두 레이아웃 데이터를 새 구조로 옮기는 변환 ④ 패널 뒤 흐림(Composite Blur)이 모든 사용자에게 걸리는 점(위 플러그인 최우선 안내 결정과 연결).
@@ -62,7 +62,7 @@ description: "ALO4OBS 결정·요구사항·버전별 진행 기록. 2026-11-06(
 - **이번 작업 사본** `C:\Users\KMG\Documents\Codex\2026-10-30\task-2\ALO4OBS`는 전부 push되어 있어 없어져도 손실이 없다. 다른 기기에서는 새로 clone하면 된다.
 - **함정:** 이 저장소는 git `user.name`·`user.email`이 비어 있다. 커밋은 `git -c user.name="Myeong-gi Kim" -c user.email="79262764+kmg200164@users.noreply.github.com" commit`으로 한다(기존 커밋과 같은 noreply 주소).
 - **ChatGPT 세션은 Reason으로 직접 닿지 않았다**("Reason 실행 기기 없음"). 메시지로 인계하지 말고 이 절과 위 "dev 구현·검증 상태"를 읽고 시작한다.
-- **Claude Code 권한(Windows 데스크톱 전용):** `gh-pages` push는 분류기가 막으므로 `~/.claude/settings.json`에 허용 규칙을 넣었다. 맥북에서 배포하려면 따로 넣어야 한다([[core/Audits/audit-device_environment]]).
+- **Claude Code 권한(Windows 데스크톱 전용):** `gh-pages` push는 분류기가 막으므로 `~/.claude/settings.json`에 허용 규칙을 넣었다. 맥북에서 배포하려면 따로 넣어야 한다([audit-device_environment](obsidian://open?vault=second-brain-archive&file=_trash%2Fcore%2FAudits%2Faudit-device_environment)).
 - **디자인 정본 (2026-10-30 명기 정정):** Figma 파일 `PHYDbj9r5xSIRrcTWECX0D`의 `sample`·`html`·`theme color` 페이지는 예전에 잠깐 쓴 작업물이라 **현재 기준이 아니다.** 새 기준은 명기가 `design-system` 페이지(지금 비어 있음)에 직접 만든다. 그 전에는 `tests/fixtures/figma-theme-tokens.json`(옛 `theme color`의 10색 팔레트 검수본)과 현재 사이트 화면을 새 디자인의 근거로 삼지 않는다. 명기가 현재 화면에 만족하지 않아 디자인 시스템부터 새로 만든다. 새 시스템이 나오면 그 페이지에서 값을 읽어 저장소 사본(`docs/design-system.md`·토큰 파일)을 새로 만든다. Claude 디자인 시스템 아티팩트도 그때 만든다. 그 전까지 헤더·화면 추가 수정과 공개 배포를 하지 않는다(dev의 헤더 3개씩 정리 `c9d7c66`은 미배포).
 - **디자인 규칙 대조·수정:** Vault 0.8.0·0.8.1 작업 지시문, 디자인 시스템 운영 원칙, 저장소 Figma 토큰 fixture와 기존 settings.html을 대조했다. 안내 화면은 기존 guide CSS·컴포넌트를 공유하고 본문 설정 버튼을 제거했다. 헤더 톱니바퀴 아래 hover/focus 툴팁 “설정 열기”와 키보드 이동을 유지한다. 전체 설정·가이드 UI는 자체 포함 Inter 우선이다. 실제 Windows Chrome의 한글은 Malgun Gothic, 일본어는 Yu Gothic UI fallback이며 로컬 오프라인 Inter 로드도 검증했다. 보편 매뉴얼에 Inter 명시 규칙이 있다고 과장하지 않는다. 정본 구현 규칙은 저장소 `docs/design-system.md`에 기록했다.
 - **남은 일:** Chrome 외 화면 제어는 승인되지 않아 실제 OBS 등록·원본 파일 선택·장면 렌더 검증은 미실행이다. macOS/Linux 실제 환경 검사와 확정 흐름에 맞춘 파일명 외 텍스트 없는 한 장 안내 이미지도 남아 있다. main 병합, 태그·Release는 하지 않았다. 코드·Pages·Vault 정상 push는 완료했고 진행 중 배포나 승인 차단은 없다.
@@ -110,13 +110,13 @@ Fredy가 읽기만 해서 확인했다. Windows PC가 꺼져 있어 Windows 폴�
 
 ## 이전 출시 계획 (2026-10-06 당시)
 
-1. **10/7부터 Windows에서 할 수정**(명기가 Codex나 Claude Code로 진행, 지시문은 Jecky가 작성). 모두 아직 시작하지 않았다. 붙여 넣을 지시문 전문과 봇 논의 기록은 [[notes/work-orders/0.8.0 작업 지시문|0.8.0 작업 지시문]]에 있다(정본).
+1. **10/7부터 Windows에서 할 수정**(명기가 Codex나 Claude Code로 진행, 지시문은 Jecky가 작성). 모두 아직 시작하지 않았다. 붙여 넣을 지시문 전문과 봇 논의 기록은 [[notes/work-orders/0.8.0-작업-지시문|0.8.0 작업 지시문]]에 있다(정본).
    - 언어 아이콘을 지구본에서 Lucide `languages`로 바꾸고, THIRD-PARTY-NOTICES에 이름을 추가한다.
    - 저장된 언어가 없으면 브라우저 언어를 따른다. 지금은 무조건 영어로 시작한다(`i18n.js:307`).
    - 패널 이름(Main·Sub·Side), Side 위치 조정 제거, 빈 공간 경고(아래 명기 결정).
    - 이름을 ALO4OBS로 바꾼다. README, HTML title, 헤더 제목, `i18n.js`, `build.py`, `OBS-script.lua` 장면 이름에 옛 이름이 남아 있다. 장면 접두사 `OST ·`도 `ALO · `로 바꾸고, README에 업데이트 방법을 적는다(아래 명기 결정).
 2. **남은 검수**(`docs/QA.md`): 0.6·0.7을 실제 OBS에 적용해 보기, Windows 기본 압축 풀기, 0.4.0 Lua와 접힌 그룹 실기 확인, `file://`로 열었을 때 브라우저 저장, 저장 창으로 ZIP 받기, Chrome에서 받은 ZIP을 OBS에 적용하기, 적용 실패 시 롤백. Windows 전용으로 내면 Mac 확인은 출시 조건이 아니다.
-3. **자산 권리 확인**([[projects/ALO4OBS/Source/assets/asset-sources|자산 출처 기록]]에 남은 것): Figma 아이콘을 하나씩 대조하기, GitHub 로고 사용 정책, `header.js` 인라인 SVG 출처, Inter 버전과 해시 기록.
+3. **자산 권리 확인**(자산 출처 기록에 남은 것): Figma 아이콘을 하나씩 대조하기, GitHub 로고 사용 정책, `header.js` 인라인 SVG 출처, Inter 버전과 해시 기록.
 4. **출시 절차**(`docs/QA.md:62-64`): `dev`에서 수정 → 검증 → `main`에 병합 → 태그 → Release에 ZIP 첨부. 이때 저장소 주소를 `ALO4OBS`로 바꾸고, 버전을 0.8.0으로 올리고 ZIP 이름에 버전을 붙이며(`ALO4OBS-v0.8.0.zip`, 하이픈 형식) README 다운로드 링크도 함께 바꾼다. README는 간결하게 다시 쓴다.
 5. **출시 뒤:** Jecky가 시연 영상을 만들고 Maki가 게시글을 쓴다. 첫 게시부터 댓글·질문 답장 초안과 버그 제보 정리는 Maki가 맡는다. 밖으로 나가는 글은 모두 명기 승인 후에 보낸다.
 
@@ -139,9 +139,9 @@ Fredy가 읽기만 해서 확인했다. Windows PC가 꺼져 있어 Windows 폴�
 아래는 공개 저장소로 옮기기 전 기록이다. 지금 제품 사양이나 사용법으로 쓰지 않는다.
 
 - `Source/`는 0.4.0-dev.1(10/4) 사본이라 공개판보다 많이 뒤처져 있다. `OBS-script.lua`, `settings.html`, `upload-storage.js`가 없고, 옛 `obs-setup.lua`·`preview.html` 구조다. `Source/assets/`에는 개인 파일과 권리를 확인하지 않은 파일(플랫폼 파비콘, 대회 이미지, 손캠 샘플, 게임 로비 이미지, 개인 설정)이 있으니 공개 저장소로 옮기지 않는다.
-- [[notes/qa/Test Results|테스트 결과]] — v0.3.2까지의 검증 기록.
-- [[notes/planning/Implementation Plan|구현 계획]] — 최초 구현 설계.
-- [[projects/ALO4OBS/Source/README|사용 안내(0.4.0-dev.1)]], [[projects/ALO4OBS/Source/CHANGELOG|변경 기록(0.4.0-dev.1까지)]], [[projects/ALO4OBS/Source/BENCHMARK|경쟁 제품 비교]], [[projects/ALO4OBS/Source/assets/platform-sources|플랫폼 아이콘 출처]]
+- [[notes/qa/test-results|테스트 결과]] — v0.3.2까지의 검증 기록.
+- [[notes/planning/implementation-plan|구현 계획]] — 최초 구현 설계.
+- [[README|사용 안내(0.4.0-dev.1)]], [[CHANGELOG|변경 기록(0.4.0-dev.1까지)]], 경쟁 제품 비교, 플랫폼 아이콘 출처
 
 ## 0.9.1 현재 상태 (2026-10-08 Windows 확인)
 
@@ -160,14 +160,14 @@ GitHub 공개 저장소의 README·CHANGELOG·QA·작업 보고·Release 문안 
 
 - [공개 README](https://github.com/kmg200164/ALO4OBS)에서 `ALO4OBS-v0.9.0.zip` 다운로드를 확인했다. main 커밋 [`8e7abad`](https://github.com/kmg200164/ALO4OBS/commit/8e7abad5bafc7824b1e2cb404416341dc72ee1a6)은 10/8 00:58 KST에 올라왔다. 0.9.0에는 Side 좌우 전환과 Figma에서 승인한 10종 × 라이트/다크 UI 색상이 반영됐다. [CHANGELOG](https://github.com/kmg200164/ALO4OBS/blob/main/CHANGELOG.md), [작업 보고](https://github.com/kmg200164/ALO4OBS/blob/main/docs/dev/work-report-0.9.0.md).
 - [QA 기록](https://github.com/kmg200164/ALO4OBS/blob/main/docs/QA.md)은 Node 212/212·Python 12/12 및 배포 ZIP 검증을 보고한다. 0.9.0의 직접 `file://` 열기·ZIP 저장/복원·실제 OBS 적용·Mac 검수는 아직 확인되지 않았다. GitHub 태그와 Releases 페이지도 비어 있다. 첫 정식 GitHub Release가 완료됐다고 쓰지 않는다.
-- 마케팅 영상은 이 0.9.0 ZIP을 실기 검수한 뒤 실제 설정·OBS 결과로 촬영한다. 계획·게시 경계는 [[projects/portfolio-overview/10-12 마케팅 시안/10-12 마케팅 시안|10-12 마케팅 시안]]을 따른다.
+- 마케팅 영상은 이 0.9.0 ZIP을 실기 검수한 뒤 실제 설정·OBS 결과로 촬영한다. 계획·게시 경계는 [10-12 마케팅 시안](obsidian://open?vault=second-brain&file=memory%2F1-experience%2F%EC%9D%B8%EA%B3%B5%EC%A7%80%EB%8A%A5%EC%82%AC%EA%B4%80%ED%95%99%EA%B5%90-7%EA%B8%B0%2Fportfolio-overview%2F10-12-%EB%A7%88%EC%BC%80%ED%8C%85-%EC%8B%9C%EC%95%88%2F10-12-%EB%A7%88%EC%BC%80%ED%8C%85-%EC%8B%9C%EC%95%88)을 따른다.
 
 ## 0.8.0 이후 기록 (2026-10-07 당시)
 
 - 0.8.0 코드는 main(`7603968`)에 올라갔고 저장소 이름은 `kmg200164/ALO4OBS`로 바뀌었다. 태그·GitHub Release는 아직 없다.
-- 0.8.1 최종 지시문: [[notes/work-orders/0.8.1 작업 지시문|0.8.1 작업 지시문]] (Codex가 이 문서를 읽고 수행).
+- 0.8.1 최종 지시문: [[notes/work-orders/0.8.1-작업-지시문|0.8.1 작업 지시문]] (Codex가 이 문서를 읽고 수행).
 - **10/7 추가 요구:** 설정 UI는 알로에 기본 + 한정 프리셋(light/dark별 배경·표면·강조 semantic 토큰)으로 바꾼다. 방송 출력의 사용자 색 설정과 UI 테마는 분리한다. 구현 범위·색 후보·호환·검수는 위 지시문이 소유한다.
-- **홍보는 실제 설정 영상 중심.** 0.8.1 Windows 구현·검수·ZIP 생성과 사용자 확인 뒤 같은 빌드로 Mac 테스트·촬영을 진행한다. 더미 캐러셀은 메인에서 제외. 촬영 구성과 캡션·공개 조건은 [[projects/portfolio-overview/10-12 마케팅 시안/10-12 마케팅 시안|10-12 마케팅 시안]]이 소유한다.
+- **홍보는 실제 설정 영상 중심.** 0.8.1 Windows 구현·검수·ZIP 생성과 사용자 확인 뒤 같은 빌드로 Mac 테스트·촬영을 진행한다. 더미 캐러셀은 메인에서 제외. 촬영 구성과 캡션·공개 조건은 [10-12 마케팅 시안](obsidian://open?vault=second-brain&file=memory%2F1-experience%2F%EC%9D%B8%EA%B3%B5%EC%A7%80%EB%8A%A5%EC%82%AC%EA%B4%80%ED%95%99%EA%B5%90-7%EA%B8%B0%2Fportfolio-overview%2F10-12-%EB%A7%88%EC%BC%80%ED%8C%85-%EC%8B%9C%EC%95%88%2F10-12-%EB%A7%88%EC%BC%80%ED%8C%85-%EC%8B%9C%EC%95%88)이 소유한다.
 - 남은 마무리(0.8.1): 버전 0.8.1로 올리기, 공개 다운로드 파일을 `downloads/OBS-Streaming-Template.zip` → `downloads/ALO4OBS-v0.8.1.zip`으로 바꾸고 README 링크 맞추기(build.py는 그대로), Side 열 왼쪽/오른쪽 전환 스위치 추가(기본 오른쪽), CHANGELOG 0.8.1·`docs/release-notes-0.8.1.md`. 명기가 집 Windows 데스크톱에서 Codex에 시킨다. 커밋·push 전 보고하고 멈추게 했다.
 - 명기 승인 뒤: 커밋·push → `v0.8.1` 태그 → Release(ZIP 첨부, `docs/release-notes-0.8.1.md`) → 저장소 설명을 "An OBS overlay that auto-arranges your panels so they never overlap."로 변경.
 - Release가 나오면 Jecky가 Maki에게 알리고, Maki가 X 게시글(한국어·영어, 초안의 0.8.0은 0.8.1로 고침)을 명기 승인 뒤 올린다. 초안은 Maki가 조사한 내용에 있다.
