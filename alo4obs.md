@@ -8,7 +8,7 @@ description: "ALO4OBS(Auto Layout Overlay for OBS) 허브. 공개 제품 폴더�
 
 # ALO4OBS — Auto Layout Overlay for OBS
 
-콘텐츠가 서로 가리지 않도록 패널을 자동 배치하는 OBS 오버레이. 현재 상태는 [[README]], 결정·요구사항·버전별 기록은 [[notes/project-log|진행 기록]]에 있다.
+콘텐츠가 서로 가리지 않도록 패널을 자동 배치하는 OBS 오버레이. 현재 상태는 [second-brain의 프로젝트 노트](obsidian://open?vault=second-brain&file=projects%2Falo4obs.md), 결정·요구사항·버전별 기록은 [[notes/project-log|진행 기록]]에 있다.
 
 - 저장소: [kmg200164/alo4obs](https://github.com/kmg200164/alo4obs) · [이슈](https://github.com/kmg200164/alo4obs/issues)
 
