@@ -4,7 +4,7 @@ Auto Layout Overlay for OBS: an open-source overlay that places panels so stream
 
 ## For agents
 
-Read this first. Shared rules: read `.agents/hub/README.md`, then `.agents/hub/law/law.md`. It is a copy of the `second-brain` vault kept by its hub bot; never edit it. If it is missing, read `../second-brain/` (same parent folder on KMG's desktop). Project status lives in the `second-brain` vault, in `projects/alo4obs.md`.
+Read this first. Shared rules live in the private `second-brain` vault (this public repo keeps no copy): read [README.md](https://github.com/kmg200164/second-brain/blob/main/README.md), then [law/law.md](https://github.com/kmg200164/second-brain/blob/main/law/law.md) and the law it points to. A local clone at `../second-brain/` (same parent folder on KMG's desktop) works too; pull it first. Project status lives in the `second-brain` vault, in `projects/alo4obs.md`.
 
 | | |
 | --- | --- |
