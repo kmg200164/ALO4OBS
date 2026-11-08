@@ -10,7 +10,7 @@ description: "ALO4OBS(Auto Layout Overlay for OBS) 허브. 공개 제품 폴더�
 
 콘텐츠가 서로 가리지 않도록 패널을 자동 배치하는 OBS 오버레이. 현재 상태는 [[README]], 결정·요구사항·버전별 기록은 [[notes/project-log|진행 기록]]에 있다.
 
-- 저장소: [kmg200164/ALO4OBS](https://github.com/kmg200164/ALO4OBS) · [이슈](https://github.com/kmg200164/ALO4OBS/issues)
+- 저장소: [kmg200164/alo4obs](https://github.com/kmg200164/alo4obs) · [이슈](https://github.com/kmg200164/alo4obs/issues)
 
 ## 제품 (공개, 배포 정본)
 
@@ -30,7 +30,6 @@ description: "ALO4OBS(Auto Layout Overlay for OBS) 허브. 공개 제품 폴더�
 
 | 경로 | 내용 |
 | --- | --- |
-| `STATUS.md` | 한 줄 현황 |
 | `notes/project-log.md` | 결정·요구사항·버전별 진행 기록 (옛 허브 본문) |
 | `notes/work-orders/` | 0.8.0·0.8.1 작업 지시문 |
 | `notes/planning/` | 구현 계획, 화면 설계 기능 목록, Bento-Overlap 통합 영향 목록 |
