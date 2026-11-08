@@ -1,8 +1,8 @@
 ---
-parent: '[[ALO4OBS|ALO4OBS]]'
+up: '[[alo4obs|ALO4OBS]]'
 created: 2026-10-02
 updated: 2026-10-02
-tags: [obs, web_overlay, implementation_plan]
+tags: [obs, web-overlay, implementation-plan]
 ---
 
 ## OBS Streaming Template Implementation Plan
@@ -15,7 +15,7 @@ tags: [obs, web_overlay, implementation_plan]
 
 **Tech Stack:** HTML, CSS Grid/Flex, JavaScript, Node 내장 테스트 러너(가용 runtime 확인 후 사용).
 
-**Spec:** [[ALO4OBS|ALO4OBS]]
+**Spec:** [[alo4obs|ALO4OBS]]
 
 ## Global Constraints
 
