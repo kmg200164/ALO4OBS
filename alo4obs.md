@@ -39,3 +39,13 @@ description: "ALO4OBS(Auto Layout Overlay for OBS) 허브. 공개 제품 폴더�
 | `wip/backup/` | 보류된 패치(Windows-only WIP) |
 
 `docs/`는 제품 문서가 쓰는 이름이라 개인 자료는 넣지 않는다. 제품 소스는 `template/`이라 별도 `src/`는 두지 않는다.
+
+## Folders
+
+- [[assets/assets|assets]]
+- [[docs/docs|docs]]
+- [[downloads/downloads|downloads]]
+- [[notes/notes|notes]]
+- [[template/template|template]]
+- [[tests/tests|tests]]
+- [[wip/wip|wip]]
