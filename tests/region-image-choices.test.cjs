@@ -1,5 +1,5 @@
 const test=require('node:test'),assert=require('node:assert/strict');
-const api=require('../template/pack.js');
+const api=require('../src/pack.js');
 test('regional image choices preserve inactive sources and reject malformed modes',()=>{
  const region={imageMode:'none',image:'assets/image.png',imageFile:'assets/image.png',imageUrl:'https://example.org/image.png'};
  const input={regionBackgrounds:{custom1:region}};

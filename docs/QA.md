@@ -77,10 +77,10 @@ Independent Chrome QA also verified that exported local settings override neutra
 
 macOS QA stopped at the user’s request on 2026-10-04 because Windows is the only planned broadcasting and gaming platform. Use the independent repository on `dev`; do not develop in an old Vault checkout. The observations below are partial Mac evidence, not complete platform compatibility. Mac-only checks are not a release gate for a Windows-only release.
 
-1. Open `template/guide-en.html` or `template/guide.html` directly from the extracted files, then configure `template/preview.html`.
+1. Open `src/guide-en.html` or `src/guide.html` directly from the extracted files, then configure `src/preview.html`.
 2. Verify file upload, settings ZIP export/extraction, and restoration after reopening the page.
 3. In OBS, test a Shogun Showdown game-window capture alongside neutral image/video sources. Request only the specific macOS capture or camera permission needed for each test.
-4. Add `template/obs-setup.lua`, select distinct individual video sources, apply twice, and verify rendering, rounded masks, locks, collapsed groups, and no duplicate sources.
+4. Add `src/obs-setup.lua`, select distinct individual video sources, apply twice, and verify rendering, rounded masks, locks, collapsed groups, and no duplicate sources.
 5. Check capture/camera permission rejection and recovery, source changes, and safe preservation when a panel is disabled.
 
 Keep personal widget links and exported settings private. Record the commit ID, device, observed result, and remaining limitations rather than calling untested platforms complete.

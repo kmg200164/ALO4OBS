@@ -42,7 +42,7 @@ class BuildTests(unittest.TestCase):
         runtime=json.loads(builder.entries['internal/export-runtime.js'].decode()
                            .removeprefix('window.OBS_EXPORT_RUNTIME = ').strip().removesuffix(';'))
         program=r"""
-const fs=require('node:fs'),pack=require('./template/pack.js'),events=require('./template/events.js');
+const fs=require('node:fs'),pack=require('./src/pack.js'),events=require('./src/events.js');
 const runtime=JSON.parse(fs.readFileSync(0,'utf8')),result={};
 for(const mode of ['bento','overlap']){
  const config={layoutVersion:4,layoutMode:mode,panelContent:Object.fromEntries(events.allPanelKeys.map(key=>[key,{type:key==='game'?'source':'none',url:''}]))};

@@ -6,7 +6,7 @@ test('shared header retains geometry across guide and editor; guide layout butto
  try{for(const width of [320,800,1280,1886])for(const lang of ['','-en','-ja']){
   const c=await b.newContext({viewport:{width,height:1000}});await c.addInitScript(()=>localStorage.setItem('obs-overlay-first-use','done'));const p=await c.newPage();let reference;
   for(const name of ['guide'+lang+'.html','settings.html','guide'+lang+'.html','settings.html']){
-   await p.goto(pathToFileURL(path.resolve('template',name)).href);await p.locator('#app-version:not([hidden])').waitFor({state:'attached'});await p.evaluate(()=>document.fonts.ready);
+   await p.goto(pathToFileURL(path.resolve('src',name)).href);await p.locator('#app-version:not([hidden])').waitFor({state:'attached'});await p.evaluate(()=>document.fonts.ready);
    if(width<=920)await p.locator('.header-menu--right').evaluate(e=>e.open=true);
    const guide=name.startsWith('guide');assert.equal(await p.locator('#change-layout').isDisabled(),guide);
    assert.ok(await p.locator('#change-layout').getAttribute('aria-label'));
@@ -22,7 +22,7 @@ test('background width-fit preserves aspect ratio in preview and exported wallpa
  try{const p=await b.newPage({viewport:{width:1920,height:1080}});
  const images=await p.evaluate(()=>[ [100,100],[100,200],[400,100],[160,90] ].map(([w,h])=>{const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').fillRect(0,0,w,h);return {w,h,url:c.toDataURL()}}));
  for(const filename of ['wallpaper.html','overlay.html?preview']){
-  const [name,query]=filename.split('?');await p.goto(pathToFileURL(path.resolve('template',name)).href+(query?'?'+query:''));
+  const [name,query]=filename.split('?');await p.goto(pathToFileURL(path.resolve('src',name)).href+(query?'?'+query:''));
   for(const img of images){await p.evaluate(img=>{const data={...window.OVERLAY_PUBLIC_CONFIG,backgroundImage:img.url,backgroundColor:'#123456',globalStyle:{...window.OVERLAY_PUBLIC_CONFIG.globalStyle,background:{mode:'file',url:img.url,color:'#123456'}}};window.postMessage({channel:'kmg-preview',action:'apply',data},'*')},img);
    const selector=name==='wallpaper.html'?'#image':'#preview-wallpaper';await p.waitForFunction(({s,w})=>{const i=document.querySelector(s);return i.complete&&i.naturalWidth===w},{s:selector,w:img.w});
    const box=await p.locator(selector).evaluate(i=>({w:i.offsetWidth,h:i.offsetHeight,nw:i.naturalWidth,nh:i.naturalHeight,count:document.querySelectorAll(i.id?'#'+i.id:'.backdrop').length}));

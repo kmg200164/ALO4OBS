@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const api = fs.existsSync(require('node:path').join(__dirname,'../template/events.js')) ? require('../template/events.js') : {};
+const api = fs.existsSync(require('node:path').join(__dirname,'../src/events.js')) ? require('../src/events.js') : {};
 test('same source event is deduplicated; other platforms remain distinct', () => {
  assert.equal(typeof api.createEventStore,'function');
  const store = api.createEventStore(3);
@@ -44,7 +44,7 @@ test('old Side positions and left/right choices restore the default frames witho
  assert.deepEqual(normalized,api.defaultPlacement());
  assert.deepEqual(Object.keys(normalized),['game','custom1','custom2','custom3']);
  assert.deepEqual(api.autoLayout({placement:old}),api.resolveLayout());
- const pack=require('../template/pack.js');
+ const pack=require('../src/pack.js');
  const content=Object.fromEntries(Object.keys(api.resolveLayout()).map(key=>[key,{type:'none',url:''}]));
  const saved=JSON.parse(new TextDecoder().decode(pack.settingsEntries({layoutVersion:4,panelPlacement:old,panelContent:content})[0].bytes));
  assert.deepEqual(saved.panelPlacement,api.defaultPlacement());

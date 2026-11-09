@@ -3,7 +3,7 @@ test('all guide cards keep symbols and inline elements consistent in base hover 
  const {chromium}=require(path.join(require('node:os').homedir(),'.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright'));
  const b=await chromium.launch({headless:true,channel:'chrome'});let cards=0;
  try{for(const lang of ['','-en','-ja'])for(const theme of ['dark','light']){
-  const p=await b.newPage({viewport:{width:1280,height:1000}});await p.goto(pathToFileURL(path.resolve('template/guide'+lang+'.html')).href);
+  const p=await b.newPage({viewport:{width:1280,height:1000}});await p.goto(pathToFileURL(path.resolve('src/guide'+lang+'.html')).href);
   await p.evaluate(t=>{document.documentElement.dataset.theme=t;document.body.dataset.theme=t;document.querySelectorAll('.faq-item').forEach(n=>n.open=true)},theme);
   const count=await p.locator('.faq-item').count();
   for(let i=0;i<count;i++){

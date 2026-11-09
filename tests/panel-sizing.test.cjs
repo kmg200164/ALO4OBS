@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const api = require('../template/events.js');
+const api = require('../src/events.js');
 const keys = Object.keys(api.resolveLayout());
 const fixed = (axis, value) => ({[axis + 'Mode']:'fixed', [axis]:value});
 function layout(sizing={},enabled={},placement=api.defaultPlacement()) {
@@ -128,7 +128,7 @@ test('main aspect choices survive disabled lower panels and settings export',()=
   assert.equal(boxes.game.width,1384);
   assert.equal(boxes.game.height,aspect==='auto'?(enabled.custom1===false?1016:778):Math.floor(1384*9/Number(aspect.split(':')[0])));
   separate(boxes,enabled);
-  const pack=require('../template/pack.js');
+  const pack=require('../src/pack.js');
   const saved=JSON.parse(new TextDecoder().decode(pack.settingsEntries({layoutVersion:4,panelPlacement:api.defaultPlacement(),panelEnabled:enabled,panelSizing:sizing,panelContent:Object.fromEntries(keys.map(key=>[key,{type:"none",url:""}]))})[0].bytes));
   assert.equal(saved.panelSizing.game.aspect,aspect);
   assert.deepEqual(saved.layout,boxes);

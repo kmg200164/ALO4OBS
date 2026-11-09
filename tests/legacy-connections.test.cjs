@@ -1,9 +1,9 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
-const events=require('../template/events.js'),pack=require('../template/pack.js');
-const source=fs.readFileSync(path.join(__dirname,'../template/preview.js'),'utf8');
+const events=require('../src/events.js'),pack=require('../src/pack.js');
+const source=fs.readFileSync(path.join(__dirname,'../src/preview.js'),'utf8');
 const clean=value=>JSON.parse(JSON.stringify(value));
 function harness(extra={}){
- const publicContext={window:{}};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../template/config.public.js'),'utf8'),publicContext);
+ const publicContext={window:{}};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../src/config.public.js'),'utf8'),publicContext);
  const defaults=structuredClone(publicContext.window.OVERLAY_PUBLIC_CONFIG),keys=events.allPanelKeys;
  const context={defaults,keys,window:{},OverlayEvents:events,structuredClone,initialPlacement:events.defaultPlacement(),panelGroups:{sub:events.bentoPanelKeys.slice(1,4),side:events.bentoPanelKeys.slice(4)},freshSmoothing:0,...extra};
  const start=source.indexOf('  const defaultStyle='),end=source.indexOf('  function restoredSettings(',start);

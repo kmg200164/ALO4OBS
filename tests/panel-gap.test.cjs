@@ -1,7 +1,7 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
-const api=require('../template/events.js');
-const pack=require('../template/pack.js');
+const api=require('../src/events.js');
+const pack=require('../src/pack.js');
 const keys=Object.keys(api.resolveLayout());
 const content=Object.fromEntries(keys.map(key=>[key,{type:'none',url:''}]));
 const fixed=width=>({widthMode:'fixed',width});

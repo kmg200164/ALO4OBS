@@ -2,12 +2,12 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
-const source=fs.readFileSync(require.resolve('../template/preview.js'),'utf8');
+const source=fs.readFileSync(require.resolve('../src/preview.js'),'utf8');
 
 function controls(values){return name=>({value:String(values[name]??'')});}
 function reader(values){
  const config={panelGap:32,globalStyle:{background:{},fill:{opacity:20,blur:32},stroke:{width:4,opacity:100}}};
- const context={config,control:controls(values),OverlayEvents:require('../template/events.js')};
+ const context={config,control:controls(values),OverlayEvents:require('../src/events.js')};
  const presets=source.slice(source.indexOf('  const opacityPresets='),source.indexOf('  function migratePanelContent('));
  vm.runInNewContext(presets,context);
  const start=source.indexOf('  function readGlobal(){'),end=source.indexOf('  function liveConfig(',start);
@@ -39,7 +39,7 @@ test('global sliders choose the nearest supported initial preset and show its se
 });
 
 test('global preset labels are translated in Korean, English, and Japanese',()=>{
- const i18n=fs.readFileSync(require.resolve('../template/i18n.js'),'utf8');
+ const i18n=fs.readFileSync(require.resolve('../src/i18n.js'),'utf8');
  for(const [ko,en,ja] of [['매우 좁음','Extra narrow','とても狭い'],['좁음','Narrow','狭い'],['보통','Medium','標準'],['넓음','Wide','広い'],['매우 넓음','Extra wide','とても広い']]){
   assert.match(i18n,new RegExp(`'${ko}':'${en}'`));assert.match(i18n,new RegExp(`'${ko}':'${ja}'`));
  }

@@ -4,7 +4,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
 
-const source=fs.readFileSync(path.join(__dirname,'../template/i18n.js'),'utf8');
+const source=fs.readFileSync(path.join(__dirname,'../src/i18n.js'),'utf8');
 function textNode(value,tagName='SPAN'){return {nodeValue:value,parentElement:{tagName,closest:()=>null}};}
 function attributeNode(values){
  const attributes={...values};
@@ -70,7 +70,7 @@ test('placement card heading is translated in all supported languages',()=>{
 });
 
 test('shared header exposes Japanese in the locale picker',()=>{
- const header=fs.readFileSync(path.join(__dirname,'../template/header.js'),'utf8');
+ const header=fs.readFileSync(path.join(__dirname,'../src/header.js'),'utf8');
  assert.ok(header.includes('value=\\"ja\\">日本語'));
 });
 
@@ -102,7 +102,7 @@ test('guide links follow the selected language and guide pages route on language
 });
 
 test('English guide retains product spelling and valid upstream link paths',()=>{
- const guide=fs.readFileSync(path.join(__dirname,'../template/guide-en.html'),'utf8');
+ const guide=fs.readFileSync(path.join(__dirname,'../src/guide-en.html'),'utf8');
  assert.ok(guide.includes('<h1>Configure and apply in OBS</h1>'));
  assert.ok(guide.includes('Click <strong>Apply saved settings / Auto layout</strong>'));
  assert.doesNotMatch(guide,/WEFLAB|Speech Translator|optional examples/);
@@ -126,7 +126,7 @@ test('export validation failures and gradient accessibility labels follow langua
 });
 
 test('generated property controls reference live row labels and color values in every locale',()=>{
- const preview=fs.readFileSync(path.join(__dirname,'../template/preview.js'),'utf8');
+ const preview=fs.readFileSync(path.join(__dirname,'../src/preview.js'),'utf8');
  const start=preview.indexOf('  let nextPropertyLabelId=0;'),end=preview.indexOf('  const gradientControl=',start);
  assert.ok(start>=0&&end>start,'property row builders are present');
  const context={};vm.runInNewContext(preview.slice(start,end)+';globalThis.builders={propertyRow,color};',context);
@@ -153,7 +153,7 @@ test('generated property controls reference live row labels and color values in 
   assert.equal(app.i18n.localize(ko,'ja'),`カスタムパネル${index}の設定`);
  }
  app.i18n.set('ja');assert.equal(app.languageEvents.at(-1).type,'kmg-language-change');assert.equal(app.languageEvents.at(-1).detail.language,'ja');
- const overlay=fs.readFileSync(path.join(__dirname,'../template/overlay.js'),'utf8');
+ const overlay=fs.readFileSync(path.join(__dirname,'../src/overlay.js'),'utf8');
  assert.match(overlay,/function applyAccessibilityLanguage\(language\)/);
  assert.match(overlay,/applyAccessibilityLanguage\(config\.uiLanguage\)/);
  assert.match(preview,/live\.uiLanguage=document\.documentElement\.lang/);
@@ -161,7 +161,7 @@ test('generated property controls reference live row labels and color values in 
 });
 
 test('fullscreen failures log only request diagnostics with activation captured before await',()=>{
- const preview=fs.readFileSync(path.join(__dirname,'../template/preview.js'),'utf8');
+ const preview=fs.readFileSync(path.join(__dirname,'../src/preview.js'),'utf8');
  assert.match(preview,/const diagnostic=\{operation,errorName:[^}]*errorMessage:[^}]*fullscreenEnabled:[^}]*policyAllowsFullscreen[^}]*userActivationIsActive:[^}]*userActivationHasBeenActive:[^}]*hasFocus:[^}]*visibilityState:[^}]*prerendering:/);
  assert.match(preview,/console\.warn\('\[fullscreen\.request\.failed\]',JSON\.stringify\(diagnostic\)\)/);
  assert.match(preview,/const activation=fullscreenActivation\(\);\s*try\{if\(!document\.exitFullscreen\)[\s\S]*?await document\.exitFullscreen\(\);\}\s*catch\(error\)\{logFullscreenFailure\('exit',error,activation\)/);
@@ -170,9 +170,9 @@ test('fullscreen failures log only request diagnostics with activation captured 
 });
 
 test('full-screen preview keeps an exit control visible and translated',()=>{
- const html=fs.readFileSync(path.join(__dirname,'../template/settings.html'),'utf8');
- const css=fs.readFileSync(path.join(__dirname,'../template/preview.css'),'utf8');
- const preview=fs.readFileSync(path.join(__dirname,'../template/preview.js'),'utf8');
+ const html=fs.readFileSync(path.join(__dirname,'../src/settings.html'),'utf8');
+ const css=fs.readFileSync(path.join(__dirname,'../src/preview.css'),'utf8');
+ const preview=fs.readFileSync(path.join(__dirname,'../src/preview.js'),'utf8');
  assert.match(html,/<div id="preview-fullscreen"[^>]*>[\s\S]*?<div class="screen-content">[\s\S]*?<div class="fullscreen-toolbar" hidden><span class="fullscreen-hint">Esc 키로 종료<\/span><button id="return-to-settings" type="button">설정으로 돌아가기<\/button><\/div><\/div>/);
  assert.match(css,/\.screen:fullscreen \.screen-content\{[^}]*aspect-ratio:16\/9/);
  assert.match(preview,/fullscreenToolbar\.hidden=!isFullscreen/);
@@ -218,7 +218,7 @@ test('a guide page shows the auto-detected matching guide without saving the cho
 
 test('shared header lists English, Korean, Japanese in that order',()=>{
  let markup='';
- const source=fs.readFileSync(path.join(__dirname,'../template/header.js'),'utf8').split(/\r?\n\r?\n/)[0];
+ const source=fs.readFileSync(path.join(__dirname,'../src/header.js'),'utf8').split(/\r?\n\r?\n/)[0];
  vm.runInNewContext(source,{document:{currentScript:{insertAdjacentHTML:(_position,html)=>{markup=html;}}}});
  const select=markup.match(/<select id="ui-language"[^>]*>([\s\S]*?)<\/select>/)[1];
  assert.deepEqual([...select.matchAll(/<option value="([^"]+)">([^<]+)<\/option>/g)].map(m=>[m[1],m[2]]),[['en','English'],['ko','한국어'],['ja','日本語']]);

@@ -1,5 +1,5 @@
 const test=require('node:test'),assert=require('node:assert/strict');
-const events=require('../template/events.js');
+const events=require('../src/events.js');
 test('sections start collapsed and column 5 alone keeps its place with no hidden-column strokes',{skip:!process.env.KMG_THEME_RENDER_URL},async()=>{
  const {chromium}=require(process.env.KMG_PLAYWRIGHT_PATH||'C:/Users/KMG/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
  const browser=await chromium.launch({channel:'chrome',headless:true});

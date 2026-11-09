@@ -4,7 +4,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
 
-const root=path.join(__dirname,'..','template');
+const root=path.join(__dirname,'..','src');
 const preview=fs.readFileSync(path.join(root,'preview.js'),'utf8');
 const html=fs.readFileSync(path.join(root,'settings.html'),'utf8');
 const css=fs.readFileSync(path.join(root,'preview.css'),'utf8');
@@ -37,7 +37,7 @@ test('version-3 URLs and media migrate to their existing panel geometry keys',()
 
 test('settings preview numbers all seven panels without adding numbers to the OBS overlay',()=>{
   const roles=['Main','Sub 1','Sub 2','Sub 3','Side 1','Side 2','Side 3'];
-  assert.deepEqual(keys.map(key=>require('../template/events.js').panelLabels[key]),roles);
+  assert.deepEqual(keys.map(key=>require('../src/events.js').panelLabels[key]),roles);
   assert.doesNotMatch(html,/id="event-target"/);
   assert.match(preview,/const names=OverlayEvents\.panelLabels/);
   assert.doesNotMatch(html,/패널 [1-7]/);

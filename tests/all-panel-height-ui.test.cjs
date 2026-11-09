@@ -1,4 +1,4 @@
-const test=require('node:test'),assert=require('node:assert/strict'),events=require('../template/events.js');
+const test=require('node:test'),assert=require('node:assert/strict'),events=require('../src/events.js');
 const enabled=process.env.KMG_RUN_OVERLAP_COLUMN_UI==='1';
 const playwright=()=>require(process.env.KMG_PLAYWRIGHT_PATH||'C:/Users/KMG/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 async function geometry(page,label){
