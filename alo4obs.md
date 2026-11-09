@@ -3,7 +3,7 @@ type: hub
 created: 2026-10-02
 updated: 2026-11-06
 tags: [hub, project]
-description: "ALO4OBS(Auto Layout Overlay for OBS) 허브. 공개 제품 폴더와 개인 노트(notes·assets·wip)의 위치만 안내한다."
+description: "ALO4OBS(Auto Layout Overlay for OBS) 허브. 공개 제품 폴더와 개인 노트(notes·assets·tmp)의 위치만 안내한다."
 ---
 
 # ALO4OBS — Auto Layout Overlay for OBS
@@ -36,7 +36,7 @@ description: "ALO4OBS(Auto Layout Overlay for OBS) 허브. 공개 제품 폴더�
 | `notes/qa/` | 테스트 결과 |
 | `assets/attachments/` | 옛 템플릿 ZIP·원본, QA 메모 (Obsidian 첨부 폴더) |
 | `assets/screenshots/` | 2026-10-24 포트폴리오 스크린샷 패키지 |
-| `wip/backup/` | 보류된 패치(Windows-only WIP) |
+| `tmp/backup/` | 보류된 패치(Windows-only WIP) |
 
 `docs/`는 제품 문서가 쓰는 이름이라 개인 자료는 넣지 않는다. 제품 소스는 `template/`이라 별도 `src/`는 두지 않는다.
 
@@ -48,4 +48,4 @@ description: "ALO4OBS(Auto Layout Overlay for OBS) 허브. 공개 제품 폴더�
 - [[notes/notes|notes]]
 - [[template/template|template]]
 - [[tests/tests|tests]]
-- [[wip/wip|wip]]
+- [[tmp/tmp|tmp]]
