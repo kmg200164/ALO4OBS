@@ -2,11 +2,11 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
-const events=require('../template/events.js');
-const pack=require('../template/pack.js');
+const events=require('../src/events.js');
+const pack=require('../src/pack.js');
 const keys=events.bentoPanelKeys,subs=keys.slice(1,4),sides=keys.slice(4);
 const content=Object.fromEntries(keys.map(key=>[key,{type:'none',url:''}]));
-const source=fs.readFileSync(require.resolve('../template/preview.js'),'utf8');
+const source=fs.readFileSync(require.resolve('../src/preview.js'),'utf8');
 function exported(input){return JSON.parse(new TextDecoder().decode(pack.settingsEntries({layoutVersion:4,panelContent:content,...input})[0].bytes));}
 function assertSeparate(layout,enabled,gap){
  events.validateLayout(layout);
@@ -18,7 +18,7 @@ function assertSeparate(layout,enabled,gap){
  }
 }
 function normalizer(){
- const publicContext={window:{}};vm.runInNewContext(fs.readFileSync(require.resolve('../template/config.public.js'),'utf8'),publicContext);
+ const publicContext={window:{}};vm.runInNewContext(fs.readFileSync(require.resolve('../src/config.public.js'),'utf8'),publicContext);
  const defaults=publicContext.window.OVERLAY_PUBLIC_CONFIG;
  const context={keys,panelGroups:{sub:subs,side:sides},defaults,OverlayEvents:events,structuredClone,initialPlacement:events.defaultPlacement()};
  vm.runInNewContext(source.slice(source.indexOf('  const defaultStyle='),source.indexOf('  function restoredSettings(')),context);

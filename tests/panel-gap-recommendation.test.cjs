@@ -2,7 +2,7 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
-const source=fs.readFileSync(require.resolve('../template/preview.js'),'utf8');
+const source=fs.readFileSync(require.resolve('../src/preview.js'),'utf8');
 test('extra-narrow selection recommends global border removal; acceptance, cancel and other controls preserve scope',()=>{
  for(const [name,value,mode,accept,prompts,expected] of [
   ['panelGap','0','solid',true,1,'none'],['panelGap','0','gradient',false,1,'gradient'],

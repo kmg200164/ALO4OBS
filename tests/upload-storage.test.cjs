@@ -2,7 +2,7 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
-const {create}=require('../template/upload-storage.js');
+const {create}=require('../src/upload-storage.js');
 const scope='file:///template/settings.html';
 function fixture(){
   const records=new Map(),local=new Map(),warnings=[];let sharedQueue=Promise.resolve();
@@ -28,11 +28,11 @@ test('reopening restores image, video and region bytes; config keeps file mode a
 test('ZIP export after reopening uses restored bytes and preserves its snapshot through reset',async()=>{
   const f=fixture(),first=controller(f);await first.save(draft(),files(),'source');
   const saved=JSON.parse(f.local.get('obs-overlay-config')),restored=await controller(f).restore(saved);
-  const preview=fs.readFileSync(require.resolve('../template/preview.js'),'utf8');
+  const preview=fs.readFileSync(require.resolve('../src/preview.js'),'utf8');
   const start=preview.indexOf("  byId('bundle').onclick=async()=>{"),end=preview.indexOf("  frame.addEventListener('load'",start);
   let entries;const bundle={},status={},keys=['game','custom1','custom2','custom3','chat','translation','hand'];
   const data={...saved,layout:Object.fromEntries(keys.map(key=>[key,{}]))};
-  const context={localized:s=>s,OverlayEvents:require('../template/events.js'),showStatus:(message)=>{status.textContent=message;},uploads:restored.entries,keys,status,current:()=>structuredClone(data),byId:()=>bundle,window:{OBS_EXPORT_RUNTIME:{}},
+  const context={localized:s=>s,OverlayEvents:require('../src/events.js'),showStatus:(message)=>{status.textContent=message;},uploads:restored.entries,keys,status,current:()=>structuredClone(data),byId:()=>bundle,window:{OBS_EXPORT_RUNTIME:{}},
     alphaMask:async(_,name)=>({name,bytes:new Uint8Array([0])}),OverlayPack:{isolateRuntime:entries=>entries,settingsEntries:()=>[],zip:input=>{entries=input;return new Uint8Array([0]);}},
     Uint8Array,Blob,URL:{createObjectURL:()=> 'blob:zip',revokeObjectURL(){}},document:{createElement:()=>({click(){}})},setTimeout(){}};
   vm.runInNewContext(preview.slice(start,end),context);const exporting=bundle.onclick();restored.entries.clear();await exporting;
@@ -59,11 +59,11 @@ test('missing stored bytes are reported so the editor cannot silently overwrite 
   const saved=JSON.parse(f.local.get('obs-overlay-config'));f.records.delete(saved._localUploads[0].id);
   const restored=await controller(f).restore(saved);assert.deepEqual(restored.missing,['whole']);
   assert.equal(f.local.get('obs-overlay-config'),JSON.stringify(saved));
-  const preview=fs.readFileSync(require.resolve('../template/preview.js'),'utf8');assert.match(preview,/draftReady&&!migrationBackupFailed&&!missingUploads\.size/);
+  const preview=fs.readFileSync(require.resolve('../src/preview.js'),'utf8');assert.match(preview,/draftReady&&!migrationBackupFailed&&!missingUploads\.size/);
 });
 test('new exported source takes precedence over a durable browser draft without applying its upload manifest',async()=>{
   const f=fixture(),api=controller(f);await api.save(draft(),files(),'old source');
-  const saved=JSON.parse(f.local.get('obs-overlay-config')),preview=fs.readFileSync(require.resolve('../template/preview.js'),'utf8');
+  const saved=JSON.parse(f.local.get('obs-overlay-config')),preview=fs.readFileSync(require.resolve('../src/preview.js'),'utf8');
   const start=preview.indexOf('  function restoredSettings('),end=preview.indexOf('  function propertyRow(',start);
   const exported={layoutVersion:4,layout:{},name:'exported'},context={defaults:{},localized:s=>s,OverlayEvents:{validateLayout(){}}};
   vm.runInNewContext(preview.slice(start,end),context);
@@ -108,14 +108,14 @@ test('empty bytes cannot replace the last durable draft and empty stored files a
   assert.deepEqual((await controller(f).restore(saved)).missing,['whole']);
 });
 test('empty selected upload is rejected before reading or replacing a valid file',async()=>{
-  const preview=fs.readFileSync(require.resolve('../template/preview.js'),'utf8'),start=preview.indexOf('  async function handleUpload('),end=preview.indexOf('  async function alphaMask(',start);
+  const preview=fs.readFileSync(require.resolve('../src/preview.js'),'utf8'),start=preview.indexOf('  async function handleUpload('),end=preview.indexOf('  async function alphaMask(',start);
   const existing={file:new Blob(['valid']),path:'assets/background-whole.png'},uploads=new Map([['whole',existing]]);let warning,reads=0;
   const context={uploads,showStatus:(message,error)=>{warning={message,error};},readUpload:()=>{reads++;}};
   vm.runInNewContext(preview.slice(start,end),context);await context.handleUpload({files:[{size:0,name:'empty.png'}],dataset:{upload:'whole'}});
   assert.equal(reads,0);assert.equal(uploads.get('whole'),existing);assert.equal(warning.error,true);assert.match(warning.message,/빈 파일/);
 });
 test('malformed draft recovery enables export and reset without overwriting the stored draft',()=>{
-  const preview=fs.readFileSync(require.resolve('../template/preview.js'),'utf8'),start=preview.indexOf('  function recoverDraft('),end=preview.indexOf('  const firstUse=',start);
+  const preview=fs.readFileSync(require.resolve('../src/preview.js'),'utf8'),start=preview.indexOf('  function recoverDraft('),end=preview.indexOf('  const firstUse=',start);
   const bundle={disabled:true},reset={disabled:true},form={inert:true},oldFile={path:'bad'},uploads=new Map([['whole',oldFile]]),missingUploads=new Set(['whole']);let writes=0,status;
   const context={document:{querySelectorAll:()=>[]},config:{invalid:true},selected:'game',defaults:{layout:{game:{}}},normalize:value=>structuredClone(value),uploads,missingUploads,draftReady:false,form,
     byId:id=>id==='bundle'?bundle:reset,renderGlobal(){},renderPlacement(){},renderEditor(){},drawHits(){},send(){},frame:{},liveConfig:value=>value,
@@ -124,9 +124,9 @@ test('malformed draft recovery enables export and reset without overwriting the 
   assert.equal(context.draftReady,true);assert.equal(bundle.disabled,false);assert.equal(reset.disabled,false);assert.equal(form.inert,false);assert.equal(writes,0);assert.equal(status.error,true);
 });
 test('reset after failed boot always enables persistence and export',()=>{
-  const preview=fs.readFileSync(require.resolve('../template/preview.js'),'utf8'),start=preview.indexOf('  function reset(){'),end=preview.indexOf("  form.addEventListener('input'",start);
+  const preview=fs.readFileSync(require.resolve('../src/preview.js'),'utf8'),start=preview.indexOf('  function reset(){'),end=preview.indexOf("  form.addEventListener('input'",start);
   const label={textContent:""},bundle={disabled:true},button={disabled:true,querySelector(){return label;}};let resets=0,applied;
-  const OverlayEvents=require('../template/events.js'),defaults={layoutVersion:4,layoutMode:'bento'},config=OverlayEvents.switchLayoutPreset({...defaults,panelGap:48},'overlap');
+  const OverlayEvents=require('../src/events.js'),defaults={layoutVersion:4,layoutMode:'bento'},config=OverlayEvents.switchLayoutPreset({...defaults,panelGap:48},'overlap');
   config.panelGap=32;
   const context={OverlayEvents,config,localized:value=>value,document:{querySelectorAll:()=>[]},draftReady:false,form:{inert:true},byId:id=>id==='bundle'?bundle:button,uploadStorage:{reset(){resets++;}},uploadRequests:new Map(),missingUploads:new Set(['whole']),storageWarning:'failed',uploads:new Map(),cameraActive:false,cameraController:null,
     defaults,normalize:value=>structuredClone(value),selected:null,renderGlobal(){},renderPlacement(){},renderEditor(){},apply:message=>{applied=message;}};

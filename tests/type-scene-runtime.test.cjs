@@ -1,5 +1,5 @@
 const test=require('node:test'),assert=require('node:assert/strict');
-const pack=require('../template/pack.js');
+const pack=require('../src/pack.js');
 test('type snapshots keep both layouts independent when extracted to the same directory',()=>{
  const files=new Map();
  for(const [mode,value] of [['bento','Bento config'],['overlap','Overlap config'],['bento','Updated Bento']]){

@@ -2,9 +2,9 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
-const shape=require('../template/panel-shape.js');
-const events=require('../template/events.js');
-const gradient=require('../template/gradient.js');
+const shape=require('../src/panel-shape.js');
+const events=require('../src/events.js');
+const gradient=require('../src/gradient.js');
 
 function documentMock(){
  const nodes=[];
@@ -60,7 +60,7 @@ test('OBS fill/frame use resolved preset boxes and the identical shape path; ful
  function render(mode){
   const doc=documentMock();doc.body.dataset.mode=mode;
   const context={document:doc,OverlayEvents:events,window:{OVERLAY_CONFIG:config,KMGPanelShape:shape,KMGGradient:gradient},innerWidth:1920,innerHeight:1080,addEventListener(){}};
-  vm.runInNewContext(fs.readFileSync(require.resolve('../template/background.js'),'utf8'),context);return doc;
+  vm.runInNewContext(fs.readFileSync(require.resolve('../src/background.js'),'utf8'),context);return doc;
  }
  const fill=render('fill'),frame=render('frame'),box=events.resolveConfigLayout(config).panel4_1;
  assert.equal(fill.canvas.children.filter(node=>node.dataset.region&&node.style.display==='block').length,15);
@@ -83,8 +83,8 @@ test('Chrome paints exterior strokes/shadows and respects smoothed content hit b
  try{
   const page=await browser.newPage({viewport:{width:1100,height:450}});
   await page.setContent('<body style="margin:0;background:#dfe3e7"><div id="stage" style="position:relative;width:1100px;height:450px"></div></body>');
-  await page.addScriptTag({path:require.resolve('../template/gradient.js')});
-  await page.addScriptTag({path:require.resolve('../template/panel-shape.js')});
+  await page.addScriptTag({path:require.resolve('../src/gradient.js')});
+  await page.addScriptTag({path:require.resolve('../src/panel-shape.js')});
   const result=await page.evaluate(async()=>{
    const shape=window.KMGPanelShape;
    async function pixels(svg,points){
@@ -127,7 +127,7 @@ test('Overlap preview paints auxiliary fill and shadow above opaque Main media, 
  const browser=await chromium.launch({headless:true,channel:'chrome'});
  try{
   const page=await browser.newPage({viewport:{width:1920,height:1080}});
-  await require('./helpers/expanded-sections.cjs')(page);await page.goto(require('node:url').pathToFileURL(require.resolve('../template/overlay.html')).href+'?preview=1');
+  await require('./helpers/expanded-sections.cjs')(page);await page.goto(require('node:url').pathToFileURL(require.resolve('../src/overlay.html')).href+'?preview=1');
   const box=await page.evaluate(async()=>{
    const source=document.createElement('canvas');source.width=source.height=1;const context=source.getContext('2d');context.fillStyle='#0033ff';context.fillRect(0,0,1,1);
    const keys=OverlayEvents.overlapPanelKeys,config={layoutVersion:4,layoutMode:'overlap',panelGap:24,cornerRadius:32,cornerSmoothing:.6,globalShadow:32,panelShadows:{panel4_1:0},panelEnabled:Object.fromEntries(keys.map(key=>[key,['game','panel4_1'].includes(key)])),regionStyleOverrides:{},regionBackgrounds:Object.fromEntries(keys.map(key=>[key,{}])),globalStyle:{background:{mode:'solid',color:'#000000'},fill:{mode:'solid',color:'#ffffff',opacity:50,blur:0},stroke:{mode:'none',width:4,color:'#ffffff'}},panelContent:Object.fromEntries(keys.map(key=>[key,key==='game'?{type:'media',url:source.toDataURL('image/png')}:{type:'none',url:''}]))};
@@ -148,7 +148,7 @@ test('Chrome renders all 15 independent Overlap panels and switches to Bento wit
  try{
   const page=await browser.newPage({viewport:{width:1920,height:1080}});
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
-  await require('./helpers/expanded-sections.cjs')(page);await page.goto(require('node:url').pathToFileURL(require.resolve('../template/overlay.html')).href+'?preview=1');
+  await require('./helpers/expanded-sections.cjs')(page);await page.goto(require('node:url').pathToFileURL(require.resolve('../src/overlay.html')).href+'?preview=1');
   const result=await page.evaluate(async()=>{
    const keys=OverlayEvents.allPanelKeys,overlap=OverlayEvents.overlapPanelKeys,aux=overlap.slice(1);
    const image=document.createElement('canvas');image.width=image.height=1;image.getContext('2d').fillRect(0,0,1,1);
@@ -197,7 +197,7 @@ test('direct-file settings expands default columns to 16 hit surfaces and preser
     Object.defineProperty(window,'showSaveFilePicker',{value:undefined,configurable:true});
    },platform);
    const page=await context.newPage(),errors=[];page.on('pageerror',error=>errors.push(error.message));
-   await require('./helpers/expanded-sections.cjs')(page);await page.goto(require('node:url').pathToFileURL(process.env.KMG_SETTINGS_HTML||require.resolve('../template/settings.html')).href);
+   await require('./helpers/expanded-sections.cjs')(page);await page.goto(require('node:url').pathToFileURL(process.env.KMG_SETTINGS_HTML||require.resolve('../src/settings.html')).href);
    await page.waitForFunction(()=>!document.querySelector('[data-layout-choice=overlap]').disabled);
    await page.locator('[data-layout-choice=overlap]').click();
    await page.waitForFunction(()=>document.querySelectorAll('[data-hit]').length===16,{},{timeout:5000});

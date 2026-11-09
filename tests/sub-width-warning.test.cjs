@@ -2,8 +2,8 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
-const api=require('../template/events.js');
-const pack=require('../template/pack.js');
+const api=require('../src/events.js');
+const pack=require('../src/pack.js');
 const keys=Object.keys(api.resolveLayout());
 const fixed=width=>({widthMode:'fixed',width});
 const subs=(a,b,c)=>({custom1:fixed(a),custom2:fixed(b),custom3:fixed(c)});
@@ -31,7 +31,7 @@ test('warnings never block saving or applying: overflow renders fitted and empty
  }
 });
 test('editor keeps an overfull all-manual Sub row for the warning instead of shrinking peers',()=>{
- const source=fs.readFileSync(require.resolve('../template/preview.js'),'utf8');
+ const source=fs.readFileSync(require.resolve('../src/preview.js'),'utf8');
  const config={panelSizing:api.normalizeSizing(subs(600,600,600)),panelPlacement:api.defaultPlacement(),panelEnabled:{},panelGap:32};
  const context={config,keys,selected:'custom1',sizeConstraintTarget:null,OverlayEvents:api};
  vm.runInNewContext(source.slice(source.indexOf('  function clampPanelSizes(){'),source.indexOf('  // Warnings never block')),context);

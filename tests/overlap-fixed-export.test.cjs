@@ -1,5 +1,5 @@
 const test=require('node:test'),assert=require('node:assert/strict');
-const events=require('../template/events.js'),pack=require('../template/pack.js');
+const events=require('../src/events.js'),pack=require('../src/pack.js');
 const content=()=>Object.fromEntries(events.allPanelKeys.map(key=>[key,{type:'none',url:''}]));
 const input=extra=>({layoutVersion:4,layoutMode:'overlap',panelContent:content(),...extra});
 const exportConfig=config=>JSON.parse(new TextDecoder().decode(pack.settingsEntries(config)[0].bytes));

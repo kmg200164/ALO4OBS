@@ -3,8 +3,8 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
-const header=fs.readFileSync(path.join(__dirname,'../template/header.js'),'utf8');
-const css=fs.readFileSync(path.join(__dirname,'../template/header.css'),'utf8');
+const header=fs.readFileSync(path.join(__dirname,'../src/header.js'),'utf8');
+const css=fs.readFileSync(path.join(__dirname,'../src/header.css'),'utf8');
 const paletteSource=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/figma-theme-tokens.json'),'utf8'));
 const presets=['red','orange','yellow','lime','aloe','cyan','blue','purple','pink','monochrome'];
 // Parse only the shipped primitive/semantic token rules, applying selector specificity.
@@ -161,7 +161,7 @@ test('chooser uses named native radio controls and keeps broadcast configuration
  for(const value of presets)assert.match(markup,new RegExp('type="radio" name="ui-accent-preset" value="'+value+'"'));
  assert.match(markup,/<legend[^>]*>UI 색상 프리셋<\/legend>/);assert.match(markup,/class="preset-check" aria-hidden="true">✓/);
  assert.doesNotMatch(headerSource(),/OVERLAY_CONFIG|config\.|removeItem/);
- for(const filename of ['overlay.css','events.js','pack.js','OBS-script.lua'])assert.doesNotMatch(fs.readFileSync(path.join(__dirname,'../template',filename),'utf8'),/overlay-ui-preset|data-ui-preset/);
+ for(const filename of ['overlay.css','events.js','pack.js','OBS-script.lua'])assert.doesNotMatch(fs.readFileSync(path.join(__dirname,'../src',filename),'utf8'),/overlay-ui-preset|data-ui-preset/);
 });
 
 test('all twenty palettes preserve approved raw colors and roles except the requested pure fields and light Cherry/Bubblegum white ink',()=>{
@@ -187,7 +187,7 @@ test('the ten named choices preserve order, scrolling and stable slider/switch g
  assert.match(css,/\.preset-check\{[^}]*color:currentColor\}/);
  assert.match(css,/max-height:calc\(100dvh - 80px\);overflow-y:auto/);
  assert.match(css,/@media\(max-width:920px\)\{\.accent-preset-options\{position:fixed;right:72px;top:72px;/);
- const previewCss=fs.readFileSync(path.join(__dirname,'../template/preview.css'),'utf8');
+ const previewCss=fs.readFileSync(path.join(__dirname,'../src/preview.css'),'utf8');
  assert.match(previewCss,/input\[type=range\]\{width:100%;height:24px;margin:0;padding:0;accent-color:var\(--accent\)\}/);
  assert.match(previewCss,/slider-runnable-track\{height:6px;border:0;outline:0;box-shadow:none/);
  assert.match(previewCss,/slider-thumb\{[^}]*width:16px;height:16px;[^}]*border:0;outline:0;box-shadow:none/);
@@ -203,12 +203,12 @@ test('interaction roles swap fill and ink while controls stay free of permanent 
   assert.ok(contrast(tokens(preset,'light')['--page-background'],tokens(preset,'dark')['--page-background'])>=7,'approved light/dark backgrounds must remain visibly distinct');
   assert.ok(luminance(tokens(preset,'light')['--page-background'])>luminance(tokens(preset,'dark')['--page-background']),'light page must be brighter than dark page');
  }
- const previewCss=fs.readFileSync(path.join(__dirname,'../template/preview.css'),'utf8');
+ const previewCss=fs.readFileSync(path.join(__dirname,'../src/preview.css'),'utf8');
  assert.match(previewCss,/input\[type=range\]\{appearance:none;[^}]*border:0;box-shadow:none/);
  assert.doesNotMatch(previewCss,/background-image:linear-gradient\(45deg/);
  assert.match(previewCss,/\.hit-outline\{[^}]*color:var\(--accent-default\)/);
  assert.match(previewCss,/\.panel-hit:is\(:hover,:focus-visible,\[aria-pressed=true\]\) \.hit-outline\{display:block\}/);
- const guideCss=fs.readFileSync(path.join(__dirname,'../template/guide-layout.css'),'utf8');
+ const guideCss=fs.readFileSync(path.join(__dirname,'../src/guide-layout.css'),'utf8');
  assert.match(guideCss,/\.page-layout \.step-content code,[^{}]*kbd[^{}]*\{background:var\(--accent-default\);color:var\(--content-on-accent\)\}/);
  assert.doesNotMatch(guideCss.replace(/\/\*[\s\S]*?\*\//g,''),/strong[^{}]*\{background:/);
 });

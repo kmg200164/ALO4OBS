@@ -2,13 +2,13 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
-const events=require('../template/events.js');
-const pack=require('../template/pack.js');
-const source=fs.readFileSync(require.resolve('../template/preview.js'),'utf8');
+const events=require('../src/events.js');
+const pack=require('../src/pack.js');
+const source=fs.readFileSync(require.resolve('../src/preview.js'),'utf8');
 const keys=events.bentoPanelKeys;
 const panelGroups={sub:keys.slice(1,4),side:keys.slice(4)};
 const publicContext={window:{}};
-vm.runInNewContext(fs.readFileSync(require.resolve('../template/config.public.js'),'utf8'),publicContext);
+vm.runInNewContext(fs.readFileSync(require.resolve('../src/config.public.js'),'utf8'),publicContext);
 const defaults=publicContext.window.OVERLAY_PUBLIC_CONFIG;
 const plain=value=>JSON.parse(JSON.stringify(value));
 function normalizer(){
@@ -111,7 +111,7 @@ test('placement card reuses property rows and range marks with vertical and hori
  }
  assert.doesNotMatch(html.innerHTML,/data-enabled|placement-heading|<select|datalist/);
  assert.equal((html.innerHTML.match(/class="size-ratio-marks"/g)||[]).length,2);
- assert.doesNotMatch(fs.readFileSync(require.resolve('../template/preview.css'),'utf8'),/#placement-list \.size-ratio-marks/);
+ assert.doesNotMatch(fs.readFileSync(require.resolve('../src/preview.css'),'utf8'),/#placement-list \.size-ratio-marks/);
 });
 
 test('vertical Main and Sub switch maps checked to the bottom row and unchecked to the top row',()=>{

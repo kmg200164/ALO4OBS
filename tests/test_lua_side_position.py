@@ -24,7 +24,7 @@ class SidePositionTests(unittest.TestCase):
     def test_exported_coordinates_apply_to_obs_browser_items(self):
         configs = json.loads(subprocess.check_output([
             "node", "-e", r"""
-const e=require('./template/events.js'),p=require('./template/pack.js');
+const e=require('./src/events.js'),p=require('./src/pack.js');
 const panelContent=Object.fromEntries(Object.keys(e.panelLabels).map(k=>[k,{type:'web',url:'https://example.test/'+k}]));
 const configs=[];
 for(const sidePosition of ['left','right'])for(const swap of [false,true])for(const panelGap of [8,48]){
@@ -33,7 +33,7 @@ for(const sidePosition of ['left','right'])for(const swap of [false,true])for(co
 }
 console.log(JSON.stringify(configs));
 """], cwd=ROOT, text=True))
-        code = (ROOT / "template/OBS-script.lua").read_text(encoding="utf-8")
+        code = (ROOT / "src/OBS-script.lua").read_text(encoding="utf-8")
         helpers = code[code.index("local function place("):code.index("local panel_keys=")]
         generic = code[code.index("local function apply_generic("):code.index("local function apply(props")]
         validation = generic[generic.index(" local content="):generic.index(" for _,name in ipairs({'overlay.html'")]

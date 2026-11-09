@@ -1,4 +1,4 @@
-const test=require('node:test'),assert=require('node:assert/strict'),events=require('../template/events.js'),pack=require('../template/pack.js');
+const test=require('node:test'),assert=require('node:assert/strict'),events=require('../src/events.js'),pack=require('../src/pack.js');
 const all=Object.fromEntries(events.overlapPanelKeys.map(k=>[k,true]));
 const saved=c=>JSON.parse(new TextDecoder().decode(pack.settingsEntries({panelContent:Object.fromEntries(events.allPanelKeys.map(k=>[k,{type:"none",url:""}])),...c})[0].bytes));
 test('Overlap column switches preserve row counts and disabled column settings',()=>{

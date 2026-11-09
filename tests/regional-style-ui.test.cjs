@@ -2,8 +2,8 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
-const source=fs.readFileSync(require.resolve('../template/preview.js'),'utf8');
-const pack=require('../template/pack.js');
+const source=fs.readFileSync(require.resolve('../src/preview.js'),'utf8');
+const pack=require('../src/pack.js');
 const presets=source.slice(source.indexOf('  const opacityPresets='),source.indexOf('  function migratePanelContent('));
 const scales={regionOpacity:[10,20,40,70,100],regionBlur:[4,8,16,32,64],regionStrokeWidth:[1,2,4,6,8]};
 
@@ -88,7 +88,7 @@ test('all range families paint progress from their current bounds without changi
  vm.runInNewContext(source.slice(start,end),context);context.syncRangeProgress();
  assert.deepEqual(inputs.map(input=>input.style['--range-progress']),['25%','100%','50%','0%']);
  assert.deepEqual(inputs.map(input=>input.value),['1','3','500','4']);
- const css=fs.readFileSync(require.resolve('../template/preview.css'),'utf8');
+ const css=fs.readFileSync(require.resolve('../src/preview.css'),'utf8');
  for(const pseudo of ['webkit-slider-runnable-track','webkit-slider-thumb','moz-range-track','moz-range-progress','moz-range-thumb'])assert.match(css,new RegExp(`::-${pseudo}\\{[^}]*border:0;outline:0;box-shadow:none`));
  assert.match(css,/::-webkit-slider-runnable-track\{height:6px/);assert.match(css,/::-webkit-slider-thumb\{[^}]*width:16px;height:16px/);
 });

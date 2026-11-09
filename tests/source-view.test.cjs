@@ -1,5 +1,5 @@
 const test=require('node:test'),assert=require('node:assert/strict');
-const events=require('../template/events.js'),pack=require('../template/pack.js');
+const events=require('../src/events.js'),pack=require('../src/pack.js');
 const contents=()=>Object.fromEntries(events.allPanelKeys.map(key=>[key,{type:key==='game'?'source':'none',url:''}]));
 test('OBS source fit and transparent crop survive settings ZIP export and both layout snapshots',()=>{
  const view={fit:'contain',crop:{left:0,top:0,right:60,bottom:30}},panelContent=contents();panelContent.custom2={type:'source',url:'',sourceView:view};

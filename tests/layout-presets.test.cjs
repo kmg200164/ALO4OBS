@@ -1,5 +1,5 @@
 const test=require('node:test'),assert=require('node:assert/strict');
-const events=require('../template/events.js'),pack=require('../template/pack.js');
+const events=require('../src/events.js'),pack=require('../src/pack.js');
 const keys=events.allPanelKeys;
 const generic=()=>({layoutVersion:4,panelContent:Object.fromEntries(keys.map(key=>[key,{type:'none',url:''}]))});
 const saved=config=>JSON.parse(new TextDecoder().decode(pack.settingsEntries(config)[0].bytes));

@@ -19,7 +19,7 @@ dist/
 **/browsers/
 .obsidian/workspace.json
 .obsidian/workspace-mobile.json
-!downloads/ALO4OBS-v*.zip
+
 !vendor/obs-composite-blur-1.6.0/*.zip
 # Vault attachments / screenshot / backup patch (tracked despite *.zip)
 !assets/

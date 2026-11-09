@@ -6,7 +6,7 @@ import posixpath
 import tempfile
 
 repository = Path(__file__).resolve().parent
-source = repository / 'template'
+source = repository / 'src'
 public_config = (source / 'config.public.js').read_bytes()
 version_source = (source / 'version.js').read_text(encoding='utf-8')
 match = re.fullmatch(r"window\.KMG_VERSION = '((?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*))';\s*", version_source)

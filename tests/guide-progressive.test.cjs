@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
-const template=path.join(__dirname,'../template');
+const template=path.join(__dirname,'../src');
 
 test('every guide starts with the shared visual workflow and keeps setup and recovery collapsed',()=>{
  for(const name of ['guide.html','guide-en.html','guide-ja.html']){

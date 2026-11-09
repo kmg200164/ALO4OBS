@@ -1,7 +1,7 @@
 const test=require('node:test'),assert=require('node:assert/strict'),path=require('node:path');
-const {pathToFileURL}=require('node:url'),events=require('../template/events.js');
+const {pathToFileURL}=require('node:url'),events=require('../src/events.js');
 const enabled=process.env.KMG_RUN_OVERLAP_COLUMN_UI==='1';
-const url=()=>process.env.KMG_THEME_RENDER_URL?new URL('settings.html',process.env.KMG_THEME_RENDER_URL).href:pathToFileURL(process.env.KMG_SETTINGS_HTML||require.resolve('../template/settings.html')).href;
+const url=()=>process.env.KMG_THEME_RENDER_URL?new URL('settings.html',process.env.KMG_THEME_RENDER_URL).href:pathToFileURL(process.env.KMG_SETTINGS_HTML||require.resolve('../src/settings.html')).href;
 const playwright=()=>require(process.env.KMG_PLAYWRIGHT_PATH||'C:/Users/KMG/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 const saved=page=>page.evaluate(()=>JSON.parse(localStorage.getItem('obs-overlay-config')));
 async function choose(page,mode){await page.locator('[data-layout-choice='+mode+']').click();await page.waitForFunction(mode=>JSON.parse(localStorage.getItem('obs-overlay-config'))?.layoutMode===mode,mode);}

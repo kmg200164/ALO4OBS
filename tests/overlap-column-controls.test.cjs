@@ -1,5 +1,5 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
-const events=require('../template/events.js'),source=fs.readFileSync(path.join(__dirname,'../template/preview.js'),'utf8');
+const events=require('../src/events.js'),source=fs.readFileSync(path.join(__dirname,'../src/preview.js'),'utf8');
 function countHarness(input){
  const context={config:structuredClone(input),selected:null,reads:0,readEditor(){context.reads++;},renderEditor(){}};
  const start=source.indexOf('  function updateOverlapColumnCount('),end=source.indexOf('  function updatePlacement(',start);
@@ -30,7 +30,7 @@ test('selection comes only from preview and smoothing uses three actual values',
  assert.match(globals,/presetRangeValue\('cornerSmoothing',OverlayEvents.cornerSmoothings,0\)/);
 });
 test('legacy collision is repaired before editing; counts/manual heights/reload preserve content',{skip:process.env.KMG_RUN_OVERLAP_COLUMN_UI!=='1'},async()=>{
- const http=require('node:http'),base=path.resolve(__dirname,'../template'),server=http.createServer((req,res)=>{const relative=decodeURIComponent(new URL(req.url,'http://localhost').pathname).replace(/^\//,''),file=path.resolve(base,relative);if(!file.startsWith(base+path.sep)||!fs.existsSync(file)||!fs.statSync(file).isFile()){res.writeHead(404);res.end();return;}const mime={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.png':'image/png'};res.setHeader('Content-Type',mime[path.extname(file)]||'application/octet-stream');res.end(fs.readFileSync(file));});
+ const http=require('node:http'),base=path.resolve(__dirname,'../src'),server=http.createServer((req,res)=>{const relative=decodeURIComponent(new URL(req.url,'http://localhost').pathname).replace(/^\//,''),file=path.resolve(base,relative);if(!file.startsWith(base+path.sep)||!fs.existsSync(file)||!fs.statSync(file).isFile()){res.writeHead(404);res.end();return;}const mime={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.png':'image/png'};res.setHeader('Content-Type',mime[path.extname(file)]||'application/octet-stream');res.end(fs.readFileSync(file));});
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const {chromium}=require(process.env.KMG_PLAYWRIGHT_PATH||'C:/Users/KMG/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright'),browser=await chromium.launch({headless:true,channel:'chrome'});
  try{
   const legacy=configuration();legacy.overlapColumns=events.normalizeOverlapColumns();legacy.overlapPositions=events.normalizeOverlapPositions();legacy.layoutVersion=4;legacy.panelEnabled=Object.fromEntries(events.overlapPanelKeys.map(key=>[key,true]));legacy.overlapPlacement.panel2_3={column:5,row:1,columnSpan:1,rowSpan:1};legacy.layout=events.overlapLayout({enabled:legacy.panelEnabled});legacy.layout.panel2_3={...legacy.layout.panel5_1};delete legacy.overlapSizing;delete legacy.layoutPresets.overlap.overlapSizing;delete legacy.layoutPresets.bento.overlapSizing;

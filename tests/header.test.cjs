@@ -5,7 +5,7 @@ const path=require('node:path');
 const vm=require('node:vm');
 
 test('config.public.js exposes exactly the allowed repository and donation links, kept out of OVERLAY_CONFIG',()=>{
- const source=fs.readFileSync(path.join(__dirname,'../template/config.public.js'),'utf8');
+ const source=fs.readFileSync(path.join(__dirname,'../src/config.public.js'),'utf8');
  const context={window:{}};vm.runInNewContext(source,context);
  assert.deepEqual(JSON.parse(JSON.stringify(context.window.OVERLAY_PUBLIC_LINKS)),{
   repository:'https://github.com/kmg200164/ALO4OBS',
@@ -15,14 +15,14 @@ test('config.public.js exposes exactly the allowed repository and donation links
 });
 
 test('header markup: GitHub, bug-report, and donation buttons start hidden until config.public.js fills them in',()=>{
- const header=fs.readFileSync(path.join(__dirname,'../template/header.js'),'utf8');
+ const header=fs.readFileSync(path.join(__dirname,'../src/header.js'),'utf8');
  for(const id of ['github-link','bug-report-link','donation-link']){
   assert.match(header,new RegExp(`id=\\\\"${id}\\\\"[^>]*href=\\\\"\\\\"[^>]*hidden`),`${id} must start with an empty href and hidden`);
  }
 });
 
 test('header script derives the bug-report link from the repository URL and hides any link with no URL',()=>{
- const header=fs.readFileSync(path.join(__dirname,'../template/header.js'),'utf8');
+ const header=fs.readFileSync(path.join(__dirname,'../src/header.js'),'utf8');
  assert.match(header,/bugReportLink,links\.repository\?links\.repository\+'\/issues\/new':''/);
  assert.match(header,/const showLink=\(link,href\)=>\{if\(href\)\{link\.href=href;link\.hidden=false;\}else\{link\.hidden=true;\}\}/);
  assert.match(header,/window\.OVERLAY_PUBLIC_LINKS\|\|\{\}/);
@@ -36,7 +36,7 @@ test('build.py only allows the repository and donation URLs in the shipped publi
 });
 
 test('header navigation offers only the other page at the same icon position',()=>{
- const source=fs.readFileSync(path.join(__dirname,'../template/header.js'),'utf8');
+ const source=fs.readFileSync(path.join(__dirname,'../src/header.js'),'utf8');
  const navigation=source.slice(source.indexOf('  const currentPath='),source.indexOf("  try{localStorage.removeItem"));
  for(const pathname of ['/settings.html','/guide.html','/guide-en.html','/guide-ja.html']){
   const layoutButton={};const context={location:{pathname},settingsLink:{},guideLink:{},header:{querySelector:s=>s==='#change-layout'?layoutButton:{insertAdjacentHTML(){}}}};
@@ -50,7 +50,7 @@ test('header navigation offers only the other page at the same icon position',()
 
 
 test('header menus follow viewport changes, exclude each other on narrow screens and close on Escape',()=>{
- const source=fs.readFileSync(path.join(__dirname,'../template/header.js'),'utf8');
+ const source=fs.readFileSync(path.join(__dirname,'../src/header.js'),'utf8');
  const start=source.indexOf('  const headerMenus='),end=source.indexOf('  const version=',start);
  assert.ok(start>=0,'responsive menu handler exists');
  const menus=[0,1].map(()=>({open:false,events:{},focuses:0,
@@ -70,7 +70,7 @@ test('header menus follow viewport changes, exclude each other on narrow screens
 });
 
 test('header puts public links on the left and centers the brand between native menus',()=>{
- const source=fs.readFileSync(path.join(__dirname,'../template/header.js'),'utf8');
+ const source=fs.readFileSync(path.join(__dirname,'../src/header.js'),'utf8');
  let markup='';const first=source.split(/\r?\n\r?\n/)[0];
  vm.runInNewContext(first,{document:{currentScript:{insertAdjacentHTML(_position,html){markup=html;}}}});
  assert.equal((markup.match(/<details /g)||[]).length,3);assert.equal((markup.match(/<summary /g)||[]).length,3);
@@ -79,7 +79,7 @@ test('header puts public links on the left and centers the brand between native 
  assert.ok(markup.indexOf('class="brand"')<markup.indexOf('id="settings-link"'));
  assert.match(markup,/<a id="guide-link"[^>]*>[\s\S]*?data-lucide="book-open"/);
  assert.equal((markup.match(/data-lucide="menu"/g)||[]).length,2);
- const css=fs.readFileSync(path.join(__dirname,'../template/header.css'),'utf8');
+ const css=fs.readFileSync(path.join(__dirname,'../src/header.css'),'utf8');
  assert.match(css,/grid-template-columns:minmax\(0,1fr\) auto minmax\(0,1fr\)/);
  assert.match(css,/@media\(max-width:920px\)/);
  assert.match(css,/header-menu--right>.header-tools\{right:0\}/);
@@ -88,7 +88,7 @@ test('header puts public links on the left and centers the brand between native 
 });
 
 test('guide/settings counterpart navigation shares the left header group',()=>{
- const source=fs.readFileSync(path.join(__dirname,'../template/header.js'),'utf8');
+ const source=fs.readFileSync(path.join(__dirname,'../src/header.js'),'utf8');
  const start=source.indexOf("  const settingsLink=header.querySelector('#settings-link');"),end=source.indexOf('  const currentPath=',start);
  const settingsLink={id:'settings-link'},guideLink={id:'guide-link'},left=[];
  const header={querySelector(selector){return selector==='#settings-link'?settingsLink:selector==='#guide-link'?guideLink:{append:(...buttons)=>left.push(...buttons)};}};

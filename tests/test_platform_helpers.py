@@ -9,7 +9,7 @@ class PlatformHelpers(unittest.TestCase):
  def run_helper(self,platform,case):
   with tempfile.TemporaryDirectory() as folder:
    root=Path(folder);(root/'files').mkdir();stubs=root/'stubs';stubs.mkdir();app=root/'OBS.app';app.mkdir()
-   helper=(ROOT/'template'/('composite-blur-install.command' if platform=='mac' else 'composite-blur-install.sh')).read_text()
+   helper=(ROOT/'src'/('composite-blur-install.command' if platform=='mac' else 'composite-blur-install.sh')).read_text()
    # Only the test copy redirects absolute OS commands and app/plugin paths.
    helper=helper.replace('$HOME/Library/Application Support/obs-studio/plugins',(root/'user-plugins').as_posix())
    helper=helper.replace('/Applications/OBS.app',app.as_posix()).replace('/Library/Application Support/obs-studio/plugins',(root/'global-plugins').as_posix())
@@ -67,7 +67,7 @@ class WindowsHelperStubs(unittest.TestCase):
     (bundle/'files/plugin'/('manifest.json' if kind=='payload' else 'manifest-modern.json')).write_text(json.dumps(manifest))
    if case.get('TEST_EXISTING'):
     target.parent.mkdir(parents=True);target.write_bytes(b'preserve my plugin')
-   cmd=(ROOT/'template/composite-blur-install.cmd').read_text()
+   cmd=(ROOT/'src/composite-blur-install.cmd').read_text()
    body=cmd.split('powershell.exe -NoProfile -Command "',1)[1].split('"\nset ',1)[0]
    stubs="""function Get-Item { param($LiteralPath) [pscustomobject]@{VersionInfo=[pscustomobject]@{ProductVersion=$env:TEST_VERSION}} }; function Get-AuthenticodeSignature { param($LiteralPath) [pscustomobject]@{Status=$env:TEST_SIGNATURE} }; function Get-Process { param($Name,$ErrorAction) if($env:TEST_RUNNING -eq 'yes'){[pscustomobject]@{Path=$null}} }; function Copy-Item { param($LiteralPath,$Destination) if($env:TEST_COPY_FAIL -eq 'yes'){throw 'Simulated disk failure'}; [IO.File]::Copy($LiteralPath,$Destination) }; """
    body=body.replace('try { if($env:PROCESSOR_ARCHITECTURE',stubs+'try { if($env:PROCESSOR_ARCHITECTURE',1)

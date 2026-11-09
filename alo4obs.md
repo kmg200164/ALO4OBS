@@ -18,11 +18,10 @@ description: "ALO4OBS(Auto Layout Overlay for OBS) 허브. 공개 제품 폴더�
 | --- | --- |
 | `README.md` `CHANGELOG.md` `LICENSE` | 사용자 안내, 변경 기록, MIT 라이선스 |
 | `build.py` | 배포 ZIP 빌드 진입점 |
-| `template/` | 오버레이 소스(HTML·JS·CSS·Lua, `assets/`) |
+| `src/` | 오버레이 소스(HTML·JS·CSS·Lua, `assets/`) |
 | `tests/` | Node(`*.test.cjs`)·Python(`test_*.py`) 테스트 |
 | `docs/` | 사용자 문서: `QA.md` `PLUGIN-SUPPORT.md` `release-notes-*` `images/` |
 | `docs/dev/` | 메인테이너 문서: 작업 보고, 출시 검증, 개발 기록, 제안서 |
-| `downloads/` | 버전별 배포 ZIP (README 다운로드 링크가 가리킴) |
 | `vendor/` | 번들 서드파티(Composite Blur 1.6.0) |
 | `.github/` | 이슈 템플릿, FUNDING |
 
@@ -38,14 +37,13 @@ description: "ALO4OBS(Auto Layout Overlay for OBS) 허브. 공개 제품 폴더�
 | `assets/screenshots/` | 2026-10-24 포트폴리오 스크린샷 패키지 |
 | `tmp/backup/` | 보류된 패치(Windows-only WIP) |
 
-`docs/`는 제품 문서가 쓰는 이름이라 개인 자료는 넣지 않는다. 제품 소스는 `template/`이라 별도 `src/`는 두지 않는다.
+`docs/`는 제품 문서가 쓰는 이름이라 개인 자료는 넣지 않는다. 배포 ZIP은 `downloads/` 대신 GitHub Releases로 올린다.
 
 ## Folders
 
 - [[assets/assets|assets]]
 - [[docs/docs|docs]]
-- [[downloads/downloads|downloads]]
 - [[notes/notes|notes]]
-- [[template/template|template]]
+- [[src/src|src]]
 - [[tests/tests|tests]]
 - [[tmp/tmp|tmp]]

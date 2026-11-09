@@ -3,9 +3,9 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
-const events=require('../template/events.js');
-const gradientApi=require('../template/gradient.js');
-const source=fs.readFileSync(path.join(__dirname,'../template/preview.js'),'utf8');
+const events=require('../src/events.js');
+const gradientApi=require('../src/gradient.js');
+const source=fs.readFileSync(path.join(__dirname,'../src/preview.js'),'utf8');
 const start=source.indexOf('  function restoredSettings('),end=source.indexOf('  function propertyRow(',start);
 const defaults={name:'NEUTRAL',layoutVersion:2};
 const context={defaults,OverlayEvents:events};vm.runInNewContext(source.slice(start,end),context);
@@ -33,7 +33,7 @@ test('malformed saved and exported geometry falls back to neutral defaults',()=>
 });
 
 test('JSON settings preserve uploaded asset paths and gradient in locally generated configuration',()=>{
- const pack=require('../template/pack.js');
+ const pack=require('../src/pack.js');
  const input={...exported,
   slotContent:{custom1:'image',custom2:'none',custom3:'none'},
   customSlotMedia:{custom1:{url:'assets/custom1.png'}},
@@ -65,7 +65,7 @@ test('style presets choose the nearest value with lower tie-break and force stro
 
 test('fresh and empty backgrounds retain solid black while first gradient edit starts neutral',()=>{
  const publicContext={window:{}};
- vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../template/config.public.js'),'utf8'),publicContext);
+ vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../src/config.public.js'),'utf8'),publicContext);
  const publicBackground=publicContext.window.OVERLAY_PUBLIC_CONFIG.globalStyle.background;
  assert.equal(publicBackground.mode,'solid');assert.equal(publicBackground.color,'#000000');
  assert.equal(gradientApi.normalize(publicBackground).stops[0].color,'#303030');
@@ -100,7 +100,7 @@ test('saved legacy background colors and explicit gradients override the new neu
 
 
 test('source runtime loads neutral defaults once before optional local settings',()=>{
- const folder=path.join(__dirname,'../template');
+ const folder=path.join(__dirname,'../src');
  for(const filename of fs.readdirSync(folder).filter(name=>name.endsWith('.html'))){
   const html=fs.readFileSync(path.join(folder,filename),'utf8');
   const scripts=[...html.matchAll(/<script[^>]*src="([^"]+)"[^>]*>/g)].map(match=>match[1]);
@@ -123,7 +123,7 @@ test('source runtime loads neutral defaults once before optional local settings'
 
 
 test('shared file-restoration status precedes preview and retains hidden status / visible alert behavior',()=>{
- const folder=path.join(__dirname,'../template');
+ const folder=path.join(__dirname,'../src');
  for(const filename of fs.readdirSync(folder).filter(name=>/^settings(?:-(?:en|ja))?\.html$/.test(name))){
   const html=fs.readFileSync(path.join(folder,filename),'utf8');
   assert.equal((html.match(/id="status"/g)||[]).length,1,filename);

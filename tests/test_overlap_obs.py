@@ -7,7 +7,7 @@ from pathlib import Path
 import unittest
 
 DLL = Path(r"C:\Program Files\obs-studio\bin\64bit\lua51.dll")
-SOURCE = Path(__file__).resolve().parents[1] / "template" / "OBS-script.lua"
+SOURCE = Path(__file__).resolve().parents[1] / "src" / "OBS-script.lua"
 BENTO_KEYS = ['game', 'custom1', 'custom2', 'custom3', 'chat', 'translation', 'hand']
 OVERLAP_KEYS = ['game'] + [f'panel{column}_{row}' for column in range(1,6) for row in range(1,4)]
 
@@ -123,7 +123,7 @@ assert(queued_public_sources==0,'temporary probes must not queue frontend mixer/
 
     def test_exported_overlap_coordinates_apply_across_all_gap_presets(self):
         configs = json.loads(subprocess.check_output(['node', '-e', """
-const e=require('./template/events.js'),p=require('./template/pack.js');
+const e=require('./src/events.js'),p=require('./src/pack.js');
 const panelContent=Object.fromEntries(e.allPanelKeys.map(k=>[k,{type:'none',url:''}]));
 console.log(JSON.stringify(e.panelGaps.map(panelGap=>JSON.parse(new TextDecoder().decode(p.settingsEntries({layoutVersion:4,layoutMode:'overlap',panelGap,panelContent})[0].bytes)))));
 """], cwd=SOURCE.parents[1], text=True))
@@ -311,7 +311,7 @@ assert(cfg.panelSource_custom1=='Keep Bento Choice')
 
     def test_exported_column_counts_hide_and_reuse_original_sources_and_apply_manual_heights(self):
         variants=json.loads(subprocess.check_output(['node','-e',"""
-const e=require('./template/events.js'),p=require('./template/pack.js');
+const e=require('./src/events.js'),p=require('./src/pack.js');
 const panelContent=Object.fromEntries(e.allPanelKeys.map(k=>[k,{type:'source',url:''}]));
 const saved=extra=>JSON.parse(new TextDecoder().decode(p.settingsEntries({layoutVersion:4,layoutMode:'overlap',panelContent,...extra})[0].bytes));
 const enabled=count=>({game:true,...Object.fromEntries(e.overlapPanelKeys.slice(1).map(k=>[k,Number(k.split('_')[1])<=count]))});
@@ -324,7 +324,7 @@ console.log(JSON.stringify(e.panelGaps.map(panelGap=>({full:saved({panelGap,pane
 
     def test_column_widths_and_switches_reapply_without_losing_manual_y_or_sources(self):
         variants=json.loads(subprocess.check_output(['node','-e',"""
-const e=require('./template/events.js'),p=require('./template/pack.js');
+const e=require('./src/events.js'),p=require('./src/pack.js');
 const panelContent=Object.fromEntries(e.allPanelKeys.map(k=>[k,{type:'source',url:''}]));
 const panelEnabled=Object.fromEntries(e.overlapPanelKeys.map(k=>[k,true]));
 const saved=extra=>JSON.parse(new TextDecoder().decode(p.settingsEntries({layoutVersion:4,layoutMode:'overlap',panelContent,panelEnabled,overlapSizing:{panel2_1:{heightMode:'fixed',height:200},panel2_2:{heightMode:'fixed',height:128},panel2_3:{heightMode:'fixed',height:120}},overlapPositions:{panel2_3:{mode:'fixed',y:700}},...extra})[0].bytes));
@@ -346,7 +346,7 @@ console.log(JSON.stringify({full:saved({}),hidden:saved({overlapColumns:{1:{widt
 
     def test_exported_manual_y_projects_ordered_bounds_and_retains_requests_for_native_sources(self):
         variants=json.loads(subprocess.check_output(['node','-e',"""
-const e=require('./template/events.js'),p=require('./template/pack.js');
+const e=require('./src/events.js'),p=require('./src/pack.js');
 const panelContent=Object.fromEntries(e.allPanelKeys.map(k=>[k,{type:'source',url:''}]));
 const panelEnabled=Object.fromEntries(e.overlapPanelKeys.map(k=>[k,true]));
 const saved=extra=>JSON.parse(new TextDecoder().decode(p.settingsEntries({layoutVersion:4,layoutMode:'overlap',panelContent,panelEnabled,...extra})[0].bytes));
@@ -365,7 +365,7 @@ console.log(JSON.stringify(e.panelGaps.map(panelGap=>({full:saved({panelGap}),ma
 
     def test_exported_alignment_and_clamped_y_apply_without_shrinking_native_bounds(self):
         variants=json.loads(subprocess.check_output(['node','-e',"""
-const e=require('./template/events.js'),p=require('./template/pack.js');
+const e=require('./src/events.js'),p=require('./src/pack.js');
 const panelContent=Object.fromEntries(e.allPanelKeys.map(k=>[k,{type:'source',url:''}]));
 const panelEnabled=Object.fromEntries(e.overlapPanelKeys.map(k=>[k,true]));
 const overlapSizing=Object.fromEntries(e.overlapPanelKeys.slice(1).map(k=>[k,{heightMode:'fixed',height:100}]));

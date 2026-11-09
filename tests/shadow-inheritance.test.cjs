@@ -1,6 +1,6 @@
 
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');
-const events=require('../template/events.js'),shape=require('../template/panel-shape.js'),pack=require('../template/pack.js');
+const events=require('../src/events.js'),shape=require('../src/panel-shape.js'),pack=require('../src/pack.js');
 const fresh=()=>({layoutVersion:4,layoutMode:'bento',panelContent:Object.fromEntries(events.allPanelKeys.map(key=>[key,{type:'none',url:''}]))});
 const exported=input=>JSON.parse(new TextDecoder().decode(pack.settingsEntries(input).find(entry=>entry.name==='config.json').bytes));
 
@@ -54,7 +54,7 @@ test('current overlay config and actual background renderer apply global shadow 
  try{
   const page=await browser.newPage({viewport:{width:1920,height:1080}});
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
-  await require('./helpers/expanded-sections.cjs')(page);await page.goto(require('node:url').pathToFileURL(require.resolve('../template/overlay.html')).href+'?preview=1');
+  await require('./helpers/expanded-sections.cjs')(page);await page.goto(require('node:url').pathToFileURL(require.resolve('../src/overlay.html')).href+'?preview=1');
   const state=await page.evaluate(()=>{
    const keys=OverlayEvents.overlapPanelKeys,config={layoutVersion:4,layoutMode:'overlap',globalShadow:32,
     panelEnabled:Object.fromEntries(keys.map(key=>[key,['game','panel2_1','panel4_1'].includes(key)])),panelShadows:{panel2_1:0,panel4_1:64},
@@ -80,7 +80,7 @@ test('rendered settings gates individual shadows with Fill and Stroke and preser
   const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];
   page.on('pageerror',error=>errors.push(error.message));
   const url=process.env.KMG_THEME_RENDER_URL?new URL('settings.html',process.env.KMG_THEME_RENDER_URL).href:
-   require('node:url').pathToFileURL(require.resolve('../template/settings.html')).href;
+   require('node:url').pathToFileURL(require.resolve('../src/settings.html')).href;
   await require('./helpers/expanded-sections.cjs')(page);await page.goto(url);await page.locator('[data-layout-choice=bento]').click();
   await page.waitForFunction(()=>JSON.parse(localStorage.getItem('obs-overlay-config'))?.layoutMode==='bento');
   await page.evaluate(()=>{

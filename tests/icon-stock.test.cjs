@@ -29,13 +29,13 @@ const stockHashes={
   "save": "dbaf6a467b35702c92c4dd465f04b0c0b9c8f7638db8d41a3386442f28477514"
 };
 test('every UI icon retains its pinned Lucide stock glyph and common stroke without overrides',()=>{
- const headerSource=fs.readFileSync(path.join(__dirname,'../template/header.js'),'utf8');
+ const headerSource=fs.readFileSync(path.join(__dirname,'../src/header.js'),'utf8');
  let header='';
  vm.runInNewContext(headerSource.split(/\r?\n\r?\n/)[0],{document:{currentScript:{insertAdjacentHTML(_where,markup){header=markup;}}}});
- const settings=fs.readFileSync(path.join(__dirname,'../template/settings.html'),'utf8');
- const gradientSource=fs.readFileSync(path.join(__dirname,'../template/gradient.js'),'utf8');
+ const settings=fs.readFileSync(path.join(__dirname,'../src/settings.html'),'utf8');
+ const gradientSource=fs.readFileSync(path.join(__dirname,'../src/gradient.js'),'utf8');
  const gradientIcons=JSON.parse(gradientSource.match(/const actionIcons=(\{[\s\S]*?\});/)[1]);
- const previewSource=fs.readFileSync(path.join(__dirname,'../template/preview.js'),'utf8');
+ const previewSource=fs.readFileSync(path.join(__dirname,'../src/preview.js'),'utf8');
  const fileIcon=JSON.parse(previewSource.match(/const fileIcon=("[^\r\n]*");/)[1]);
  const sharedLayoutButton=JSON.parse(headerSource.match(/insertAdjacentHTML\('afterbegin',([^\r\n]+)\);/)[1]);
  const found=new Set();let count=0;
@@ -54,11 +54,11 @@ test('every UI icon retains its pinned Lucide stock glyph and common stroke with
  assert.match(header,/class="[^"]*theme-icon-moon/);
  assert.doesNotMatch(headerSource,/createElementNS/);
  for(const file of ['header.css','preview.css']){
-  const css=fs.readFileSync(path.join(__dirname,'../template',file),'utf8');
+  const css=fs.readFileSync(path.join(__dirname,'../src',file),'utf8');
   assert.doesNotMatch(css,/[^{}]*\.button-svg[^{}]*\{[^{}]*stroke-width/);
  }
- const notices=fs.readFileSync(path.join(__dirname,'../template/assets/THIRD-PARTY-NOTICES.md'),'utf8');
- const license=fs.readFileSync(path.join(__dirname,'../template/assets/Lucide-LICENSE.txt'),'utf8');
+ const notices=fs.readFileSync(path.join(__dirname,'../src/assets/THIRD-PARTY-NOTICES.md'),'utf8');
+ const license=fs.readFileSync(path.join(__dirname,'../src/assets/Lucide-LICENSE.txt'),'utf8');
  assert.match(notices,/lucide-static.+0\.468\.0/);assert.doesNotMatch(notices,/Figma Simple Design System/);
  assert.match(license,/ISC License/);assert.match(license,/The MIT License \(MIT\)/);assert.match(license,/Cole Bemis/);
 });

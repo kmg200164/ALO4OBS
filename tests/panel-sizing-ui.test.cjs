@@ -2,10 +2,10 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
-const events=require('../template/events.js');
-const pack=require('../template/pack.js');
+const events=require('../src/events.js');
+const pack=require('../src/pack.js');
 const keys=Object.keys(events.resolveLayout());
-const source=fs.readFileSync(require.resolve('../template/preview.js'),'utf8');
+const source=fs.readFileSync(require.resolve('../src/preview.js'),'utf8');
 function clamp(sizing,selected='custom1',enabled={},target=null){
  const config={panelSizing:events.normalizeSizing(),panelPlacement:events.defaultPlacement(),panelEnabled:enabled};
  for(const [key,value] of Object.entries(sizing))Object.assign(config.panelSizing[key],value);
