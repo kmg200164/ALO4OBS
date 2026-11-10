@@ -69,7 +69,7 @@ process.stdout.write(JSON.stringify(result));
     def test_setup_infographic_is_distributed_without_bloating_obs_runtime(self):
         import json
         self.assertEqual(builder.entries['assets/setup-workflow.png'],
-                         (builder.repository / 'docs/images/setup-workflow.png').read_bytes())
+                         (builder.repository / 'src/assets/setup-workflow.png').read_bytes())
         runtime = json.loads(builder.entries['internal/export-runtime.js'].decode()
                              .removeprefix('window.OBS_EXPORT_RUNTIME = ').strip().removesuffix(';'))
         self.assertNotIn('assets/setup-workflow.png', runtime)

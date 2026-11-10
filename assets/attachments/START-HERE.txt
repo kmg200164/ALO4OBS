@@ -1,9 +1,0 @@
-OBS Streaming Template v0.3.2
-
-1. OBS-Streaming-Template.zip을 압축 풀기합니다. 파일은 streaming-template 폴더에 들어 있습니다.
-2. 폴더에서 언어별 가이드를 엽니다: guide.html (한국어), guide-en.html (English), guide-ja.html (日本語).
-3. 선택한 가이드의 순서에 따라 설정합니다. 방송과 녹화는 자동으로 시작되지 않습니다.
-
-설정 화면에서 내려받는 사용자 설정 파일은 OBS-settings.zip입니다.
-
-이 파일은 ZIP 밖에서 함께 전달하는 시작 안내입니다.
