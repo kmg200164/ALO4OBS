@@ -232,6 +232,7 @@ def build_windows(destination, plugin_archive, source_archive):
             combined = {name: archive.read(name) for name in archive.namelist()}
         combined.update(added)
         destination = Path(destination)
+        destination.parent.mkdir(parents=True, exist_ok=True)
         with ZipFile(destination, 'w', ZIP_DEFLATED) as archive:
             for name, blob in combined.items():
                 if name.endswith(('.command', '.sh')):
@@ -248,10 +249,48 @@ def build_windows(destination, plugin_archive, source_archive):
     print('Verified offline Windows candidate: ' + str(destination))
 
 
+WEB_INDEX = (
+    '<!doctype html><html lang="en"><meta charset="utf-8"><title>ALO4OBS</title>'
+    '<meta name="viewport" content="width=device-width,initial-scale=1">'
+    '<meta http-equiv="refresh" content="0;url=settings.html">'
+    '<body><a href="settings.html">Open ALO4OBS</a></body></html>'
+)
+
+
+def build_web(destination):
+    """Write the editor as a static site (GitHub Pages).
+
+    The site holds the same verified editor files as the ZIP's files/ folder, so
+    visitors configure in the browser and download only their personal
+    Settings-Bento.zip / Settings-Overlap.zip. The Composite Blur plugin is not
+    hosted here; it stays in the offline distribution ZIP.
+    """
+    import shutil
+    verify_entries(entries)
+    destination = Path(destination)
+    if destination.exists():
+        shutil.rmtree(destination)
+    destination.mkdir(parents=True)
+    for name, data in entries.items():
+        target = destination / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(data)
+    (destination / 'index.html').write_text(WEB_INDEX, encoding='utf-8')
+    (destination / '.nojekyll').write_bytes(b'')
+    written = {path.relative_to(destination).as_posix() for path in destination.rglob('*') if path.is_file()}
+    if written != set(entries) | {'index.html', '.nojekyll'}:
+        raise ValueError('Web site inventory does not match the allowlist.')
+    print(f'Built web site {destination} v{version} ({len(entries)} editor files)')
+
+
 def build(destination=output):
     dependency = repository / 'vendor' / 'obs-composite-blur-1.6.0'
     return build_windows(destination, dependency / 'windows-legacy-x64.zip', dependency / 'source.zip')
 
 
 if __name__ == '__main__':
-    build()
+    import sys
+    if len(sys.argv) >= 2 and sys.argv[1] == '--web':
+        build_web(sys.argv[2] if len(sys.argv) > 2 else repository / 'site')
+    else:
+        build()
