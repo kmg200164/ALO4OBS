@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Host the settings editor on GitHub Pages (https://kmg200164.github.io/alo4obs/). Visitors configure in the browser and download only their personal Settings-Bento.zip / Settings-Overlap.zip. The distribution ZIP stays available for offline use and the bundled Composite Blur plugin.
+- Add `python build.py --web [folder]`, which writes the verified editor files as a static site, and a Pages workflow that deploys it on every push to main.
+- Create `dist/` when building the distribution ZIP in a fresh clone.
+
 ## 0.10.4 — 2026-10-24
 
 - Packaging hotfix: expose Windows/macOS/Linux installation helpers beside settings.html at the ZIP root; keep plugin packages/source under files and update helper/documentation paths. Explicitly load the built-in Windows PowerShell signature module.
