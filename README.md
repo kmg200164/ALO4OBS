@@ -4,12 +4,6 @@ Auto Layout Overlay for OBS: an open-source overlay that places panels so stream
 
 Latest release: 0.10.4.
 
-## Use in your browser
-
-Open https://kmg200164.github.io/alo4obs/ — no download or extraction needed. Configure your layout and click Save as ZIP; you download only your personal `Settings-Bento.zip` or `Settings-Overlap.zip`. Then continue from step 5 of [Install](#install).
-
-The web page is the same editor as the distribution ZIP. It does not include the Composite Blur plugin: Overlap live blur needs that plugin, so install it from the distribution ZIP below or the official releases. Settings drafts and uploaded media stay in your browser on this site; they are not shared with folders where you opened an older ZIP copy.
-
 ## Download
 
 The latest distribution is `ALO4OBS-v0.10.4.zip` from GitHub Releases:

@@ -174,21 +174,6 @@ process.stdout.write(JSON.stringify(result));
             self.assertTrue(all(not path.exists() for path in temporary_paths))
 
 
-
-class WebSiteTests(unittest.TestCase):
-    def test_web_site_matches_editor_files(self):
-        with tempfile.TemporaryDirectory(prefix='QA-test-web-') as folder:
-            site = Path(folder) / 'site'
-            builder.build_web(site)
-            written = {path.relative_to(site).as_posix() for path in site.rglob('*') if path.is_file()}
-            self.assertEqual(written, set(builder.entries) | {'index.html', '.nojekyll'})
-            for name, data in builder.entries.items():
-                self.assertEqual((site / name).read_bytes(), data, name)
-            self.assertIn('url=settings.html', (site / 'index.html').read_text())
-            # The plugin binaries stay in the offline ZIP only.
-            self.assertFalse(any(name.startswith('plugin/') for name in written))
-
-
 class PublicConfigUrlGuardTests(unittest.TestCase):
     def test_allowlisted_repository_and_donation_links_pass(self):
         builder.check_public_config_urls(

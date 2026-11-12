@@ -10,7 +10,6 @@ __pycache__/
 **/__pycache__/
 .qa-private/
 dist/
-site/
 **/dist/
 **/build/
 **/.pytest_cache/
