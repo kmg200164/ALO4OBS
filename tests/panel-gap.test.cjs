@@ -18,7 +18,7 @@ function assertSpacing(layout,gap){
  assert.equal(chat.y+chat.height+gap,translation.y);assert.equal(translation.y+translation.height+gap,hand.y);
 }
 test('every gap step spaces panels and canvas edges by exactly that value',()=>{
- assert.deepEqual(api.panelGaps,[8,16,24,32,48]);
+ assert.deepEqual(api.panelGaps,[0,8,16,24,32,48]);
  for(const gap of api.panelGaps)for(const aspect of [undefined,'16:9']){
   const layout=api.autoLayout({placement:api.defaultPlacement(),sizing:aspect?{game:{aspect}}:undefined,gap});
   assertSpacing(layout,gap);
@@ -60,5 +60,5 @@ test('settings export validates the gap and gives OBS boxes that reflect it',()=
  }
  const old=exported({panelPlacement:api.defaultPlacement()});
  assert.equal(old.panelGap,32);assert.deepEqual(old.layout,api.resolveLayout());
- for(const gap of [0,12,'16',null])assert.throws(()=>exported({panelGap:gap}),/Invalid panel gap/);
+ for(const gap of [-1,12,'16',null])assert.throws(()=>exported({panelGap:gap}),/Invalid panel gap/);
 });

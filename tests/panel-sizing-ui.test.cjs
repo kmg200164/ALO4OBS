@@ -106,7 +106,7 @@ test('per-panel style separates labeled Fill and Stroke groups without changing 
   vm.runInNewContext(source.slice(fileStart,fileEnd)+source.slice(sectionStart,sectionEnd)+source.slice(regionStart,regionEnd)+';this.markup=regionInputs;',context);
   const html=context.markup,fill=html.indexOf('<h4>패널 채우기</h4>'),stroke=html.indexOf('<h4>패널 테두리</h4>'),divider=html.indexOf('<div class="divider"></div>',fill);
   assert.ok(fill>=0&&fill<html.indexOf('name="regionFillMode"')&&html.indexOf('name="regionBlur"')<divider&&divider<stroke&&stroke<html.indexOf('name="regionStrokeMode"'));
-  assert.equal((html.match(/name="regionFillMode"/g)||[]).length,5);assert.equal((html.match(/name="regionStrokeMode"/g)||[]).length,3);
+  assert.equal((html.match(/name="regionFillMode"/g)||[]).length,4);assert.equal((html.match(/name="regionStrokeMode"/g)||[]).length,2);
   for(const name of ['regionOverride','regionColor','regionOpacity','regionBlur','regionBorderColor','regionStrokeWidth','regionImage'])assert.equal((html.match(new RegExp('name="'+name+'"','g'))||[]).length,1,name);
   assert.equal((html.match(/data-upload-trigger="region"/g)||[]).length,1);assert.equal((html.match(/data-upload="region"/g)||[]).length,1);
   assert.equal(/class="property-group region-style-details" hidden/.test(html),!override);

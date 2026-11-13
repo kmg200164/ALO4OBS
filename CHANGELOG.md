@@ -5,6 +5,8 @@
 - Make the guide pages (Korean, English, Japanese) and the README describe the browser flow: open the website, configure, save the personal Settings ZIP, add the script in OBS. Offline use of the distribution ZIP is now described as the optional route.
 - Replace the quick-start picture with a browser-flow picture. Only file names and the site address appear as text.
 - Ask once, when the settings are saved with a panel blur above 0 in Overlap, whether the Composite Blur plugin is installed on this PC. Answering that it is needed offers an installer ZIP for the detected OS (Windows, macOS, Linux) with the GPL source ZIP beside it. The script/settings download stays plugin-free. `python build.py --web` writes these under `plugin/`; the offline ZIP is unchanged.
+- Remove the "None" choices from panel fill and stroke; use the None step of opacity and width instead. Saved "none" fills and strokes become opacity 0 and width 0.
+- Add a "None" (0 px) step to panel gap and corner radius. The suggestion to remove the global stroke now appears when the gap is 0.
 - Replace the "use shadow" switches with a "None" step on the shadow slider (global and per panel), and add "None" steps to fill opacity and stroke width, so each strength has one slider without a separate on/off switch. Existing saved values keep working.
 - Add a "None" (0 px) step to the panel blur slider and make it the default, so the Composite Blur plugin is only needed once a blur is chosen. Saved settings keep their blur values.
 - Host the settings editor on GitHub Pages (https://kmg200164.github.io/alo4obs/). Add `python build.py --web [folder]`, which writes the verified editor files as a static site, and a Pages workflow that deploys it on every push to main.

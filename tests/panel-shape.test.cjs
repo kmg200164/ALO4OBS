@@ -20,12 +20,12 @@ function documentMock(){
 }
 test('Figma smoothing choices stay finite at all radius presets and small-panel boundaries',()=>{
  const curves=new Set();
- for(const radius of [8,16,24,32,48])for(const smoothing of [0,.6,1]){
+ for(const radius of [0,8,16,24,32,48])for(const smoothing of [0,.6,1]){
   const d=shape.path(292,240,radius,smoothing);assert.doesNotMatch(d,/NaN|Infinity|undefined/);
   assert.match(d,/^M /);assert.match(d,/ Z$/);curves.add(d);
   for(const [width,height] of [[20,12],[1,1],[0,0],[1920,1080]])assert.doesNotMatch(shape.path(width,height,radius,smoothing),/NaN|Infinity/);
  }
- assert.equal(curves.size,15,'every visible choice has distinct geometry on the Figma sample size');
+ assert.equal(curves.size,16,'every visible rounded choice has distinct geometry on the Figma sample size; radius 0 is one square shape');
  assert.equal(shape.path(200,100,0,1),'M 0 0 H 200 V 100 H 0 Z');
  assert.equal(shape.path(20,12,48,1),shape.path(20,12,6,1),'oversized corners obey half-short-side boundary');
  assert.equal(shape.path(292,240,16,.6),'M 266.4 0 c 8.9608 0 13.4413 0 16.8638 1.7439 a 16.0000 16.0000 0 0 1 6.9923 6.9923 c 1.7439 3.4226 1.7439 7.9030 1.7439 16.8638 L 292 214.4 c 0 8.9608 0 13.4413 -1.7439 16.8638 a 16.0000 16.0000 0 0 1 -6.9923 6.9923 c -3.4226 1.7439 -7.9030 1.7439 -16.8638 1.7439 L 25.6 240 c -8.9608 0 -13.4413 0 -16.8638 -1.7439 a 16.0000 16.0000 0 0 1 -6.9923 -6.9923 c -1.7439 -3.4226 -1.7439 -7.9030 -1.7439 -16.8638 L 0 25.6 c 0 -8.9608 0 -13.4413 1.7439 -16.8638 a 16.0000 16.0000 0 0 1 6.9923 -6.9923 c 3.4226 -1.7439 7.9030 -1.7439 16.8638 -1.7439 Z');
@@ -94,7 +94,7 @@ test('Chrome paints exterior strokes/shadows and respects smoothed content hit b
     return points.map(([x,y])=>Array.from(context.getImageData(x,y,1,1).data));
    }
    const checks=[];
-   for(const radius of [8,16,24,32,48])for(const smoothing of [0,.6,1]){
+   for(const radius of [0,8,16,24,32,48])for(const smoothing of [0,.6,1]){
     const svg=shape.strokeNode(292,240,{radius,smoothing,stroke:{mode:'solid',width:4,color:'#ff0000'}});
     checks.push(await pixels(svg,[[150,2],[150,6],[150,120],[2,2]]));
    }

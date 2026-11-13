@@ -31,7 +31,7 @@
   }
   // One spacing value is both the outer margin and the gap between panels.
   // The Side frame keeps its width; the Main/Sub frame takes what remains.
-  const panelGaps=[8,16,24,32,48],sideWidth=440;
+  const panelGaps=[0,8,16,24,32,48],sideWidth=440;
   function normalizeGap(value){return panelGaps.includes(value)?value:32;}
   function normalizeSidePosition(value){return value==='left'?'left':'right';}
   function frameSize(gap,sidePosition){const left=normalizeSidePosition(sidePosition)==='left';return {left:1920-3*gap-sideWidth,height:1080-2*gap,mainX:left?sideWidth+2*gap:gap,sideX:left?gap:1920-gap-sideWidth};}
@@ -238,7 +238,7 @@
     return [[1,'1:1'],[16/9,'16:9']].map(([ratio,label])=>({label,value:Math.round(axis==='width'?other*ratio:other/ratio)}))
       .filter(stop=>stop.value>=bounds.min&&stop.value<=bounds.max);
   }
-  const cornerRadii=[8,16,24,32,48],cornerSmoothings=[0,.6,1],panelShadowStrengths=[0,8,16,32,48,64];
+  const cornerRadii=[0,8,16,24,32,48],cornerSmoothings=[0,.6,1],panelShadowStrengths=[0,8,16,32,48,64];
   // Shadows share the same individual-style switch as fill and stroke.
   // Missing local values inherit; an explicit zero disables an overridden shadow.
   function effectivePanelShadow(config={},key){

@@ -59,7 +59,7 @@
     const numberValue=Number(value);if(!Number.isFinite(numberValue))return fallback;
     return values.reduce((best,candidate)=>Math.abs(candidate-numberValue)<Math.abs(best-numberValue)||Math.abs(candidate-numberValue)===Math.abs(best-numberValue)&&candidate<best?candidate:best,values[0]);
   }
-  const gapLabels=['매우 좁음','좁음','보통','넓음','매우 넓음'];
+  const gapLabels=['없음','매우 좁음','좁음','보통','넓음','매우 넓음'];
   const globalStrengthLabels=['매우 약함','약함','중간','강함','매우 강함'],globalBlurLabels=['없음',...globalStrengthLabels],globalNoneLabels=globalBlurLabels;
   const selectShell=html=>`<span class="select-shell">${html}<svg class="lucide lucide-chevron-down select-icon" data-lucide="chevron-down" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg></span>`;
   function presetSelect(name,value,values,fallback,labels=['매우 강함','강함','중간','약함','매우 약함']){
@@ -92,10 +92,14 @@
   }
   function normalizeStylePresets(next){
     const fill=next.globalStyle.fill,stroke=next.globalStyle.stroke;
+    if(fill.mode==='none'){fill.mode='solid';fill.opacity=0;}
+    if(stroke.mode==='none'){stroke.mode='solid';stroke.width=0;}
     fill.opacity=nearestPreset(fill.opacity,globalOpacityPresets,20);fill.blur=nearestPreset(fill.blur,globalBlurPresets,0);
     stroke.width=nearestPreset(stroke.width,globalStrokeWidthPresets,4);forceStrokeAlpha(stroke);next.borderOpacity=100;
     for(const region of Object.values(next.regionBackgrounds)){
       if(!region||typeof region!=='object')continue;
+      if(region.fill?.mode==='none'&&!['file','url'].includes(region.imageMode)&&!region.image){region.fill.mode='solid';region.fill.opacity=0;}
+      if(region.stroke?.mode==='none'){region.stroke.mode='solid';region.stroke.width=0;}
       region.opacity=nearestPreset(region.fill?.opacity??region.opacity,opacityPresets,20);
       region.blur=nearestPreset(region.fill?.blur??region.blur,blurPresets,0);
       if(region.fill){region.fill.opacity=region.opacity;region.fill.blur=region.blur;}
@@ -277,7 +281,7 @@
       if(!region[key]){
         region[key]=key==='fill'
           ?{mode:'solid',color:region.color||'#ffffff',color2:region.color2||'#000000',opacity:region.opacity??20,blur:region.blur??0}
-          :{mode:region.borderVisible===false?'none':'solid',color:region.borderColor||'#ffffff',color2:region.borderColor2||'#000000',opacity:100,width:4};
+          :{mode:'solid',color:region.borderColor||'#ffffff',color2:region.borderColor2||'#000000',opacity:100,width:region.borderVisible===false?0:4};
         config.regionBackgrounds[selected]=region;
       }
       const part=region[key];
@@ -331,14 +335,12 @@
         ${propertyRow('모서리 스무딩',presetRange('cornerSmoothing',config.cornerSmoothing,OverlayEvents.cornerSmoothings,0,['기본 (0%)','iOS (60%)','최대 스무딩 (100%)'],'smoothing'),'','',false,'radio','property-row--size property-row--preset')}
       </div></details><div class="divider"></div>
       <details class="property-section"><summary><h4>패널 채우기</h4></summary><div class="property-group">
-        ${propertyRow('없음','','globalFillMode','none',f.mode==='none')}
         ${propertyRow('단색',color('globalFillColor',f.color),'globalFillMode','solid',f.mode==='solid')}
         ${propertyRow('그라디언트',gradientControl('globalFill'),'globalFillMode','gradient',f.mode==='gradient')}
         ${propertyRow('불투명도',presetRange('globalFillOpacity',f.opacity,globalOpacityPresets,20,globalNoneLabels,'%'),'','',false,'radio','property-row--size property-row--preset')}
         ${propertyRow('흐림',presetRange('globalFillBlur',f.blur,globalBlurPresets,0,globalBlurLabels,'px'),'','',false,'radio','property-row--size property-row--preset')}
       </div></details><div class="divider"></div>
       <details class="property-section"><summary><h4>패널 테두리</h4></summary><div class="property-group">
-        ${propertyRow('없음','','globalStrokeMode','none',t.mode==='none')}
         ${propertyRow('단색',color('globalStrokeColor',t.color),'globalStrokeMode','solid',t.mode==='solid')}
         ${propertyRow('그라디언트',gradientControl('globalStroke'),'globalStrokeMode','gradient',t.mode==='gradient')}
         ${propertyRow('두께',presetRange('globalStrokeWidth',t.width,globalStrokeWidthPresets,4,globalNoneLabels,'px'),'','',false,'radio','property-row--size property-row--preset')}
@@ -463,7 +465,7 @@
     const positioning=config.layoutMode==='overlap'&&key!=='game'?section('패널 위치',editorRow('세로 위치',`${modeSwitch('panelPositionMode',position.mode)}<div class="size-controls" data-fixed-position${position.mode==='fixed'?'':' hidden'}><input name="panelY" type="number" min="0" step="1" aria-label="Y 좌표 (px)"><div class="size-slider-track"><input name="panelYSlider" type="range" min="0" step="1" aria-label="Y 좌표 슬라이더"></div><span class="editor-help" data-position-range></span></div>`,'property-row--size')+alignmentControl+'<p class="editor-help">자동: 컬럼의 패널 묶음을 정렬합니다. 수동: Y 좌표를 고정합니다. 미리보기에서 위아래로 드래그할 수 있습니다.</p>')+'<div class="divider"></div>':'';
     const shadow=section('그림자',key==='game'&&config.layoutMode==='overlap'?'<p class="editor-help">Main은 전체 화면을 채웁니다.</p>':editorRow('그림자 강도',presetRange('panelShadow',config.panelShadows[key]??config.globalShadow??0,OverlayEvents.panelShadowStrengths,0,globalNoneLabels,'px'),'property-row--size property-row--preset'));
     const fill=region.fill||{mode:'solid',color:region.color||'#ffffff',opacity:region.opacity??20,blur:region.blur??0};
-    const stroke=region.stroke||{mode:region.borderVisible===false?'none':'solid',color:region.borderColor||'#ffffff',opacity:100,width:4};
+    const stroke=region.stroke||{mode:'solid',color:region.borderColor||'#ffffff',opacity:100,width:region.borderVisible===false?0:4};
     const useRegionOverride=!!config.regionStyleOverrides[key];
     const imageMode=region.imageMode??(region.image?(/^assets\//.test(region.image)?'file':'url'):'none');
     const fillChoice=['file','url'].includes(imageMode)?imageMode:fill.mode;
@@ -472,7 +474,6 @@
       <div class="property-group region-style-details"${useRegionOverride?'':' hidden'}>
       <div class="divider"></div>
       ${section('패널 채우기',`
-      ${propertyRow('없음','','regionFillMode','none',fillChoice==='none')}
       ${propertyRow('단색',color('regionColor',fill.color||region.color||'#ffffff'),'regionFillMode','solid',fillChoice==='solid')}
       ${propertyRow('그라디언트',gradientControl('regionFill'),'regionFillMode','gradient',fillChoice==='gradient')}
       ${propertyRow('이미지 URL','<input name="regionImage" type="url" placeholder="https://…">','regionFillMode','url',fillChoice==='url')}
@@ -482,7 +483,6 @@
       `)}
       <div class="divider"></div>
       ${section('패널 테두리',`
-      ${propertyRow('없음','','regionStrokeMode','none',stroke.mode==='none')}
       ${propertyRow('단색',color('regionBorderColor',stroke.color||region.borderColor||'#ffffff'),'regionStrokeMode','solid',stroke.mode!=='none'&&stroke.mode!=='gradient')}
       ${propertyRow('그라디언트',gradientControl('regionStroke'),'regionStrokeMode','gradient',stroke.mode==='gradient')}
       ${editorPreset('두께','regionStrokeWidth',stroke.width??4,strokeWidthPresets,4)}
@@ -564,7 +564,7 @@
     r.color=fillMode==='gradient'&&fill.gradient?.stops?.length?fill.gradient.stops[0].color:control('regionColor').value;
     r.opacity=presetRangeValue('regionOpacity',globalOpacityPresets,20);r.blur=presetRangeValue('regionBlur',globalBlurPresets,0);
     r.borderColor=strokeMode==='gradient'&&stroke.gradient?.stops?.length?stroke.gradient.stops[0].color:control('regionBorderColor').value;
-    r.borderVisible=strokeMode!=='none';
+    r.borderVisible=strokeMode!=='none'&&presetRangeValue('regionStrokeWidth',globalStrokeWidthPresets,4)>0;
     r.imageUrl=control('regionImage').value.trim();r.image=r.image||r.imageUrl;r.imageFile=r.imageFile||(/^assets\//.test(r.image||'')?r.image:'');
     r.imageMode=['url','file'].includes(fillChoice)?fillChoice:'none';
     if(r.imageMode==='url')r.image=r.imageUrl;else if(r.imageMode==='file')r.image=r.imageFile;
@@ -757,7 +757,7 @@
     if(/^overlapColumn[1-5](?:Enabled|Wide)$/.test(input.name)&&updateOverlapColumn(input))return;
     if(input.matches('[data-upload]')){handleUpload(input);return;}
     if(input.name==='cameraDevice')return;
-    if(input.name==='panelGap'&&presetRangeValue('panelGap',OverlayEvents.panelGaps,32)===8&&config.globalStyle.stroke.mode!=='none'&&window.confirm(localized('간격이 매우 좁습니다. 전역 테두리를 제거할까요? 패널별 개별 설정은 유지됩니다.')))control('globalStrokeMode').value='none';
+    if(input.name==='panelGap'&&presetRangeValue('panelGap',OverlayEvents.panelGaps,32)===0&&config.globalStyle.stroke.width>0&&window.confirm(localized('간격이 매우 좁습니다. 전역 테두리를 제거할까요? 패널별 개별 설정은 유지됩니다.'))){const width=control('globalStrokeWidth');width.value='0';width.dispatchEvent?.(new Event('input',{bubbles:true}));}
     if(['placementSwap','sidePosition'].includes(input.name)){updatePlacement(input);apply();return;}
     if(input.name==='regionOverride'){
       const details=byId('panel-editor').querySelector('.region-style-details');

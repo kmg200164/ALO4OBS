@@ -8,7 +8,7 @@ test('regional image radios, gradient defaults, switches and uniform vertical al
   await require('./helpers/expanded-sections.cjs')(page);await page.goto(new URL('settings.html',process.env.KMG_THEME_RENDER_URL||'http://127.0.0.1:8783/review/files/').href);await page.locator('[data-layout-choice=bento]').click();
   await page.locator('[data-hit=custom1] .panel-number').click();
   const override=page.locator('[name=regionOverride]');assert.equal(await override.getAttribute('role'),'switch');await override.check();
-  assert.deepEqual(await page.locator('[name=regionFillMode]').evaluateAll(nodes=>nodes.map(node=>node.value)),['none','solid','gradient','url','file']);
+  assert.deepEqual(await page.locator('[name=regionFillMode]').evaluateAll(nodes=>nodes.map(node=>node.value)),['solid','gradient','url','file']);
   for(const name of ['regionFill','regionStroke'])assert.match(await page.locator('[data-gradient-preview='+name+']').getAttribute('style'),/255, 255, 255.*0, 0, 0/);
   assert.equal(await page.locator('[name=panelShadowEnabled]').count(),0);assert.equal(await page.locator('[name=globalShadowEnabled]').count(),0);
   assert.ok(await page.locator('[name=regionFillMode][value=file]').evaluate(el=>el.getBoundingClientRect().top<document.querySelector('[name=regionOpacity]').getBoundingClientRect().top));
@@ -16,7 +16,7 @@ test('regional image radios, gradient defaults, switches and uniform vertical al
   await page.locator('[name=regionImage]').fill(url);await page.locator('[name=regionFillMode][value=url]').check();
   await page.waitForFunction(()=>JSON.parse(localStorage.getItem('obs-overlay-config')).regionBackgrounds.custom1.imageMode==='url');
   const image=page.frameLocator('#preview').locator('[data-region=custom1] .panel-image');await image.waitFor({state:'visible'});
-  await page.locator('[name=regionFillMode][value=none]').check();await image.waitFor({state:'hidden'});
+  await page.locator('[name=regionFillMode][value=solid]').check();await image.waitFor({state:'hidden'});
   await page.locator('[data-upload=region]').setInputFiles({name:'pixel.png',mimeType:'image/png',buffer:Buffer.from(url.split(',')[1],'base64')});
   await page.waitForFunction(()=>JSON.parse(localStorage.getItem('obs-overlay-config')).regionBackgrounds.custom1.imageMode==='file');
   await image.waitFor({state:'visible'});await page.locator('[name=regionFillMode][value=solid]').check();await image.waitFor({state:'hidden'});
