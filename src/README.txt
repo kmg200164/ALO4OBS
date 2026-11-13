@@ -1,11 +1,11 @@
 ALO4OBS
-Auto Layout Overlay for OBS — 0.10.4
+Auto Layout Overlay for OBS — 0.10.5
 
-ALO4OBS-v0.10.4.zip is this distribution archive. Settings-Bento.zip / Settings-Overlap.zip is your personal saved application package.
+ALO4OBS-v0.10.5.zip is this distribution archive. Settings-Bento.zip / Settings-Overlap.zip is your personal saved application package.
 
 1. Use OBS Studio 30.1 or newer with Browser Source and Tools > Scripts. The script needs obs_sceneitem_get_info2 / obs_sceneitem_set_info2 (30.1 APIs); isolated Windows OBS 32.2.2 migration checks passed in the scope below. macOS is unverified for this version.
 2. Use a 1920 x 1080 base canvas (Settings > Video). Choose a separate profile if your production profile uses another size; do not overwrite it arbitrarily.
-3. Extract the entire distribution. Open root settings.html (it opens files/settings.html), never a page inside the ZIP.
+3. Open https://kmg200164.github.io/alo4obs/ in your browser. Offline route: extract the entire distribution and open root settings.html (it opens files/settings.html), never a page inside the ZIP. The web page does not include the Composite Blur plugin; install it from this distribution (see BUNDLED COMPOSITE BLUR INSTALLATION) or from the official releases.
 4. First choose Bento (4 columns) or Overlap (5 columns). Switch layout returns to this chooser; each layout retains its layout and panel settings. Main and global appearance are shared. Bento uses Main, Sub and Side; Overlap uses Main and 15 independent panels named Panel 1-1 through Panel 5-3. Select a panel and Content type: None, OBS source, Web URL or Image/video.
 5. For OBS source, create and verify the original capture or camera in OBS first. Scenes/groups are not panel source choices. For web widgets use the OBS display URL; for media upload a file or enter its direct URL.
 6. Set layout, sizes, spacing and styles. In Bento, Sub runs left to right and Side top to bottom; their counts and row/column positions can change. In Overlap, Main fills 1920 x 1080. Fresh Overlap enables all five columns and all 15 panels, with the 5-column width basis (355.2 px), Manual heights 328 px and Manual Y positions 24/376/728 px at gap 24; an Enabled switch controls visibility and a count slider selects 1-3 panels. Columns 1, 3 and 5 offer a Wider width switch: 5-column basis when off, 3-column basis when on. Wide neighbors temporarily suppress columns 2 and 4 without clearing saved settings. Disabled columns retain their horizontal slots and all settings; disabling a column does not move the other columns. Names identify each panel's fixed column and default row. Select visible panels in the preview and choose Auto or Manual pixel height. Red/yellow warnings do not block use. UI theme colors do not change broadcast colors.
