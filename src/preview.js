@@ -830,7 +830,7 @@
       if(key==='game')return false;
       const region=data.regionBackgrounds?.[key]||{};
       const fill=data.regionStyleOverrides?.[key]?region.fill:data.globalStyle?.fill;
-      let radius=Number(fill?.blur??region.blur??0);
+      let radius=Number(data.regionStyleOverrides?.[key]?fill?.blur??region.blur??0:fill?.blur??0);
       if(fill?.mode==='none')radius=0;
       return radius>0;
     });
