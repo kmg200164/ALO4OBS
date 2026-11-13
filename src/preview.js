@@ -848,7 +848,6 @@
   function closePlugin(state){if(state){try{localStorage.setItem(pluginKey,state);}catch{}}pluginDialog.close();}
   byId('bundle').addEventListener('click',offerPlugin);
   byId('blur-plugin-yes').onclick=()=>closePlugin('installed');
-  byId('blur-plugin-no').onclick=()=>closePlugin('skipped');
   byId('blur-plugin-get').addEventListener('click',()=>closePlugin('downloaded'));
   pluginDialog.addEventListener('cancel',event=>{event.preventDefault();closePlugin('');});
   function showEditor(){chooser.hidden=true;for(const section of document.querySelectorAll('.editor-workspace,.preview-section,.settings-section'))section.hidden=false;byId('change-layout').querySelector('[data-layout-label]').textContent=localized('레이아웃 전환 · 현재 '+(config.layoutMode==='overlap'?'Overlap':'Bento'));}
