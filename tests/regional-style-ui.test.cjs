@@ -5,7 +5,7 @@ const vm=require('node:vm');
 const source=fs.readFileSync(require.resolve('../src/preview.js'),'utf8');
 const pack=require('../src/pack.js');
 const presets=source.slice(source.indexOf('  const opacityPresets='),source.indexOf('  function migratePanelContent('));
-const scales={regionOpacity:[10,20,40,70,100],regionBlur:[4,8,16,32,64],regionStrokeWidth:[1,2,4,6,8]};
+const scales={regionOpacity:[10,20,40,70,100],regionBlur:[0,4,8,16,32,64],regionStrokeWidth:[1,2,4,6,8]};
 
 function editor(values,region={}){
  const inputs=Object.fromEntries(Object.entries({regionFillMode:'solid',regionStrokeMode:'solid',regionColor:'#123456',regionBorderColor:'#abcdef',regionOpacity:'1',regionBlur:'2',regionStrokeWidth:'2',regionImage:'assets/card.png',panelContentType:'none',...values}).map(([name,value])=>[name,{name,value:String(value)}]));
@@ -61,8 +61,8 @@ test('regional slider input updates translated labels before change with global 
  const start=source.indexOf("  form.addEventListener('input',event=>{"),end=source.indexOf("  form.addEventListener('change'",start);
  vm.runInNewContext(source.slice(start,end),context);
  for(const [name,values] of Object.entries(scales)){
-  handler({target:{dataset:{},name,value:'4',matches:()=>false,closest:()=>null}});
-  assert.equal(label.innerHTML,`<span data-preset-strength>Very strong</span> (${values[4]}${name==='regionOpacity'?'%':'px'})`);
+  const top=values.length-1;handler({target:{dataset:{},name,value:String(top),matches:()=>false,closest:()=>null}});
+  assert.equal(label.innerHTML,`<span data-preset-strength>Very strong</span> (${values[top]}${name==='regionOpacity'?'%':'px'})`);
  }
  assert.equal(applies,3);
 });

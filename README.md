@@ -14,7 +14,7 @@ Your settings and uploaded files stay in your browser on this site.
 
 - The guide and README now follow the browser flow: open the site, configure, save the personal ZIP, add the script in OBS. The old "download, extract, open `settings.html`" steps are now the optional offline route.
 - New quick-start picture for the browser flow.
-- When a panel blur above 0 is set in Overlap or the settings are saved, the settings page asks once whether the Composite Blur plugin is installed and offers an installer ZIP for your OS. The plugin is also in the distribution ZIP and the official releases.
+- When the settings are saved with a panel blur above 0 in Overlap, the settings page asks once whether the Composite Blur plugin is installed and offers an installer ZIP for your OS. The plugin is also in the distribution ZIP and the official releases.
 
 The full list of changes is in [CHANGELOG.md](CHANGELOG.md).
 
