@@ -29,7 +29,7 @@ window.OVERLAY_PUBLIC_CONFIG = window.OVERLAY_CONFIG = {
     ] }
   } },
   regionBackgrounds: Object.fromEntries(["game", "custom1", "custom2", "custom3", "chat", "translation", "hand"].map(key => [key, {
-    color: "#ffffff", image: "", opacity: 20, blur: 16,
+    color: "#ffffff", image: "", opacity: 20, blur: 0,
     borderColor: "#ffffff", borderVisible: true
   }])),
   alertDuration: 7000
