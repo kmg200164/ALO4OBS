@@ -842,14 +842,14 @@
     if(state)return;
     const platform=(navigator.userAgentData?.platform||navigator.platform||navigator.userAgent||'').toLowerCase();
     const os=/mac|iphone|ipad/.test(platform)?'macos':/linux|x11/.test(platform)&&!/android/.test(platform)?'linux':'windows';
-    const get=byId('blur-plugin-get');get.dataset.pluginFile=os;for(const link of pluginDialog.querySelectorAll('[data-plugin-file]'))link.href=pluginBundles+(link.dataset.pluginFile==='source'?'composite-blur-1.6.0-source.zip':'composite-blur-'+link.dataset.pluginFile+'.zip');
-    pluginDialog.showModal();get.focus();
+    for(const link of pluginDialog.querySelectorAll('[data-plugin-file]'))link.href=pluginBundles+(link.dataset.pluginFile==='source'?'composite-blur-1.6.0-source.zip':'composite-blur-'+link.dataset.pluginFile+'.zip');
+    try{const auto=document.createElement('a');auto.href=pluginBundles+'composite-blur-'+os+'.zip';auto.download='';auto.hidden=true;document.body.append(auto);auto.click();auto.remove();}catch{}
+    try{localStorage.setItem(pluginKey,'downloaded');}catch{}
+    pluginDialog.showModal();byId('blur-plugin-yes').focus();
   }
   function closePlugin(state){if(state){try{localStorage.setItem(pluginKey,state);}catch{}}pluginDialog.close();}
   byId('bundle').addEventListener('click',offerPlugin);
-  byId('blur-plugin-yes').onclick=()=>closePlugin('installed');
-  byId('blur-plugin-no').onclick=()=>closePlugin('skipped');
-  byId('blur-plugin-get').addEventListener('click',()=>closePlugin('downloaded'));
+  byId('blur-plugin-yes').onclick=()=>closePlugin('downloaded');
   pluginDialog.addEventListener('cancel',event=>{event.preventDefault();closePlugin('');});
   function showEditor(){chooser.hidden=true;for(const section of document.querySelectorAll('.editor-workspace,.preview-section,.settings-section'))section.hidden=false;byId('change-layout').querySelector('[data-layout-label]').textContent=localized('레이아웃 전환 · 현재 '+(config.layoutMode==='overlap'?'Overlap':'Bento'));}
   const guideReturnKey='obs-overlay-guide-return',pagePath=window.location.href.split(/[?#]/)[0];
