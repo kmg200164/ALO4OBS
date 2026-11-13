@@ -4,7 +4,7 @@
 
 - Make the guide pages (Korean, English, Japanese) and the README describe the browser flow: open the website, configure, save the personal Settings ZIP, add the script in OBS. Offline use of the distribution ZIP is now described as the optional route.
 - Replace the quick-start picture with a browser-flow picture. Only file names and the site address appear as text.
-- State that the web page does not include the Composite Blur plugin and where to get it: the distribution ZIP or the official releases.
+- Ask once, when Overlap is chosen on the web page, whether the Composite Blur plugin is installed on this PC. Answering that it is needed offers an installer ZIP for the detected OS (Windows, macOS, Linux) with the GPL source ZIP beside it. The script/settings download stays plugin-free. `python build.py --web` writes these under `plugin/`; the offline ZIP is unchanged.
 - Host the settings editor on GitHub Pages (https://kmg200164.github.io/alo4obs/). Add `python build.py --web [folder]`, which writes the verified editor files as a static site, and a Pages workflow that deploys it on every push to main.
 - Create `dist/` when building the distribution ZIP in a fresh clone.
 

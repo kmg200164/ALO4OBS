@@ -14,13 +14,13 @@ Your settings and uploaded files stay in your browser on this site.
 
 - The guide and README now follow the browser flow: open the site, configure, save the personal ZIP, add the script in OBS. The old "download, extract, open `settings.html`" steps are now the optional offline route.
 - New quick-start picture for the browser flow.
-- The Composite Blur note says that the settings page does not include the plugin. Get it from the distribution ZIP or from the official releases.
+- When Overlap is chosen, the settings page asks once whether the Composite Blur plugin is installed and offers an installer ZIP for your OS. The plugin is also in the distribution ZIP and the official releases.
 
 The full list of changes is in [CHANGELOG.md](CHANGELOG.md).
 
 ## Offline use and the blur plugin
 
-The settings page does not include the Composite Blur plugin that Overlap live blur needs. Bento and blur 0 work without it. The distribution ZIP `ALO4OBS-v0.10.5.zip` bundles the plugin and install helpers, and also runs the editor offline:
+The Composite Blur plugin that Overlap live blur needs is not part of your Settings ZIP; the settings page offers an installer on request. Bento and blur 0 work without it. The distribution ZIP `ALO4OBS-v0.10.5.zip` bundles the plugin and install helpers, and also runs the editor offline:
 
 https://github.com/kmg200164/alo4obs/releases/latest
 

@@ -181,12 +181,21 @@ class WebSiteTests(unittest.TestCase):
             site = Path(folder) / 'site'
             builder.build_web(site)
             written = {path.relative_to(site).as_posix() for path in site.rglob('*') if path.is_file()}
-            self.assertEqual(written, set(builder.entries) | {'index.html', '.nojekyll'})
+            plugin = {name for name in written if name.startswith('plugin/')}
+            self.assertEqual(plugin, {'plugin/composite-blur-windows.zip', 'plugin/composite-blur-macos.zip',
+                                      'plugin/composite-blur-linux.zip', 'plugin/' + builder.PLUGIN_SOURCE_NAME})
+            self.assertEqual(written - plugin, set(builder.entries) | {'index.html', '.nojekyll'})
             for name, data in builder.entries.items():
-                self.assertEqual((site / name).read_bytes(), data, name)
+                if name == 'settings.html':
+                    self.assertEqual((site / name).read_bytes(), data.replace(b'</head>', builder.PLUGIN_META + b'</head>', 1), name)
+                else:
+                    self.assertEqual((site / name).read_bytes(), data, name)
             self.assertIn('url=settings.html', (site / 'index.html').read_text())
-            # The plugin binaries stay in the offline ZIP only.
-            self.assertFalse(any(name.startswith('plugin/') for name in written))
+            for name in ('windows', 'macos', 'linux'):
+                with ZipFile(site / 'plugin' / f'composite-blur-{name}.zip') as archive:
+                    self.assertIsNone(archive.testzip())
+            # The offline ZIP carries no web-only plugin marker.
+            self.assertNotIn(builder.PLUGIN_META, builder.entries['settings.html'])
 
 
 class PublicConfigUrlGuardTests(unittest.TestCase):
