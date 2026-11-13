@@ -2,29 +2,29 @@
 
 Auto Layout Overlay for OBS: an open-source overlay that places panels so stream content never overlaps.
 
-Latest release: 0.10.4.
+Latest release: 0.10.5.
 
 ## Use in your browser
 
-Open https://kmg200164.github.io/alo4obs/ — no download or extraction needed. Configure your layout and click Save as ZIP; you download only your personal `Settings-Bento.zip` or `Settings-Overlap.zip`. Then continue from step 5 of [Install](#install).
+Open https://kmg200164.github.io/alo4obs/. Nothing needs to be downloaded or extracted first. Choose a layout, configure your panels, and click Save as ZIP. You download only your personal `Settings-Bento.zip` or `Settings-Overlap.zip`, which contains the OBS script. Then continue from step 3 of [Install](#install).
 
-The web page is the same editor as the distribution ZIP. It does not include the Composite Blur plugin: Overlap live blur needs that plugin, so install it from the distribution ZIP below or the official releases. Settings drafts and uploaded media stay in your browser on this site; they are not shared with folders where you opened an older ZIP copy.
+Your settings and uploaded files stay in your browser on this site.
 
-## Download
+## What's new in 0.10.5
 
-The latest distribution is `ALO4OBS-v0.10.4.zip` from GitHub Releases:
+- The guide and README now follow the browser flow: open the site, configure, save the personal ZIP, add the script in OBS. The old "download, extract, open `settings.html`" steps are now the optional offline route.
+- New quick-start picture for the browser flow.
+- The Composite Blur note says that the settings page does not include the plugin. Get it from the distribution ZIP or from the official releases.
+
+The full list of changes is in [CHANGELOG.md](CHANGELOG.md).
+
+## Offline use and the blur plugin
+
+The settings page does not include the Composite Blur plugin that Overlap live blur needs. Bento and blur 0 work without it. The distribution ZIP `ALO4OBS-v0.10.5.zip` bundles the plugin and install helpers, and also runs the editor offline:
 
 https://github.com/kmg200164/alo4obs/releases/latest
 
-## What's new in 0.10.4
-
-- Windows, macOS and Linux install helpers now sit next to `settings.html` at the root of the distribution ZIP. Plugin packages stay under `files/`.
-- Personal exports use `script-bento.lua` or `script-overlap.lua`.
-- Bento panel blur uses the configured background image or color. Overlap blurs the live Main source, and keeps the static backdrop while capture is unavailable.
-- Per-panel media fit and crop are saved in the editor and in the exported settings.
-- Official Composite Blur 1.6.0 is bundled. Actual plugin installation is verified on Windows OBS 32 only; macOS and Linux installation remain unverified.
-
-The full list of changes is in [CHANGELOG.md](CHANGELOG.md).
+For the bundled plugin, see [docs/PLUGIN-SUPPORT.md](docs/PLUGIN-SUPPORT.md). Official plugin releases: https://github.com/FiniteSingularity/obs-composite-blur/releases
 
 ## Requirements
 
@@ -34,17 +34,14 @@ The full list of changes is in [CHANGELOG.md](CHANGELOG.md).
 
 ## Install
 
-1. Download the distribution ZIP and extract the entire archive.
-2. Open the root `settings.html` (it opens `files/settings.html`). Do not open pages inside the ZIP.
-3. Choose Bento (4 columns) or Overlap (5 columns), then configure panels and content.
-4. Click Save as ZIP. The personal package is `Settings-Bento.zip` or `Settings-Overlap.zip`.
-5. Extract that entire personal ZIP into a permanent folder. Keep `script-bento.lua` or `script-overlap.lua` with its `files/` folder; moving only the Lua file breaks relative paths.
-6. In OBS, Tools → Scripts → +, add that script, select a distinct original source for each panel you want to show, then click Apply saved settings / Auto layout.
-7. Open the `ALO4OBS · BENTO` or `ALO4OBS · OVERLAP` scene and check capture, camera, widgets and media in OBS. The browser preview cannot show your real OBS content.
+1. Open https://kmg200164.github.io/alo4obs/ (or, offline: extract the entire distribution ZIP and open its root `settings.html`; it opens `files/settings.html`. Do not open pages inside the ZIP).
+2. Choose Bento (4 columns) or Overlap (5 columns), then configure panels and content.
+3. Click Save as ZIP. The personal package is `Settings-Bento.zip` or `Settings-Overlap.zip`.
+4. Extract that entire personal ZIP into a permanent folder. Keep `script-bento.lua` or `script-overlap.lua` with its `files/` folder; moving only the Lua file breaks relative paths.
+5. In OBS, Tools → Scripts → +, add that script, select a distinct original source for each panel you want to show, then click Apply saved settings / Auto layout.
+6. Open the `ALO4OBS · BENTO` or `ALO4OBS · OVERLAP` scene and check capture, camera, widgets and media in OBS. The browser preview cannot show your real OBS content.
 
-The distribution ZIP also includes `README.txt` and the full guide: `guide.html` (한국어), `guide-en.html` (English), `guide-ja.html` (日本語).
-
-For the bundled Composite Blur plugin, see [docs/PLUGIN-SUPPORT.md](docs/PLUGIN-SUPPORT.md). Official plugin releases: https://github.com/FiniteSingularity/obs-composite-blur/releases
+The guide is in the page header (한국어, English, 日本語). The distribution ZIP also includes `README.txt` and the guide pages `guide.html`, `guide-en.html` and `guide-ja.html`.
 
 ## Updating
 
