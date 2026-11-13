@@ -138,8 +138,8 @@ def build_editor(destination=output):
     print(f'Built and verified {destination} v{version} ({len(entries)} files; neutral prerelease package)')
 
 
-def build_windows(destination, plugin_archive, source_archive):
-    """Create an offline Windows OBS 32 candidate; never install or publish it."""
+def plugin_files(plugin_archive, source_archive):
+    """Pinned, checksum-verified Composite Blur payloads, packages and helpers keyed by ZIP path."""
     import hashlib
     import io
     lock = {
@@ -224,6 +224,12 @@ def build_windows(destination, plugin_archive, source_archive):
     added['files/plugin/packages.json'] = json.dumps(packages, indent=2).encode()
     for helper in ['composite-blur-install.command', 'composite-blur-install.sh']:
         added[helper] = (source / helper).read_bytes()
+    return added
+
+
+def build_windows(destination, plugin_archive, source_archive):
+    """Create an offline Windows OBS 32 candidate; never install or publish it."""
+    added = plugin_files(plugin_archive, source_archive)
     # Keep the root entry and all existing editor files byte-for-byte intact.
     with tempfile.TemporaryDirectory() as temporary:
         neutral = Path(temporary) / 'neutral.zip'
@@ -257,13 +263,66 @@ WEB_INDEX = (
 )
 
 
+PLUGIN_META = b'<meta name="alo4obs-plugin-bundles" content="plugin/">'
+PLUGIN_BUNDLES = {
+    'windows': ('composite-blur-install.cmd', ('files/plugin/manifest.json', 'files/plugin/manifest-modern.json', 'files/plugin/packages.json', 'files/plugin/LICENSE.txt', 'files/plugin/NOTICE.txt'), ('files/plugin/payload/', 'files/plugin/payload-modern/')),
+    'macos': ('composite-blur-install.command', ('files/plugin/packages.json', 'files/plugin/LICENSE.txt', 'files/plugin/NOTICE.txt'), ('files/plugin/packages/obs-composite-blur-1.6.0-macos-universal.pkg',)),
+    'linux': ('composite-blur-install.sh', ('files/plugin/packages.json', 'files/plugin/LICENSE.txt', 'files/plugin/NOTICE.txt'), ('files/plugin/packages/obs-composite-blur-1.6.0-x86_64-linux-gnu.deb', 'files/plugin/packages/obs-composite-blur-1.6.0-x86_64-linux-gnu-legacy.deb')),
+}
+PLUGIN_SOURCE_NAME = 'composite-blur-1.6.0-source.zip'
+# The Windows helper opens files/settings.html when it finishes; point that at the site.
+WINDOWS_OPEN_PAGE = (
+    '<!doctype html><html lang="en"><meta charset="utf-8"><title>ALO4OBS</title>'
+    '<meta http-equiv="refresh" content="0;url=https://kmg200164.github.io/alo4obs/">'
+    '<body><a href="https://kmg200164.github.io/alo4obs/">Open ALO4OBS</a></body></html>'
+)
+PLUGIN_README = (
+    'Composite Blur {v} by FiniteSingularity, unmodified official release files.\n'
+    'Licensed under GNU GPL version 2. The complete corresponding source is offered from the same place as this file:\n'
+    '{source}\n'
+    'Close OBS, then run {helper} once. Review any permission prompts yourself. Reopen OBS afterward.\n'
+)
+
+
+def plugin_bundles():
+    """One small installer ZIP per OS: {name: bytes}, plus the GPL source archive."""
+    from zipfile import ZipInfo
+    import io
+    dependency = repository / 'vendor' / 'obs-composite-blur-1.6.0'
+    files = plugin_files(dependency / 'windows-legacy-x64.zip', dependency / 'source.zip')
+    bundles = {}
+    for osname, (helper, exact, prefixes) in PLUGIN_BUNDLES.items():
+        picked = {helper: files[helper]}
+        for name in exact:
+            picked[name] = files[name]
+        for name, data in files.items():
+            if name.startswith(prefixes) or name in prefixes:
+                picked[name] = data
+        if osname == 'windows':
+            picked['files/settings.html'] = WINDOWS_OPEN_PAGE.encode()
+        picked['README.txt'] = PLUGIN_README.format(v='1.6.0', source=PLUGIN_SOURCE_NAME, helper=helper).encode()
+        buffer = io.BytesIO()
+        with ZipFile(buffer, 'w', ZIP_DEFLATED) as archive:
+            for name, data in picked.items():
+                if name.endswith(('.command', '.sh')):
+                    info = ZipInfo(name)
+                    info.create_system = 3
+                    info.external_attr = 0o100755 << 16
+                    archive.writestr(info, data, compress_type=ZIP_DEFLATED)
+                else:
+                    archive.writestr(name, data)
+        bundles[f'composite-blur-{osname}.zip'] = buffer.getvalue()
+    return bundles, files['files/plugin/source.zip']
+
+
 def build_web(destination):
     """Write the editor as a static site (GitHub Pages).
 
     The site holds the same verified editor files as the ZIP's files/ folder, so
     visitors configure in the browser and download only their personal
-    Settings-Bento.zip / Settings-Overlap.zip. The Composite Blur plugin is not
-    hosted here; it stays in the offline distribution ZIP.
+    Settings-Bento.zip / Settings-Overlap.zip. The Composite Blur installers sit
+    under plugin/ and are offered by a popup only to people who need blur; the
+    GPL source archive is served from the same folder.
     """
     import shutil
     verify_entries(entries)
@@ -272,15 +331,26 @@ def build_web(destination):
         shutil.rmtree(destination)
     destination.mkdir(parents=True)
     for name, data in entries.items():
+        if name == 'settings.html':
+            data = data.replace(b'</head>', PLUGIN_META + b'</head>', 1)
+            if PLUGIN_META not in data:
+                raise ValueError('settings.html has no head to mark the plugin folder.')
         target = destination / name
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(data)
+    bundles, source_zip = plugin_bundles()
+    plugin_folder = destination / 'plugin'
+    plugin_folder.mkdir()
+    for name, data in bundles.items():
+        (plugin_folder / name).write_bytes(data)
+    (plugin_folder / PLUGIN_SOURCE_NAME).write_bytes(source_zip)
     (destination / 'index.html').write_text(WEB_INDEX, encoding='utf-8')
     (destination / '.nojekyll').write_bytes(b'')
     written = {path.relative_to(destination).as_posix() for path in destination.rglob('*') if path.is_file()}
-    if written != set(entries) | {'index.html', '.nojekyll'}:
+    expected = set(entries) | {'index.html', '.nojekyll', 'plugin/' + PLUGIN_SOURCE_NAME} | {'plugin/' + name for name in bundles}
+    if written != expected:
         raise ValueError('Web site inventory does not match the allowlist.')
-    print(f'Built web site {destination} v{version} ({len(entries)} editor files)')
+    print(f'Built web site {destination} v{version} ({len(entries)} editor files, {len(bundles)} plugin installers)')
 
 
 def build(destination=output):
