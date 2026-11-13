@@ -824,8 +824,20 @@
   function showChooser(){readEditor();readGlobal();for(const section of document.querySelectorAll('.editor-workspace,.preview-section,.settings-section'))section.hidden=true;chooser.hidden=false;byId('layout-question').focus({preventScroll:true});}
   const pluginKey='obs-overlay-blur-plugin',pluginDialog=byId('blur-plugin');
   const pluginBundles=document.querySelector('meta[name="alo4obs-plugin-bundles"]')?.content;
+  function needsBlurPlugin(data){
+    if(data.layoutMode!=='overlap')return false;
+    return OverlayEvents.activePanelKeys(data).some(key=>{
+      if(key==='game')return false;
+      const region=data.regionBackgrounds?.[key]||{};
+      const fill=data.regionStyleOverrides?.[key]?region.fill:data.globalStyle?.fill;
+      let radius=Number(fill?.blur??region.blur??0);
+      if(fill?.mode==='none')radius=0;
+      return radius>0;
+    });
+  }
   function offerPlugin(){
-    if(!pluginBundles||config.layoutMode!=='overlap'||pluginDialog.open)return;
+    if(!pluginBundles||pluginDialog.open)return;
+    try{if(!needsBlurPlugin(current()))return;}catch{return;}
     let state;try{state=localStorage.getItem(pluginKey);}catch{}
     if(state)return;
     const platform=(navigator.userAgentData?.platform||navigator.platform||navigator.userAgent||'').toLowerCase();
@@ -834,11 +846,13 @@
     pluginDialog.showModal();get.focus();
   }
   function closePlugin(state){if(state){try{localStorage.setItem(pluginKey,state);}catch{}}pluginDialog.close();}
+  form.addEventListener('change',event=>{if(/blur|fill|override/i.test(event.target.name||''))setTimeout(offerPlugin,0);});
+  byId('bundle').addEventListener('click',offerPlugin);
   byId('blur-plugin-yes').onclick=()=>closePlugin('installed');
   byId('blur-plugin-no').onclick=()=>closePlugin('skipped');
   byId('blur-plugin-get').addEventListener('click',()=>closePlugin('downloaded'));
   pluginDialog.addEventListener('cancel',event=>{event.preventDefault();closePlugin('');});
-  function showEditor(){offerPlugin();chooser.hidden=true;for(const section of document.querySelectorAll('.editor-workspace,.preview-section,.settings-section'))section.hidden=false;byId('change-layout').querySelector('[data-layout-label]').textContent=localized('레이아웃 전환 · 현재 '+(config.layoutMode==='overlap'?'Overlap':'Bento'));}
+  function showEditor(){chooser.hidden=true;for(const section of document.querySelectorAll('.editor-workspace,.preview-section,.settings-section'))section.hidden=false;byId('change-layout').querySelector('[data-layout-label]').textContent=localized('레이아웃 전환 · 현재 '+(config.layoutMode==='overlap'?'Overlap':'Bento'));}
   const guideReturnKey='obs-overlay-guide-return',pagePath=window.location.href.split(/[?#]/)[0];
   byId('guide-link').addEventListener('click',async event=>{
     if(event.button!==0||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;
