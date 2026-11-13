@@ -1,0 +1,31 @@
+name: Publish release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build distribution ZIP
+        run: python build.py
+      - name: Check the tag matches the built version
+        run: |
+          test -f "dist/ALO4OBS-${GITHUB_REF_NAME}.zip" || { echo "dist/ALO4OBS-${GITHUB_REF_NAME}.zip was not built"; ls dist; exit 1; }
+      - name: Extract release notes from CHANGELOG.md
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          awk -v v="$version" '$0 ~ "^## " v " " {found=1; next} found && /^## / {exit} found {print}' CHANGELOG.md > notes.md
+          test -s notes.md || { echo "No CHANGELOG section for $version"; exit 1; }
+      - name: Create the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" "dist/ALO4OBS-${GITHUB_REF_NAME}.zip" --title "ALO4OBS ${GITHUB_REF_NAME}" --notes-file notes.md --verify-tag
