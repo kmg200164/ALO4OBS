@@ -16,7 +16,7 @@ function reader(values){
 }
 
 test('every global slider index saves its actual preset value',()=>{
- const cases=[['cornerSmoothing',[0,0.6,1],value=>value.cornerSmoothing],['cornerRadius',[8,16,24,32,48],value=>value.cornerRadius],['panelGap',[8,16,24,32,48],value=>value.panelGap],['globalFillOpacity',[0,10,20,40,70,100],value=>value.globalStyle.fill.opacity],['globalFillBlur',[0,4,8,16,32,64],value=>value.globalStyle.fill.blur],['globalStrokeWidth',[0,1,2,4,6,8],value=>value.globalStyle.stroke.width]];
+ const cases=[['cornerSmoothing',[0,0.6,1],value=>value.cornerSmoothing],['cornerRadius',[0,8,16,24,32,48],value=>value.cornerRadius],['panelGap',[0,8,16,24,32,48],value=>value.panelGap],['globalFillOpacity',[0,10,20,40,70,100],value=>value.globalStyle.fill.opacity],['globalFillBlur',[0,4,8,16,32,64],value=>value.globalStyle.fill.blur],['globalStrokeWidth',[0,1,2,4,6,8],value=>value.globalStyle.stroke.width]];
  for(const [name,presets,read] of cases)for(let index=0;index<presets.length;index++){
   const context=reader({panelGap:3,globalFillOpacity:3,globalFillBlur:1,globalStrokeWidth:2,[name]:index});
   assert.equal(read(context.config),presets[index],`${name} index ${index}`);
@@ -47,7 +47,7 @@ test('global preset labels are translated in Korean, English, and Japanese',()=>
 
 test('dragging a global slider updates its visible English and Japanese label before change',()=>{
  let handler,applies=0;const label={textContent:''};
- const context={OverlayEvents:{panelGaps:[8,16,24,32,48]},form:{querySelector:()=>label,addEventListener(_event,callback){handler=callback;}},selected:null,apply(){applies++;},paintGradientControls(){},window:{KMGI18n:{localize:value=>({ '매우 강함':'Very strong'}[value]||value)}}};
+ const context={OverlayEvents:{panelGaps:[0,8,16,24,32,48]},form:{querySelector:()=>label,addEventListener(_event,callback){handler=callback;}},selected:null,apply(){applies++;},paintGradientControls(){},window:{KMGI18n:{localize:value=>({ '매우 강함':'Very strong'}[value]||value)}}};
  const presets=source.slice(source.indexOf('  const opacityPresets='),source.indexOf('  function migratePanelContent('));
  vm.runInNewContext(presets,context);
  const start=source.indexOf("  form.addEventListener('input',event=>{"),end=source.indexOf("  form.addEventListener('change'",start);

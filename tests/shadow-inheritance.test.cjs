@@ -93,8 +93,8 @@ test('rendered settings gates individual shadows with Fill and Stroke and preser
   const local=page.locator('#panel-editor .region-style-details'),saved=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('obs-overlay-config')));
   assert.equal(await local.isVisible(),false);
   assert.equal(await local.locator('[name=panelShadow]').count(),1);
-  assert.equal(await local.locator('[name=regionFillMode]').count(),5);
-  assert.equal(await local.locator('[name=regionStrokeMode]').count(),3);
+  assert.equal(await local.locator('[name=regionFillMode]').count(),4);
+  assert.equal(await local.locator('[name=regionStrokeMode]').count(),2);
   assert.equal(await page.locator('#global-settings [name=globalShadow]').inputValue(),'3');
   const waitSaved=async(field,value)=>page.waitForFunction(({field,value})=>{const data=JSON.parse(localStorage.getItem('obs-overlay-config'));return field.split('.').reduce((node,key)=>node?.[key],data)===value;},{field,value});
   const range=async(name,index)=>{const control=page.locator('[name='+name+']');await control.evaluate((node,value)=>node.value=String(value),index);await control.dispatchEvent('input');await waitSaved(name==='globalShadow'?'globalShadow':'panelShadows.chat',[0,8,16,32,48,64][index]);};

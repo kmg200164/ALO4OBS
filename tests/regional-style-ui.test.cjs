@@ -55,7 +55,7 @@ test('regional ranges retain saved defaults and use the same ascending five-step
 
 test('regional slider input updates translated labels before change with global handler',()=>{
  let handler,applies=0;const label={};
- const context={selected:'custom1',OverlayEvents:{panelGaps:[8,16,24,32,48]},form:{querySelector:()=>label,addEventListener(_event,callback){handler=callback;}},apply(){applies++;},paintGradientControls(){},window:{KMGI18n:{localize:value=>({'매우 강함':'Very strong'}[value]||value)}}};
+ const context={selected:'custom1',OverlayEvents:{panelGaps:[0,8,16,24,32,48]},form:{querySelector:()=>label,addEventListener(_event,callback){handler=callback;}},apply(){applies++;},paintGradientControls(){},window:{KMGI18n:{localize:value=>({'매우 강함':'Very strong'}[value]||value)}}};
  vm.runInNewContext(source.slice(source.indexOf('  const modeValue='),source.indexOf('  const modeSwitch=')),context);
  vm.runInNewContext(presets,context);
  const start=source.indexOf("  form.addEventListener('input',event=>{"),end=source.indexOf("  form.addEventListener('change'",start);

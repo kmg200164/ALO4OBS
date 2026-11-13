@@ -81,7 +81,7 @@ test('legacy valid spans normalize to canonical anchors for every gap',()=>{
   assert.ok(layout.panel4_1.y+layout.panel4_1.height<=1080-gap+1e-9);
   count++;
  }
- assert.equal(count,450);
+ assert.equal(count,540);
 });
 
 test('all fifteen cells start enabled with fixed five-column geometry',()=>{
@@ -118,7 +118,7 @@ test('all column count combinations have ordered bounded noncolliding active rec
    assert.equal(layout[active[0]].y,gap);const last=layout[active.at(-1)];assert.ok(Math.abs(last.y+last.height-(1080-gap))<1e-8);
    for(let i=1;i<active.length;i++)assert.ok(Math.abs(layout[active[i]].y-layout[active[i-1]].y-layout[active[i-1]].height-gap)<1e-8);
   }combinations++;
- }assert.equal(combinations,5120);
+ }assert.equal(combinations,6144);
 });
 test('fixed heights reserve peer minima; oversized imports project without changing requested sizes',()=>{
  const enabled=Object.fromEntries(events.overlapPanelKeys.map(key=>[key,true])),sizing={panel2_1:{heightMode:'fixed',height:200},panel2_2:{heightMode:'fixed',height:300}};
