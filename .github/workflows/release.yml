@@ -3,6 +3,7 @@ name: Publish release
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -15,17 +16,27 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Work out the release tag
+        run: |
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            tag="$GITHUB_REF_NAME"
+          else
+            tag="v$(grep -oE '[0-9]+\.[0-9]+\.[0-9]+' src/version.js | head -1)"
+          fi
+          echo "TAG=$tag" >> "$GITHUB_ENV"
       - name: Build distribution ZIP
         run: python build.py
       - name: Check the tag matches the built version
         run: |
-          test -f "dist/ALO4OBS-${GITHUB_REF_NAME}.zip" || { echo "dist/ALO4OBS-${GITHUB_REF_NAME}.zip was not built"; ls dist; exit 1; }
+          test -f "dist/ALO4OBS-${TAG}.zip" || { echo "dist/ALO4OBS-${TAG}.zip was not built"; ls dist; exit 1; }
       - name: Extract release notes from CHANGELOG.md
         run: |
-          version="${GITHUB_REF_NAME#v}"
+          version="${TAG#v}"
           awk -v v="$version" '$0 ~ "^## " v " " {found=1; next} found && /^## / {exit} found {print}' CHANGELOG.md > notes.md
           test -s notes.md || { echo "No CHANGELOG section for $version"; exit 1; }
       - name: Create the GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" "dist/ALO4OBS-${GITHUB_REF_NAME}.zip" --title "ALO4OBS ${GITHUB_REF_NAME}" --notes-file notes.md --verify-tag
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then echo "Release $TAG already exists"; exit 1; fi
+          gh release create "$TAG" "dist/ALO4OBS-${TAG}.zip" --title "ALO4OBS ${TAG}" --notes-file notes.md --target "$GITHUB_SHA"
