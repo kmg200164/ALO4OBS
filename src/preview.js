@@ -206,6 +206,7 @@
     next.panelEnabled=next.layoutMode==='overlap'?OverlayEvents.normalizeOverlapEnabled(next.panelEnabled):normalizePanelEnabled(next.panelEnabled);
     next.overlapSizing=OverlayEvents.normalizeOverlapSizing(next.overlapSizing);
     next.overlapPositions=OverlayEvents.normalizeOverlapPositions(next.overlapPositions);
+    OverlayEvents.releaseDefaultOverlapRows(next.overlapSizing,next.overlapPositions);
     next.panelPlacement=OverlayEvents.normalizePlacement(Object.fromEntries(OverlayEvents.bentoPanelKeys.map(key=>[key,{...initialPlacement[key],...next.panelPlacement?.[key]}])));
     next.regionBackgrounds={...defaults.regionBackgrounds,...next.regionBackgrounds};
     next.regionStyleOverrides={...next.regionStyleOverrides};
