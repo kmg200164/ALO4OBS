@@ -846,7 +846,6 @@
     pluginDialog.showModal();get.focus();
   }
   function closePlugin(state){if(state){try{localStorage.setItem(pluginKey,state);}catch{}}pluginDialog.close();}
-  form.addEventListener('change',event=>{if(/blur|fill|override/i.test(event.target.name||''))setTimeout(offerPlugin,0);});
   byId('bundle').addEventListener('click',offerPlugin);
   byId('blur-plugin-yes').onclick=()=>closePlugin('installed');
   byId('blur-plugin-no').onclick=()=>closePlugin('skipped');
