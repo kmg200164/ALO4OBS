@@ -317,6 +317,13 @@
     }
     return result;
   }
+  // Earlier versions stored the default row stack as fixed heights and positions, so rows ignored the gap setting.
+  function releaseDefaultOverlapRows(sizing,positions){
+    for(const key of auxiliaryKeys){
+      const row=Number(key.split('_')[1]);
+      if(sizing[key].heightMode==='fixed'&&sizing[key].height===328&&positions[key].mode==='fixed'&&positions[key].y===24+(row-1)*352){sizing[key].heightMode='auto';positions[key].mode='auto';}
+    }
+  }
   function normalizeOverlapPositions(input){
     if(input!==undefined)objectFields(input,auxiliaryKeys,'Overlap position');
     const result={};
@@ -434,8 +441,8 @@
     if(input===undefined)input=mode==='overlap'?{
       panelEnabled:Object.fromEntries(overlapPanelKeys.map(key=>[key,true])),
       overlapColumns:Object.fromEntries([1,2,3,4,5].map(column=>[column,{enabled:true,widthMode:'fixed',width:column===3?356:355}])),
-      overlapSizing:Object.fromEntries(auxiliaryKeys.map(key=>[key,{heightMode:'fixed',height:328}])),
-      overlapPositions:Object.fromEntries(auxiliaryKeys.map(key=>[key,{mode:'fixed',y:24+(Number(key.split('_')[1])-1)*352}]))
+      overlapSizing:Object.fromEntries(auxiliaryKeys.map(key=>[key,{heightMode:'auto',height:328}])),
+      overlapPositions:Object.fromEntries(auxiliaryKeys.map(key=>[key,{mode:'auto',y:24+(Number(key.split('_')[1])-1)*352}]))
     }:{};
     objectFields(input,['panelGap','panelEnabled','panelPlacement','panelSizing','sidePosition','overlapPlacement','overlapSizing','overlapPositions','overlapColumnAlignment','overlapColumns'],'layout preset');
     const panelGap=input.panelGap===undefined?(mode==='overlap'?24:32):input.panelGap;
@@ -455,7 +462,9 @@
       objectFields(input.panelSizing,panelKeys,'panel size');
       for(const key of panelKeys)if(input.panelSizing[key]!==undefined)objectFields(input.panelSizing[key],['widthMode','width','heightMode','height','aspect'],'panel size: '+key);
     }
-    return {panelGap,panelEnabled,panelPlacement:normalizePlacement(input.panelPlacement),panelSizing:normalizeSizing(input.panelSizing),sidePosition:normalizeSidePosition(input.sidePosition),overlapPlacement:normalizeOverlapPlacement(input.overlapPlacement),overlapSizing:normalizeOverlapSizing(input.overlapSizing),overlapPositions:normalizeOverlapPositions(input.overlapPositions),overlapColumnAlignment:normalizeOverlapColumnAlignment(input.overlapColumnAlignment),overlapColumns:normalizeOverlapColumns(input.overlapColumns,panelEnabled)};
+    const overlapSizing=normalizeOverlapSizing(input.overlapSizing),overlapPositions=normalizeOverlapPositions(input.overlapPositions);
+    if(mode==='overlap')releaseDefaultOverlapRows(overlapSizing,overlapPositions);
+    return {panelGap,panelEnabled,panelPlacement:normalizePlacement(input.panelPlacement),panelSizing:normalizeSizing(input.panelSizing),sidePosition:normalizeSidePosition(input.sidePosition),overlapPlacement:normalizeOverlapPlacement(input.overlapPlacement),overlapSizing,overlapPositions,overlapColumnAlignment:normalizeOverlapColumnAlignment(input.overlapColumnAlignment),overlapColumns:normalizeOverlapColumns(input.overlapColumns,panelEnabled)};
   }
   function activeLayoutSnapshot(config,mode,previous={}){return normalizeLayoutSnapshot({...previous,...Object.fromEntries(['panelGap','panelEnabled','panelPlacement','panelSizing','sidePosition','overlapPlacement','overlapSizing','overlapPositions','overlapColumnAlignment','overlapColumns'].filter(key=>config[key]!==undefined).map(key=>[key,config[key]]))},mode);}
   function normalizeLayoutPresets(config={}){
@@ -519,7 +528,7 @@
     }
     return {fit,crop};
   }
-  const api = {normalizeSourceView,effectivePanelShadow,migratePanelAppearance,bentoPanelKeys,overlapPanelKeys,allPanelKeys,activePanelKeys,legacyOverlapKeys,migrateOverlapPanels,cornerRadii,cornerSmoothings,panelShadowStrengths,normalizeLayoutMode,overlapSafetyGrid,defaultOverlapPlacement,normalizeOverlapPlacement,normalizeOverlapEnabled,normalizeOverlapSizing,normalizeOverlapPositions,normalizeOverlapColumnAlignment,normalizeOverlapColumns,effectiveOverlapColumns,effectivePanelEnabled,overlapPositionBounds,overlapSizingBounds,overlapLayout,overlapCollisions,normalizeLayoutPresets,switchLayoutPreset,resolveConfigLayout,panelLabels,panelGaps,normalizeGap,normalizeSidePosition,subWidthWarning,normalizeEvent,createEventStore,handcamLayout,resolveLayout,defaultPlacement,normalizePlacement,normalizeSizing,canResizeWidth,canResizeHeight,sizingBounds,aspectStops,autoLayout,validateLayout,resolveSlots,nicknameColor};
+  const api = {releaseDefaultOverlapRows,normalizeSourceView,effectivePanelShadow,migratePanelAppearance,bentoPanelKeys,overlapPanelKeys,allPanelKeys,activePanelKeys,legacyOverlapKeys,migrateOverlapPanels,cornerRadii,cornerSmoothings,panelShadowStrengths,normalizeLayoutMode,overlapSafetyGrid,defaultOverlapPlacement,normalizeOverlapPlacement,normalizeOverlapEnabled,normalizeOverlapSizing,normalizeOverlapPositions,normalizeOverlapColumnAlignment,normalizeOverlapColumns,effectiveOverlapColumns,effectivePanelEnabled,overlapPositionBounds,overlapSizingBounds,overlapLayout,overlapCollisions,normalizeLayoutPresets,switchLayoutPreset,resolveConfigLayout,panelLabels,panelGaps,normalizeGap,normalizeSidePosition,subWidthWarning,normalizeEvent,createEventStore,handcamLayout,resolveLayout,defaultPlacement,normalizePlacement,normalizeSizing,canResizeWidth,canResizeHeight,sizingBounds,aspectStops,autoLayout,validateLayout,resolveSlots,nicknameColor};
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.OverlayEvents = api;
 })(typeof window !== 'undefined' ? window : globalThis);

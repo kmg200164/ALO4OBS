@@ -215,17 +215,31 @@ test('alignment follows every column count and integer height allocations keep c
 });
 
 
-test('fresh Overlap and reset seed all rows with fixed sizes and pinned Y; saved custom choices survive',()=>{
+test('fresh Overlap and reset seed all rows with automatic sizes that equal the old default stack; saved custom choices survive',()=>{
  const fresh=events.switchLayoutPreset(generic(),'overlap'),layout=events.resolveConfigLayout(fresh);
  assert.deepEqual(layout.game,{x:0,y:0,width:1920,height:1080});
  for(let column=1;column<=5;column++){
   assert.equal(fresh.overlapColumns[column].enabled,true);assert.equal(fresh.overlapColumns[column].widthMode,'fixed');
-  for(let row=1;row<=3;row++){const key=`panel${column}_${row}`;assert.equal(fresh.panelEnabled[key],true);assert.deepEqual(fresh.overlapSizing[key],{heightMode:'fixed',height:328});assert.deepEqual(fresh.overlapPositions[key],{mode:'fixed',y:24+(row-1)*352});}
+  for(let row=1;row<=3;row++){const key=`panel${column}_${row}`;assert.equal(fresh.panelEnabled[key],true);assert.deepEqual(fresh.overlapSizing[key],{heightMode:'auto',height:328});assert.deepEqual(fresh.overlapPositions[key],{mode:'auto',y:24+(row-1)*352});assert.equal(layout[key].y,24+(row-1)*352);assert.equal(layout[key].height,328);}
  }
  assert.equal(layout.panel5_3.x+layout.panel5_3.width,1896);assert.deepEqual(events.overlapCollisions(layout,fresh.panelEnabled),[]);
- fresh.overlapSizing.panel2_1.height=120;fresh.panelEnabled.panel2_3=false;const changed=events.resolveConfigLayout(fresh);assert.deepEqual(changed.panel2_2,layout.panel2_2);
+ for(const key of ['panel2_1','panel2_2','panel2_3']){const row=Number(key.split('_')[1]);fresh.overlapSizing[key]={heightMode:'fixed',height:300};fresh.overlapPositions[key]={mode:'fixed',y:40+(row-1)*330};}
+ const base=events.resolveConfigLayout(fresh);
+ fresh.overlapSizing.panel2_1.height=120;fresh.panelEnabled.panel2_3=false;const changed=events.resolveConfigLayout(fresh);assert.deepEqual(changed.panel2_2,base.panel2_2);
  fresh.overlapColumns[1].enabled=false;assert.equal(events.resolveConfigLayout(fresh).panel2_2.width,layout.panel2_2.width);
  fresh.overlapColumns[2].widthMode='auto';fresh.overlapPositions.panel2_2={mode:'auto',y:300};
  const returned=events.switchLayoutPreset(events.switchLayoutPreset(fresh,'bento'),'overlap');assert.deepEqual(returned.overlapColumns,fresh.overlapColumns);assert.deepEqual(returned.overlapPositions,fresh.overlapPositions);assert.deepEqual(saved(returned).panelEnabled,returned.panelEnabled);
  const clean=events.normalizeLayoutPresets(generic()).overlap;assert.equal(Object.values(clean.panelEnabled).filter(Boolean).length,16);assert.equal(clean.overlapColumns[1].widthMode,'fixed');
+});
+
+test('default Overlap rows follow the gap setting; old fixed default rows are released, custom ones stay',()=>{
+ const fresh=events.switchLayoutPreset(generic(),'overlap');
+ for(const gap of events.panelGaps){const layout=events.overlapLayout({gap,enabled:fresh.panelEnabled,sizing:fresh.overlapSizing,positions:fresh.overlapPositions});
+  assert.equal(layout.panel1_1.y,gap);assert.equal(layout.panel1_2.y-layout.panel1_1.y-layout.panel1_1.height,gap);}
+ const sizing=events.normalizeOverlapSizing(Object.fromEntries(['panel1_1','panel1_2','panel1_3'].map(key=>[key,{heightMode:'fixed',height:328}])));
+ const positions=events.normalizeOverlapPositions(Object.fromEntries(['panel1_1','panel1_2','panel1_3'].map((key,index)=>[key,{mode:'fixed',y:24+index*352}])));
+ positions.panel1_3={mode:'fixed',y:700};sizing.panel1_2.height=200;
+ events.releaseDefaultOverlapRows(sizing,positions);
+ assert.equal(sizing.panel1_1.heightMode,'auto');assert.equal(positions.panel1_1.mode,'auto');
+ assert.equal(sizing.panel1_2.heightMode,'fixed');assert.equal(positions.panel1_3.mode,'fixed');
 });
