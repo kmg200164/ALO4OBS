@@ -4,7 +4,7 @@
 
 - Make the guide pages (Korean, English, Japanese) and the README describe the browser flow: open the website, configure, save the personal Settings ZIP, add the script in OBS. Offline use of the distribution ZIP is now described as the optional route.
 - Replace the quick-start picture with a browser-flow picture. Only file names and the site address appear as text.
-- Ask once, when the settings are saved with a panel blur above 0 in Overlap, whether the Composite Blur plugin is installed on this PC. Answering that it is needed offers an installer ZIP for the detected OS (Windows, macOS, Linux) with the GPL source ZIP beside it. The script/settings download stays plugin-free. `python build.py --web` writes these under `plugin/`; the offline ZIP is unchanged.
+- Once per browser, when the settings are saved with a panel blur above 0 in Overlap, a notice says the Composite Blur plugin is needed and the installer ZIP for the detected OS (Windows, macOS, Linux) downloads with the settings; the notice lists the other systems and the GPL source ZIP. The script/settings download stays plugin-free. `python build.py --web` writes these under `plugin/`; the offline ZIP is unchanged.
 - Make the default Overlap rows follow the panel gap setting. Rows used to be stored as fixed heights and positions, so the vertical gap stopped changing. Untouched default rows in saved settings are released to automatic; rows you customized stay as they are.
 - Remove the "None" choices from panel fill and stroke; use the None step of opacity and width instead. Saved "none" fills and strokes become opacity 0 and width 0.
 - Add a "None" (0 px) step to panel gap and corner radius. The suggestion to remove the global stroke now appears when the gap is 0.
