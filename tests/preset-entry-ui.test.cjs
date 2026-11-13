@@ -84,7 +84,7 @@ test('rendered package chooser, sixteen-panel switching, restore and ZIP export 
   await page.locator('[name=panelHeight]').fill('200');await page.locator('[name=panelHeight]').dispatchEvent('change');
   await page.waitForFunction(()=>JSON.parse(localStorage.getItem('obs-overlay-config'))?.overlapSizing?.panel2_3?.height===200);
   assert.equal(await page.locator('[name=panelHeightSlider]').inputValue(),'200');
-  await page.locator('[name=panelContentType]').selectOption('source');await page.locator('[name=regionOverride]').check();await page.locator('[name=panelShadowEnabled]').check();await setRange('panelShadow',4);
+  await page.locator('[name=panelContentType]').selectOption('source');await page.locator('[name=regionOverride]').check();await setRange('panelShadow',5);
   const childCounts=await page.locator('.panel-hit').evaluateAll(hits=>hits.map(hit=>[hit.querySelectorAll('.hit-surface').length,hit.querySelectorAll('.hit-outline').length]));assert.ok(childCounts.every(([surface,outline])=>surface===1&&outline===1));
   await page.locator('.panel-hit[data-hit=panel5_3] .panel-number').click();await page.locator('[name=panelContentType]').selectOption('web');await page.locator('[name=panelContentUrl]').fill('https://example.invalid/panel5-3');await page.locator('[name=panelContentUrl]').dispatchEvent('change');await setRange('overlapColumn5Count',2);
   assert.equal(await page.locator('.panel-hit').count(),15);

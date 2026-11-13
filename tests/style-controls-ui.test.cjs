@@ -10,7 +10,7 @@ test('regional image radios, gradient defaults, switches and uniform vertical al
   const override=page.locator('[name=regionOverride]');assert.equal(await override.getAttribute('role'),'switch');await override.check();
   assert.deepEqual(await page.locator('[name=regionFillMode]').evaluateAll(nodes=>nodes.map(node=>node.value)),['none','solid','gradient','url','file']);
   for(const name of ['regionFill','regionStroke'])assert.match(await page.locator('[data-gradient-preview='+name+']').getAttribute('style'),/255, 255, 255.*0, 0, 0/);
-  assert.equal(await page.locator('[name=panelShadowEnabled]').getAttribute('role'),'switch');assert.equal(await page.locator('[name=globalShadowEnabled]').getAttribute('role'),'switch');
+  assert.equal(await page.locator('[name=panelShadowEnabled]').count(),0);assert.equal(await page.locator('[name=globalShadowEnabled]').count(),0);
   assert.ok(await page.locator('[name=regionFillMode][value=file]').evaluate(el=>el.getBoundingClientRect().top<document.querySelector('[name=regionOpacity]').getBoundingClientRect().top));
   const url='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jX1sAAAAASUVORK5CYII=';
   await page.locator('[name=regionImage]').fill(url);await page.locator('[name=regionFillMode][value=url]').check();

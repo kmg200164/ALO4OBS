@@ -92,26 +92,25 @@ test('rendered settings gates individual shadows with Fill and Stroke and preser
   await page.locator('[data-hit=chat] .panel-number').click();
   const local=page.locator('#panel-editor .region-style-details'),saved=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('obs-overlay-config')));
   assert.equal(await local.isVisible(),false);
-  assert.equal(await local.locator('[name=panelShadowEnabled]').count(),1);
+  assert.equal(await local.locator('[name=panelShadow]').count(),1);
   assert.equal(await local.locator('[name=regionFillMode]').count(),5);
   assert.equal(await local.locator('[name=regionStrokeMode]').count(),3);
-  assert.equal(await page.locator('#global-settings [name=globalShadowEnabled]').isChecked(),true);
-  assert.equal(await page.locator('#global-settings [name=globalShadow]').inputValue(),'2');
+  assert.equal(await page.locator('#global-settings [name=globalShadow]').inputValue(),'3');
   const waitSaved=async(field,value)=>page.waitForFunction(({field,value})=>{const data=JSON.parse(localStorage.getItem('obs-overlay-config'));return field.split('.').reduce((node,key)=>node?.[key],data)===value;},{field,value});
-  const range=async(name,index)=>{const control=page.locator('[name='+name+']');await control.evaluate((node,value)=>node.value=String(value),index);await control.dispatchEvent('input');await waitSaved(name==='globalShadow'?'globalShadow':'panelShadows.chat',[8,16,32,48,64][index]);};
-  await range('globalShadow',3);
+  const range=async(name,index)=>{const control=page.locator('[name='+name+']');await control.evaluate((node,value)=>node.value=String(value),index);await control.dispatchEvent('input');await waitSaved(name==='globalShadow'?'globalShadow':'panelShadows.chat',[0,8,16,32,48,64][index]);};
+  await range('globalShadow',4);
   let config=await saved();assert.equal(config.globalShadow,48);assert.equal(config.panelShadows.chat,64);assert.equal(events.effectivePanelShadow(config,'chat'),48);
   await page.locator('[name=regionOverride]').check();await waitSaved('regionStyleOverrides.chat',true);assert.equal(await local.isVisible(),true);
   config=await saved();assert.equal(events.effectivePanelShadow(config,'chat'),64);
-  await range('panelShadow',1);
+  await range('panelShadow',2);
   config=await saved();assert.equal(config.panelShadows.chat,16);assert.equal(events.effectivePanelShadow(config,'chat'),16);
   await page.locator('[name=regionOverride]').uncheck();await waitSaved('regionStyleOverrides.chat',false);assert.equal(await local.isVisible(),false);
-  await range('globalShadow',2);config=await saved();assert.equal(events.effectivePanelShadow(config,'chat'),32);assert.equal(config.panelShadows.chat,16);
-  await page.locator('[name=globalShadowEnabled]').uncheck();await waitSaved('globalShadow',0);config=await saved();assert.equal(config.globalShadow,0);assert.equal(events.effectivePanelShadow(config,'chat'),0);
+  await range('globalShadow',3);config=await saved();assert.equal(events.effectivePanelShadow(config,'chat'),32);assert.equal(config.panelShadows.chat,16);
+  await range('globalShadow',0);config=await saved();assert.equal(config.globalShadow,0);assert.equal(events.effectivePanelShadow(config,'chat'),0);
   await page.locator('[name=regionOverride]').check();await waitSaved('regionStyleOverrides.chat',true);config=await saved();assert.equal(events.effectivePanelShadow(config,'chat'),16);
   await page.reload();await page.locator('[data-layout-choice=bento]').click();await page.locator('[data-hit=chat] .panel-number').click();
-  assert.equal(await local.isVisible(),true);assert.equal(await page.locator('[name=globalShadowEnabled]').isChecked(),false);
-  assert.equal(await page.locator('[name=panelShadow]').inputValue(),'1');
+  assert.equal(await local.isVisible(),true);assert.equal(await page.locator('[name=globalShadow]').inputValue(),'0');
+  assert.equal(await page.locator('[name=panelShadow]').inputValue(),'2');
   const exported=await page.evaluate(()=>{
    const config=JSON.parse(localStorage.getItem('obs-overlay-config'));
    return JSON.parse(new TextDecoder().decode(OverlayPack.settingsEntries(config).find(entry=>entry.name==='config.json').bytes));
@@ -120,7 +119,7 @@ test('rendered settings gates individual shadows with Fill and Stroke and preser
   await page.locator('#change-layout').click();await page.locator('[data-layout-choice=overlap]').click();
   await page.locator('#select-main').click();
   assert.equal(await page.locator('[name=overlapPanel]').count(),0);
-  assert.equal(await page.locator('#panel-editor [name=panelShadowEnabled]').count(),0,'fullscreen Main suppresses local shadow controls');
+  assert.equal(await page.locator('#panel-editor [name=panelShadow]').count(),0,'fullscreen Main suppresses local shadow controls');
   assert.deepEqual(errors,[]);
  }finally{await browser.close();}
 });

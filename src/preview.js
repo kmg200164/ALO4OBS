@@ -53,14 +53,14 @@
     if(!configured?.gradient&&hasLegacyColor)delete background.gradient;
     return background;
   }
-  const opacityPresets=[100,70,40,20,10],blurPresets=[64,32,16,8,4,0],strokeWidthPresets=[8,6,4,2,1];
+  const opacityPresets=[100,70,40,20,10,0],blurPresets=[64,32,16,8,4,0],strokeWidthPresets=[8,6,4,2,1,0];
   const globalOpacityPresets=[...opacityPresets].reverse(),globalBlurPresets=[...blurPresets].reverse(),globalStrokeWidthPresets=[...strokeWidthPresets].reverse();
   function nearestPreset(value,values,fallback){
     const numberValue=Number(value);if(!Number.isFinite(numberValue))return fallback;
     return values.reduce((best,candidate)=>Math.abs(candidate-numberValue)<Math.abs(best-numberValue)||Math.abs(candidate-numberValue)===Math.abs(best-numberValue)&&candidate<best?candidate:best,values[0]);
   }
   const gapLabels=['매우 좁음','좁음','보통','넓음','매우 넓음'];
-  const globalStrengthLabels=['매우 약함','약함','중간','강함','매우 강함'],globalBlurLabels=['없음',...globalStrengthLabels];
+  const globalStrengthLabels=['매우 약함','약함','중간','강함','매우 강함'],globalBlurLabels=['없음',...globalStrengthLabels],globalNoneLabels=globalBlurLabels;
   const selectShell=html=>`<span class="select-shell">${html}<svg class="lucide lucide-chevron-down select-icon" data-lucide="chevron-down" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg></span>`;
   function presetSelect(name,value,values,fallback,labels=['매우 강함','강함','중간','약함','매우 약함']){
     const selected=nearestPreset(value,values,fallback);
@@ -76,7 +76,7 @@
     return values[Number.isInteger(index)&&index>=0&&index<values.length?index:values.indexOf(fallback)];
   }
   function globalPreset(name){
-    return name==='cornerSmoothing'?[OverlayEvents.cornerSmoothings,['기본 (0%)','iOS (60%)','최대 스무딩 (100%)'],'smoothing']:name==='cornerRadius'?[OverlayEvents.cornerRadii,gapLabels,'px']:['globalShadow','panelShadow'].includes(name)?[OverlayEvents.panelShadowStrengths.slice(1),globalStrengthLabels,'px']:name==='panelGap'?[OverlayEvents.panelGaps,gapLabels,'px']:['globalFillOpacity','regionOpacity'].includes(name)?[globalOpacityPresets,globalStrengthLabels,'%']:['globalFillBlur','regionBlur'].includes(name)?[globalBlurPresets,globalBlurLabels,'px']:['globalStrokeWidth','regionStrokeWidth'].includes(name)?[globalStrokeWidthPresets,globalStrengthLabels,'px']:null;
+    return name==='cornerSmoothing'?[OverlayEvents.cornerSmoothings,['기본 (0%)','iOS (60%)','최대 스무딩 (100%)'],'smoothing']:name==='cornerRadius'?[OverlayEvents.cornerRadii,gapLabels,'px']:['globalShadow','panelShadow'].includes(name)?[OverlayEvents.panelShadowStrengths,globalNoneLabels,'px']:name==='panelGap'?[OverlayEvents.panelGaps,gapLabels,'px']:['globalFillOpacity','regionOpacity'].includes(name)?[globalOpacityPresets,globalNoneLabels,'%']:['globalFillBlur','regionBlur'].includes(name)?[globalBlurPresets,globalNoneLabels,'px']:['globalStrokeWidth','regionStrokeWidth'].includes(name)?[globalStrokeWidthPresets,globalNoneLabels,'px']:null;
   }
   function updatePresetLabel(input){
     const preset=globalPreset(input.name);if(!preset)return false;
@@ -334,18 +334,17 @@
         ${propertyRow('없음','','globalFillMode','none',f.mode==='none')}
         ${propertyRow('단색',color('globalFillColor',f.color),'globalFillMode','solid',f.mode==='solid')}
         ${propertyRow('그라디언트',gradientControl('globalFill'),'globalFillMode','gradient',f.mode==='gradient')}
-        ${propertyRow('불투명도',presetRange('globalFillOpacity',f.opacity,globalOpacityPresets,20,globalStrengthLabels,'%'),'','',false,'radio','property-row--size property-row--preset')}
+        ${propertyRow('불투명도',presetRange('globalFillOpacity',f.opacity,globalOpacityPresets,20,globalNoneLabels,'%'),'','',false,'radio','property-row--size property-row--preset')}
         ${propertyRow('흐림',presetRange('globalFillBlur',f.blur,globalBlurPresets,0,globalBlurLabels,'px'),'','',false,'radio','property-row--size property-row--preset')}
       </div></details><div class="divider"></div>
       <details class="property-section"><summary><h4>패널 테두리</h4></summary><div class="property-group">
         ${propertyRow('없음','','globalStrokeMode','none',t.mode==='none')}
         ${propertyRow('단색',color('globalStrokeColor',t.color),'globalStrokeMode','solid',t.mode==='solid')}
         ${propertyRow('그라디언트',gradientControl('globalStroke'),'globalStrokeMode','gradient',t.mode==='gradient')}
-        ${propertyRow('두께',presetRange('globalStrokeWidth',t.width,globalStrokeWidthPresets,4,globalStrengthLabels,'px'),'','',false,'radio','property-row--size property-row--preset')}
+        ${propertyRow('두께',presetRange('globalStrokeWidth',t.width,globalStrokeWidthPresets,4,globalNoneLabels,'px'),'','',false,'radio','property-row--size property-row--preset')}
       </div></details><div class="divider"></div>
       <details class="property-section"><summary><h4>패널 그림자</h4></summary><div class="property-group">
-        ${editorToggle('그림자 사용','globalShadowEnabled',config.globalShadow>0)}
-        ${editorRow('그림자 강도',presetRange('globalShadow',config.globalShadow||16,OverlayEvents.panelShadowStrengths.slice(1),16,globalStrengthLabels,'px'),'property-row--size property-row--preset')}
+        ${editorRow('그림자 강도',presetRange('globalShadow',config.globalShadow??0,OverlayEvents.panelShadowStrengths,0,globalNoneLabels,'px'),'property-row--size property-row--preset')}
       </div></details></div>`;
     control('globalBackgroundUrl').value=b.url||'';
     paintGradientControls();
@@ -433,7 +432,7 @@
   const editorRow=(label,controlHtml,variant='')=>propertyRow(label,controlHtml,'',undefined,false,'radio',variant);
   const editorColor=(label,name,value)=>editorRow(label,color(name,value));
   // Regional sliders share the global scale; stored settings still contain actual values.
-  const editorPreset=(label,name,value,values,fallback)=>editorRow(label,presetRange(name,value,[...values].reverse(),fallback,name==='regionBlur'?globalBlurLabels:globalStrengthLabels,name==='regionOpacity'?'%':'px'),'property-row--size property-row--preset');
+  const editorPreset=(label,name,value,values,fallback)=>editorRow(label,presetRange(name,value,[...values].reverse(),fallback,globalNoneLabels,name==='regionOpacity'?'%':'px'),'property-row--size property-row--preset');
   const fieldHtml=(label,name,type='text',extra='',wide=false)=>editorRow(label,`<input name="${name}" type="${type}" ${extra}>`,wide?'property-row--long':'');
   const urlField=(label,name)=>fieldHtml(label,name,'url','placeholder="https://…" autocomplete="off"',true);
   const editorSelect=(label,name,options,value)=>editorRow(label,selectShell(`<select name="${name}">${optionHtml(options,value)}</select>`));
@@ -462,7 +461,7 @@
     const alignment=['top','center','bottom'].indexOf(config.overlapColumnAlignment[column]);
     const alignmentControl=key==='game'?'':`<div class="property-row column-alignment" data-auto-position${position?.mode==='fixed'?' hidden':''}><label for="overlap-column-alignment">컬럼 정렬</label><div class="column-alignment-control"><input id="overlap-column-alignment" name="overlapColumnAlignment" type="range" min="0" max="2" step="1" value="${alignment}" aria-label="컬럼 정렬" aria-valuetext="${['상단 정렬','중앙 정렬','하단 정렬'][alignment]}"><div class="column-alignment-labels" aria-hidden="true"><span>상단 정렬</span><span>중앙 정렬</span><span>하단 정렬</span></div></div></div>`;
     const positioning=config.layoutMode==='overlap'&&key!=='game'?section('패널 위치',editorRow('세로 위치',`${modeSwitch('panelPositionMode',position.mode)}<div class="size-controls" data-fixed-position${position.mode==='fixed'?'':' hidden'}><input name="panelY" type="number" min="0" step="1" aria-label="Y 좌표 (px)"><div class="size-slider-track"><input name="panelYSlider" type="range" min="0" step="1" aria-label="Y 좌표 슬라이더"></div><span class="editor-help" data-position-range></span></div>`,'property-row--size')+alignmentControl+'<p class="editor-help">자동: 컬럼의 패널 묶음을 정렬합니다. 수동: Y 좌표를 고정합니다. 미리보기에서 위아래로 드래그할 수 있습니다.</p>')+'<div class="divider"></div>':'';
-    const shadow=section('그림자',key==='game'&&config.layoutMode==='overlap'?'<p class="editor-help">Main은 전체 화면을 채웁니다.</p>':editorToggle('그림자 사용','panelShadowEnabled',(config.panelShadows[key]??config.globalShadow)>0)+editorRow('그림자 강도',presetRange('panelShadow',(config.panelShadows[key]??config.globalShadow)||16,OverlayEvents.panelShadowStrengths.slice(1),16,globalStrengthLabels,'px'),'property-row--size property-row--preset'));
+    const shadow=section('그림자',key==='game'&&config.layoutMode==='overlap'?'<p class="editor-help">Main은 전체 화면을 채웁니다.</p>':editorRow('그림자 강도',presetRange('panelShadow',config.panelShadows[key]??config.globalShadow??0,OverlayEvents.panelShadowStrengths,0,globalNoneLabels,'px'),'property-row--size property-row--preset'));
     const fill=region.fill||{mode:'solid',color:region.color||'#ffffff',opacity:region.opacity??20,blur:region.blur??0};
     const stroke=region.stroke||{mode:region.borderVisible===false?'none':'solid',color:region.borderColor||'#ffffff',opacity:100,width:4};
     const useRegionOverride=!!config.regionStyleOverrides[key];
@@ -558,7 +557,7 @@
       if(control('overlapColumnAlignment'))config.overlapColumnAlignment[Number(key[5])]=['top','center','bottom'][Number(control('overlapColumnAlignment').value)];
       if(position.mode==='fixed'&&control('panelY')&&Number(control('panelY').value)!==Math.round(config.layout[key].y))position.y=Math.max(Number(control('panelY').min),Math.min(Number(control('panelY').max),Math.round(Number(control('panelY').value)||0)));
     }
-    if(control('panelShadowEnabled'))config.panelShadows[key]=control('panelShadowEnabled').checked?presetRangeValue('panelShadow',OverlayEvents.panelShadowStrengths.slice(1),16):0;
+    if(control('panelShadow'))config.panelShadows[key]=presetRangeValue('panelShadow',OverlayEvents.panelShadowStrengths,0);
     if(config.layoutMode!=='overlap')config.panelSizing[key]={widthMode:modeValue('panelWidthMode'),width:control('panelWidth')?Number(control('panelWidth').value):config.panelSizing[key].width,heightMode:modeValue('panelHeightMode'),height:control('panelHeight')?Number(control('panelHeight').value):config.panelSizing[key].height};
     if(key==='game'&&config.layoutMode!=='overlap')config.panelSizing.game.aspect=control('panelAspect')?.value||'16:9';
     const fillChoice=control('regionFillMode')?.value||fill.mode||'solid',fillMode=['url','file'].includes(fillChoice)?'none':fillChoice,strokeMode=control('regionStrokeMode')?.value||stroke.mode||(r.borderVisible===false?'none':'solid');
@@ -584,7 +583,7 @@
   }
   function readGlobal(){
     const b=config.globalStyle.background,f=config.globalStyle.fill,t=config.globalStyle.stroke;
-    if(control('globalShadowEnabled'))config.globalShadow=control('globalShadowEnabled').checked?presetRangeValue('globalShadow',OverlayEvents.panelShadowStrengths.slice(1),16):0;
+    if(control('globalShadow'))config.globalShadow=presetRangeValue('globalShadow',OverlayEvents.panelShadowStrengths,0);
     if(control('cornerRadius'))config.cornerRadius=presetRangeValue('cornerRadius',OverlayEvents.cornerRadii,16);
     if(control('cornerSmoothing'))config.cornerSmoothing=presetRangeValue('cornerSmoothing',OverlayEvents.cornerSmoothings,0);
     for(const [part,fields] of [[b,['Mode','Color','Color2','Url']],[f,['Mode','Color','Color2','Opacity','Blur']],[t,['Mode','Color','Color2','Width']]]){
